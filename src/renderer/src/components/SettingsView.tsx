@@ -613,6 +613,25 @@ function OutfitPicker({
   const now = new Date();
   const seasonal = seasonalOutfitForDate(now);
   const isAuto = draft.outfitMode === "seasonal";
+  const [customOutfits, setCustomOutfits] = useState<
+    Array<{ id: string; part: string; label: Record<string, string>; relativePath: string }>
+  >([]);
+
+  useEffect(() => {
+    void window.pawpal.listCustomOutfits().then(setCustomOutfits);
+  }, []);
+
+  async function handleAddCustom(part: string): Promise<void> {
+    const sourcePath = await window.pawpal.selectOutfitFile(part as never);
+    if (!sourcePath) return;
+    const item = await window.pawpal.importOutfit(part as never, sourcePath, "");
+    if (!item) return;
+    setCustomOutfits((prev) => [
+      ...prev,
+      { id: item.id, part: item.part, label: item.label, relativePath: item.relativePath }
+    ]);
+    updateDraft({ outfit: { ...draft.outfit, [part]: item.id } });
+  }
   return (
     <section className="prefs__group">
       <h2 className="prefs__group-title">{labels.outfit}</h2>
@@ -677,6 +696,32 @@ function OutfitPicker({
                       </button>
                     );
                   })}
+                  {customOutfits
+                    .filter((item) => item.part === slot.part)
+                    .map((item) => {
+                      const isActive = draft.outfit[slot.part] === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`pref-chip-button ${isActive ? "is-active" : ""}`}
+                          onClick={() =>
+                            updateDraft({
+                              outfit: { ...draft.outfit, [slot.part]: item.id }
+                            })
+                          }
+                        >
+                          {item.label[draft.language]}
+                        </button>
+                      );
+                    })}
+                  <button
+                    type="button"
+                    className="pref-chip-button"
+                    onClick={() => void handleAddCustom(slot.part)}
+                  >
+                    {labels.outfitUploadCustom}
+                  </button>
                 </div>
               }
             />

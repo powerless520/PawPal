@@ -1,6 +1,7 @@
 import { basename, extname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { copyFile, mkdir } from "node:fs/promises";
+import { existsSync, readdirSync } from "node:fs";
 import {
   app,
   BrowserWindow,
@@ -31,6 +32,8 @@ import type {
   Language,
   PetAppearanceId,
   PetAction,
+  OutfitItem,
+  OutfitPart,
   PetDiary,
   PetFacing,
   PetGrowth,
@@ -1308,6 +1311,55 @@ function scheduleHydrationReminderTimer(delayMs?: number): void {
   publishSnapshot();
 }
 
+async function importCustomOutfit(
+  part: OutfitPart,
+  sourcePath: string,
+  label: string
+): Promise<OutfitItem | null> {
+  try {
+    const ext = sourcePath.toLowerCase().split(".").pop() ?? "";
+    if (ext !== "png") return null;
+    const customRoot = join(app.getPath("userData"), "custom_outfits", part);
+    await mkdir(customRoot, { recursive: true });
+    const id = `custom-${Date.now().toString(36)}`;
+    const fileName = `${id}.png`;
+    await copyFile(sourcePath, join(customRoot, fileName));
+    return {
+      id,
+      part,
+      label: { "zh-CN": label || "Text:自定义", en: label || "Custom" },
+      relativePath: `custom_outfits/${part}/${fileName}`,
+      custom: true
+    };
+  } catch {
+    return null;
+  }
+}
+
+function listCustomOutfits(): OutfitItem[] {
+  const items: OutfitItem[] = [];
+  const parts: OutfitPart[] = ["hat", "glasses", "scarf", "bow"];
+  for (const part of parts) {
+    const dir = join(app.getPath("userData"), "custom_outfits", part);
+    if (!existsSync(dir)) continue;
+    try {
+      const entries = readdirSync(dir).filter((f) => f.endsWith(".png"));
+      for (const entry of entries) {
+        items.push({
+          id: entry.replace(/\.png$/, ""),
+          part,
+          label: { "zh-CN": "自定义", en: "Custom" },
+          relativePath: `custom_outfits/${part}/${entry}`,
+          custom: true
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return items;
+}
+
 function performPetAction(action: PetAction): void {
   if (blockingMode) return;
   cancelPetReactionRevert();
@@ -1833,6 +1885,37 @@ function registerIpc(): void {
     const client = createAiClient(settings.aiProvider, settings.aiApiKey);
     return client.testConnection();
   });
+  ipcMain.handle(
+    "outfit:import",
+    async (
+      _e,
+      payload: { part: OutfitPart; sourcePath: string; label: string }
+    ): Promise<OutfitItem | null> => {
+      return importCustomOutfit(payload.part, payload.sourcePath, payload.label);
+    }
+  );
+  ipcMain.handle("outfit:list-custom", (): OutfitItem[] => listCustomOutfits());
+  ipcMain.handle(
+    "outfit:select-file",
+    async (_e, part: OutfitPart): Promise<string | null> => {
+      try {
+        const parent = settingsWindow && !settingsWindow.isDestroyed() ? settingsWindow : null;
+        const result = parent
+          ? await dialog.showOpenDialog(parent, {
+              properties: ["openFile"],
+              filters: [{ name: "PNG Images", extensions: ["png"] }]
+            })
+          : await dialog.showOpenDialog({
+              properties: ["openFile"],
+              filters: [{ name: "PNG Images", extensions: ["png"] }]
+            });
+        if (result.canceled || !result.filePaths[0]) return null;
+        return result.filePaths[0];
+      } catch {
+        return null;
+      }
+    }
+  );
   ipcMain.handle("diary:generate", async (): Promise<PetDiary> => {
     const settings = getSettings();
     const client = createAiClient(settings.aiProvider, settings.aiApiKey);
@@ -1988,15 +2071,20 @@ app.whenReady().then(() => {
     const appBase = app.isPackaged ? process.resourcesPath : process.cwd();
     const builtInAssetRoot = resolve(appBase, "pet_assets");
     const customAssetRoot = resolve(app.getPath("userData"), "custom_pet_assets");
+    const customOutfitRoot = resolve(app.getPath("userData"), "custom_outfits");
     const assetPath = relativePath.startsWith("custom_pet_assets/")
       ? resolve(app.getPath("userData"), relativePath)
-      : resolve(appBase, relativePath);
+      : relativePath.startsWith("custom_outfits/")
+        ? resolve(app.getPath("userData"), relativePath)
+        : resolve(appBase, relativePath);
     const isInsideBuiltInAssetRoot =
       assetPath === builtInAssetRoot || assetPath.startsWith(`${builtInAssetRoot}${sep}`);
     const isInsideCustomAssetRoot =
       assetPath === customAssetRoot || assetPath.startsWith(`${customAssetRoot}${sep}`);
+    const isInsideCustomOutfitRoot =
+      assetPath === customOutfitRoot || assetPath.startsWith(`${customOutfitRoot}${sep}`);
 
-    if (!isInsideBuiltInAssetRoot && !isInsideCustomAssetRoot) {
+    if (!isInsideBuiltInAssetRoot && !isInsideCustomAssetRoot && !isInsideCustomOutfitRoot) {
       return new Response("Asset not found", { status: 404 });
     }
 

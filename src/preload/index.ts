@@ -5,6 +5,8 @@ import type {
   ChatMessage,
   CustomPetAsset,
   DemoTrigger,
+  OutfitItem,
+  OutfitPart,
   PetDiary,
   PetId,
   PetReaction,
@@ -60,6 +62,12 @@ const api = {
     ipcRenderer.invoke("chat:reply", { history, language }),
   aiTestConnection: (): Promise<AiTestResult> =>
     ipcRenderer.invoke("ai:test-connection"),
+  selectOutfitFile: (part: OutfitPart): Promise<string | null> =>
+    ipcRenderer.invoke("outfit:select-file", part),
+  importOutfit: (part: OutfitPart, sourcePath: string, label: string): Promise<OutfitItem | null> =>
+    ipcRenderer.invoke("outfit:import", { part, sourcePath, label }),
+  listCustomOutfits: (): Promise<OutfitItem[]> =>
+    ipcRenderer.invoke("outfit:list-custom"),
   generateDiary: (): Promise<PetDiary> => ipcRenderer.invoke("diary:generate"),
   listRoster: (): Promise<PetRoster> => ipcRenderer.invoke("roster:list"),
   switchPet: (petId: PetId): Promise<PetRoster> => ipcRenderer.invoke("roster:switch", petId),

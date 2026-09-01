@@ -83,6 +83,7 @@ export type OutfitItem = {
   part: OutfitPart;
   label: Record<Language, string>;
   relativePath: string;
+  custom?: boolean;
 };
 
 export type OutfitSlot = {
