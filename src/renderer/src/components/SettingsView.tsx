@@ -267,6 +267,60 @@ function updateCustomPetAsset(
   };
 }
 
+function DiaryPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+  const snapshot = useSnapshot();
+  const [generating, setGenerating] = useState(false);
+
+  async function handleGenerate(): Promise<void> {
+    setGenerating(true);
+    try {
+      await window.pawpal.generateDiary();
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  const entries = snapshot.petDiary?.entries ?? [];
+
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.diary}</h2>
+      <Row
+        label={labels.diary}
+        control={
+          <button
+            type="button"
+            className="pref-button"
+            disabled={generating}
+            onClick={() => void handleGenerate()}
+          >
+            {generating ? labels.diaryGenerating : labels.diaryGenerate}
+          </button>
+        }
+      />
+      {entries.length === 0 ? (
+        <p className="pref-hint">{labels.diaryEmpty}</p>
+      ) : (
+        <div className="diary-list">
+          {entries.map((entry) => (
+            <article key={entry.date} className="diary-entry">
+              <header className="diary-entry__meta">
+                <span className="diary-entry__date">{entry.date}</span>
+                <span
+                  className={`diary-entry__source diary-entry__source--${entry.source}`}
+                >
+                  {entry.source === "ai" ? labels.diarySourceAi : labels.diarySourceFallback}
+                </span>
+              </header>
+              <p className="diary-entry__body">{entry.body}</p>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function AiSettingsPanel({
   labels,
   draft,
@@ -763,6 +817,8 @@ export function SettingsView(): JSX.Element {
       )}
 
       <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} />
+
+      <DiaryPanel labels={labels} />
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.system}</h2>

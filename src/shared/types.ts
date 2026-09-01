@@ -59,6 +59,17 @@ export type OutfitSlot = {
   items: OutfitItem[];
 };
 
+export type DiaryEntry = {
+  date: string;
+  body: string;
+  generatedAt: number;
+  source: "ai" | "fallback";
+};
+
+export type PetDiary = {
+  entries: DiaryEntry[];
+};
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -156,6 +167,7 @@ export type AppSnapshot = {
   petMood: PetMood;
   lastInteractionAt: number | null;
   pets: Record<PetId, PetInstance>;
+  petDiary: PetDiary;
   blockingMode: BlockingMode;
   focusActive: boolean;
   dogVisible: boolean;

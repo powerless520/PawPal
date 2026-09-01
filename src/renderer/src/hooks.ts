@@ -55,6 +55,7 @@ export function useSnapshot(): AppSnapshot {
         lastInteractionAt: null
       }
     },
+    petDiary: { entries: [] },
     blockingMode: null,
     focusActive: false,
     dogVisible: true

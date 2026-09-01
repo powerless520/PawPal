@@ -4,6 +4,7 @@ import type {
   AppSnapshot,
   CustomPetAsset,
   DemoTrigger,
+  PetDiary,
   PetReaction,
   PetState,
   Settings,
@@ -51,6 +52,7 @@ const api = {
   resetToday: (): void => ipcRenderer.send("stats:reset-today"),
   aiTestConnection: (): Promise<AiTestResult> =>
     ipcRenderer.invoke("ai:test-connection"),
+  generateDiary: (): Promise<PetDiary> => ipcRenderer.invoke("diary:generate"),
   onPetState: (callback: (state: PetState) => void): Unsubscribe =>
     onChannel("pet:set-state", callback),
   onShowBubble: (callback: (bubble: SpeechBubble) => void): Unsubscribe =>

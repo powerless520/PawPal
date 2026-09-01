@@ -20,13 +20,16 @@ import {
   DEFAULT_SETTINGS
 } from "../shared/constants";
 import { i18n, pick } from "../shared/i18n";
-import { PET_STATE_ORDER } from "../shared/petAppearances";
+import { PET_STATE_ORDER, petAppearanceOptions } from "../shared/petAppearances";
 import type {
   AppSnapshot,
   BlockingMode,
   CustomPetAsset,
   DistractionStatus,
   DemoTrigger,
+  Language,
+  PetAppearanceId,
+  PetDiary,
   PetFacing,
   PetId,
   PetInstance,
@@ -64,6 +67,7 @@ import type { DisplayBounds, SavedWindowPosition } from "./displayPosition";
 import { classifyDistraction, isPermissionError, readActiveWindow } from "./distraction";
 import { applyLaunchAtLoginPreference, getLaunchAtLoginState } from "./loginItem";
 import { createAiClient } from "./aiClient";
+import { appendDiary, composeDiaryEntry, emptyDiary } from "./diary";
 import {
   buildApplicationMenuTemplate,
   buildPetContextMenuTemplate,
@@ -397,6 +401,24 @@ async function performChatter(): Promise<void> {
   scheduleNextChatter();
 }
 
+function petAppearanceLabel(id: PetAppearanceId, language: Language): string {
+  if (id === "custom") {
+    const custom = getSettings().customPetAppearance;
+    if (custom?.name) return custom.name;
+  }
+  const options = petAppearanceOptions(language);
+  const found = options.find((opt) => opt.value === id);
+  return found?.label ?? id;
+}
+
+function readDiary(): PetDiary {
+  const stored = store.get("petDiary");
+  if (stored && typeof stored === "object" && Array.isArray((stored as PetDiary).entries)) {
+    return stored as PetDiary;
+  }
+  return emptyDiary();
+}
+
 let updateCheck: UpdateCheckResult = createInitialUpdateCheck();
 
 function setPetMouseInteractive(interactive: boolean): void {
@@ -509,6 +531,7 @@ function snapshot(): AppSnapshot {
     petMood,
     lastInteractionAt,
     pets: petsById(),
+    petDiary: readDiary(),
     blockingMode,
     dogVisible: Boolean(petWindow?.isVisible()),
     focusActive
@@ -1512,6 +1535,28 @@ function registerIpc(): void {
     const settings = getSettings();
     const client = createAiClient(settings.aiProvider, settings.aiApiKey);
     return client.testConnection();
+  });
+  ipcMain.handle("diary:generate", async (): Promise<PetDiary> => {
+    const settings = getSettings();
+    const client = createAiClient(settings.aiProvider, settings.aiApiKey);
+    const stats = getStats();
+    const statsSummary =
+      settings.language === "zh-CN"
+        ? `专注 ${stats.focusMinutes} 分钟，休息 ${stats.breaksTaken} 次，喝水 ${stats.watersLogged} 次`
+        : `focused ${stats.focusMinutes}m, breaks ${stats.breaksTaken}, waters ${stats.watersLogged}`;
+    const appearanceName = petAppearanceLabel(settings.petAppearanceId, settings.language);
+    const entry = await composeDiaryEntry(
+      client,
+      settings.language,
+      statsSummary,
+      petMood,
+      appearanceName
+    );
+    const current = readDiary();
+    const next = appendDiary(current, entry);
+    store.set("petDiary", next);
+    sendToAll("app:snapshot", snapshot());
+    return next;
   });
   ipcMain.on("pet:clicked", () => {
     if (blockingMode) return;
