@@ -16,6 +16,17 @@ Current built-in appearances:
 
 - `pet_assets/金毛 puppy/`
 - `pet_assets/线条小狗/`
+- `pet_assets/小鸡毛/`
+- `pet_assets/小恐龙/`
+- `pet_assets/小锯鳄/`
+
+### IP / Trademark Note
+
+Some appearances may depict characters inspired by third-party intellectual property (for example, `小锯鳄` references the Pokémon Totodile, a registered trademark of Nintendo / Game Freak / The Pokémon Company). Such appearances are intended for personal, non-commercial use only. If you fork or redistribute this project:
+
+- Do not use these appearances in any public release or commercial product without the rights holder's permission.
+- Remove or replace them with original art before publishing binaries, screenshots used for promotion, or store listings.
+- The MIT License covers source code only and does not grant any rights to depicted third-party characters.
 
 ## Raw Working Assets
 
