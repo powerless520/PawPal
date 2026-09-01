@@ -106,9 +106,9 @@ export const I18N = {
     },
     settings: {
       title: "设置",
-      welcomeTitle: "欢迎使用 PawPal",
+      welcomeTitle: "欢迎使用 PawPal Local",
       welcomeCopy:
-        "PawPal 会住在菜单栏和屏幕底部，定时提醒你休息、喝水和保持专注。分心检测目前仅支持 macOS，需要在系统设置里允许辅助功能权限。",
+        "PawPal Local 会住在菜单栏和屏幕底部，定时提醒你休息、喝水和保持专注。分心检测目前仅支持 macOS，需要在系统设置里允许辅助功能权限。",
       dismissWelcome: "知道了",
       appearance: "外观",
       system: "系统",
@@ -344,9 +344,9 @@ export const I18N = {
     },
     settings: {
       title: "Settings",
-      welcomeTitle: "Welcome to PawPal",
+      welcomeTitle: "Welcome to PawPal Local",
       welcomeCopy:
-        "PawPal lives in the menu bar and near the bottom of your screen. It reminds you to take breaks, drink water, and stay focused. Distraction detection is macOS-only and requires accessibility permissions.",
+        "PawPal Local lives in the menu bar and near the bottom of your screen. It reminds you to take breaks, drink water, and stay focused. Distraction detection is macOS-only and requires accessibility permissions.",
       dismissWelcome: "Got it",
       appearance: "Appearance",
       system: "System",

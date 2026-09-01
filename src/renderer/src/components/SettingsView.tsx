@@ -15,8 +15,7 @@ import type {
   CustomPetAsset,
   DemoTrigger,
   PetState,
-  Settings,
-  UpdateCheckResult
+  Settings
 } from "../../../shared/types";
 import { getPetAsset } from "../assets";
 import { distractionHelp, formatDistractionState, formatTimer, formatTimestamp, localeFor } from "../format";
@@ -252,20 +251,6 @@ function StatCard({
   );
 }
 
-function formatUpdateStatus(updateCheck: UpdateCheckResult, labels: SettingsCopy): string {
-  if (updateCheck.status === "checking") return labels.updateChecking;
-  if (updateCheck.status === "available" && updateCheck.latestVersion) {
-    return labels.updateAvailable(updateCheck.latestVersion);
-  }
-  if (updateCheck.status === "up-to-date") {
-    return labels.updateCurrent(updateCheck.currentVersion);
-  }
-  if (updateCheck.status === "error") {
-    return labels.updateError(updateCheck.error ?? labels.none);
-  }
-  return labels.updateIdle;
-}
-
 function updateCustomPetAsset(
   customPetAppearance: CustomPetAppearance | null,
   state: PetState,
@@ -311,7 +296,7 @@ function customPetAssetPreviewSrc(asset: CustomPetAsset): string {
 
 export function SettingsView(): JSX.Element {
   const snapshot = useSnapshot();
-  const { settings, stats, updateCheck } = snapshot;
+  const { settings, stats } = snapshot;
   const [draft, setDraft] = useState(settings);
   const [settingsDirty, setSettingsDirty] = useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -352,10 +337,6 @@ export function SettingsView(): JSX.Element {
   function updateDraft(partial: Partial<Settings>): void {
     setDraft((current) => ({ ...current, ...partial }));
     setSettingsDirty(true);
-  }
-
-  async function checkForUpdates(): Promise<void> {
-    await window.pawpal.checkForUpdates();
   }
 
   async function uploadCustomPetAsset(state: PetState): Promise<void> {
@@ -655,69 +636,18 @@ export function SettingsView(): JSX.Element {
             />
           }
         />
-        <Row
-          label={labels.updateCheckOnLaunch}
-          hint={labels.updateCheckOnLaunchHelp}
-          control={
-            <ToggleControl
-              checked={draft.checkUpdatesOnLaunchEnabled}
-              onChange={(checkUpdatesOnLaunchEnabled) =>
-                updateDraft({ checkUpdatesOnLaunchEnabled })
-              }
-              ariaLabel={labels.updateCheckOnLaunch}
-            />
-          }
-        />
+        {/* Local-only fork: update-check toggle removed (always off). */}
       </section>
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.about}</h2>
         <Row
           label={labels.version}
-          hint={
-            updateCheck.latestVersion
-              ? labels.latestVersion(updateCheck.latestVersion)
-              : undefined
-          }
           control={
             <span className="pref-static-value">{snapshot.appInfo.version || labels.none}</span>
           }
         />
-        <Row
-          label={labels.updates}
-          hint={formatUpdateStatus(updateCheck, labels)}
-          control={
-            <div className="pref-button-group">
-              <button
-                type="button"
-                className="pref-button"
-                disabled={updateCheck.status === "checking"}
-                onClick={() => void checkForUpdates()}
-              >
-                {updateCheck.status === "checking"
-                  ? labels.checkingUpdates
-                  : labels.checkForUpdates}
-              </button>
-              {updateCheck.status === "available" ? (
-                <button
-                  type="button"
-                  className="pref-button is-primary"
-                  onClick={window.pawpal.openReleaseNotes}
-                >
-                  {labels.openReleaseNotes}
-                </button>
-              ) : null}
-            </div>
-          }
-        />
-        <Row
-          label={labels.releaseNotes}
-          control={
-            <button type="button" className="pref-button" onClick={window.pawpal.openReleaseNotes}>
-              {labels.openReleaseNotes}
-            </button>
-          }
-        />
+        {/* Local-only fork: update status / release-notes UI removed. */}
       </section>
 
       <section className="prefs__group prefs__group--quiet">

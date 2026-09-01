@@ -1219,9 +1219,7 @@ app.whenReady().then(() => {
   if (IS_DEV) {
     createSettingsWindow();
   }
-  if (getSettings().checkUpdatesOnLaunchEnabled) {
-    setTimeout(() => void checkForUpdates({ notifyAvailable: true }), 1500);
-  }
+  // Local-only fork: no auto-update check on launch.
 
   app.on("activate", () => {
     if (!petWindow) createPetWindow();

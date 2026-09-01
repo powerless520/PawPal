@@ -4,10 +4,10 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export const APP_NAME = "PawPal";
-export const STORE_NAME = "pawpal";
-export const RELEASES_API_URL = "https://api.github.com/repos/zebangeth/PawPal/releases/latest";
-export const RELEASES_URL = "https://github.com/zebangeth/PawPal/releases";
+export const APP_NAME = "PawPal Local";
+export const STORE_NAME = "pawpal-local";
+export const RELEASES_API_URL = "https://api.github.com/repos/powerless520/PawPal/releases/latest";
+export const RELEASES_URL = "https://github.com/powerless520/PawPal/releases";
 
 export const PET_WINDOW = {
   width: 220,

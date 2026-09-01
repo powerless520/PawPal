@@ -1,8 +1,8 @@
 {
-  "name": "pawpal",
-  "version": "0.3.1",
-  "description": "A tiny desktop dog that helps you pause before you burn out.",
-  "author": "zebangeth",
+  "name": "pawpal-local",
+  "version": "0.3.2-pawpal.1",
+  "description": "Personal fork of PawPal — local-only build with no auto-update and no upstream coupling.",
+  "author": "powerless520",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@11.1.1",
@@ -17,8 +17,8 @@
     "dist:win": "tsc --noEmit && electron-vite build && electron-builder --win"
   },
   "build": {
-    "appId": "com.pawpal.app",
-    "productName": "PawPal",
+    "appId": "com.powerless520.pawpal-local",
+    "productName": "PawPal Local",
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -28,7 +28,7 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": true
+      "notarize": false
     },
     "win": {
       "target": [
