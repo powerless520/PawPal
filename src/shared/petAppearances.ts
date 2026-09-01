@@ -43,6 +43,7 @@ const goldenPuppy = (state: PetState, name: string): string =>
   `pet_assets/金毛 puppy/${state}/${name}`;
 const lineDog = (state: PetState, name: string): string => `pet_assets/线条小狗/${state}/${name}`;
 const xiaoJiMao = (state: PetState, name: string): string => `pet_assets/小鸡毛/${state}/${name}`;
+const dino = (state: PetState, name: string): string => `pet_assets/小恐龙/${state}/${name}`;
 
 const STATE_FALLBACKS: Partial<Record<PetState, PetState>> = {
   breakDone: "happy",
@@ -282,18 +283,49 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
         path: xiaoJiMao("sleeping", "线条小狗第14弹_难受.gif")
       }
     }
+  },
+  dino: {
+    id: "dino",
+    label: {
+      "zh-CN": "小恐龙",
+      en: "Little Dino"
+    },
+    fallback: {
+      path: dino("idle", "站.gif"),
+      isPlaceholder: true
+    },
+    states: {
+      idle: {
+        path: [
+          dino("idle", "站.gif"),
+          dino("idle", "眨眼.gif")
+        ]
+      },
+      happy: { path: dino("happy", "欢呼.gif") },
+      breakPrompt: { path: dino("breakPrompt", "戳你.gif") },
+      breakRunning: {
+        path: dino("breakRunning", "跑.gif"),
+        replayIntervalMs: 4500
+      },
+      hydrationPrompt: { path: dino("hydrationPrompt", "指嘴.gif") },
+      drinking: { path: dino("drinking", "喝水.gif") },
+      focusAlert: { path: dino("focusAlert", "皱眉.gif") },
+      focusGuard: { path: dino("focusGuard", "盯屏幕.gif") },
+      sad: { path: dino("sad", "委屈.gif"), isPlaceholder: true },
+      sleeping: { path: dino("sleeping", "睡.gif"), isPlaceholder: true }
+    }
   }
 };
 
 export function resolvePetAppearanceId(value: unknown): PetAppearanceId {
-  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "custom") {
+  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino" || value === "custom") {
     return value;
   }
   return "lineDog";
 }
 
 export function resolveBuiltInPetAppearanceId(value: unknown): BuiltInPetAppearanceId {
-  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao") return value;
+  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino") return value;
   return "lineDog";
 }
 

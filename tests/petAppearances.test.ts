@@ -47,9 +47,28 @@ export const tests = [
     }
   },
   {
+    name: "petAppearanceOptions includes Little Dino",
+    run(): void {
+      assert.equal(
+        petAppearanceOptions("zh-CN").some((option) => option.value === "dino"),
+        true
+      );
+      assert.equal(
+        petAppearanceOptions("en").some((option) => option.value === "dino"),
+        true
+      );
+    }
+  },
+  {
     name: "resolvePetAppearanceId accepts Xiao Ji Mao",
     run(): void {
       assert.equal(resolvePetAppearanceId("xiaoJiMao"), "xiaoJiMao");
+    }
+  },
+  {
+    name: "resolvePetAppearanceId accepts Little Dino",
+    run(): void {
+      assert.equal(resolvePetAppearanceId("dino"), "dino");
     }
   },
   {
