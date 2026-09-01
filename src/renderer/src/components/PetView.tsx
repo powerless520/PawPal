@@ -75,9 +75,13 @@ export function PetView(): JSX.Element {
   const asset = getPetAsset(appearanceId, state, assetVariant, assetReplayKey, customAppearance);
   const outfitMode = snapshot.settings.outfitMode;
   const rawOutfit = snapshot.settings.outfit;
+  const birthday =
+    snapshot.settings.birthdayMonth && snapshot.settings.birthdayDay
+      ? { month: snapshot.settings.birthdayMonth, day: snapshot.settings.birthdayDay }
+      : null;
   const outfit =
     outfitMode === "seasonal"
-      ? seasonalOutfitForDate(new Date()) ?? rawOutfit
+      ? seasonalOutfitForDate(new Date(), birthday) ?? rawOutfit
       : rawOutfit;
 
   function finishPointerDrag(clicked: boolean): void {

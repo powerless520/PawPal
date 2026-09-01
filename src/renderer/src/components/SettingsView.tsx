@@ -540,6 +540,67 @@ function removeCustomPetState(
   };
 }
 
+function BirthdayRow({
+  labels,
+  draft,
+  updateDraft
+}: {
+  labels: SettingsCopy;
+  draft: Settings;
+  updateDraft: (partial: Partial<Settings>) => void;
+}): JSX.Element {
+  const month = draft.birthdayMonth ?? 0;
+  const day = draft.birthdayDay ?? 0;
+  const dayMax = month >= 1 && month <= 12 ? new Date(2024, month, 0).getDate() : 31;
+  return (
+    <Row
+      label={labels.birthday}
+      hint={labels.birthdayHint}
+      control={
+        <div className="pref-input-row">
+          <select
+            className="pref-input"
+            value={month || 0}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              updateDraft({
+                birthdayMonth: next > 0 ? next : null,
+                birthdayDay:
+                  next > 0 && (draft.birthdayDay ?? 0) > new Date(2024, next, 0).getDate()
+                    ? null
+                    : draft.birthdayDay
+              });
+            }}
+          >
+            <option value={0}>—</option>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <span>/</span>
+          <select
+            className="pref-input"
+            value={day || 0}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              updateDraft({ birthdayDay: next > 0 ? next : null });
+            }}
+          >
+            <option value={0}>—</option>
+            {Array.from({ length: dayMax }, (_, i) => i + 1).map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+      }
+    />
+  );
+}
+
 function OutfitPicker({
   labels,
   draft,
@@ -816,6 +877,7 @@ export function SettingsView(): JSX.Element {
       </section>
 
       <OutfitPicker labels={labels} draft={draft} updateDraft={updateDraft} />
+      <BirthdayRow labels={labels} draft={draft} updateDraft={updateDraft} />
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.reminders}</h2>

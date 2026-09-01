@@ -166,6 +166,8 @@ export type Settings = {
   outfit: Outfit;
   outfitMode: OutfitMode;
   soundEnabled: boolean;
+  birthdayMonth: number | null;
+  birthdayDay: number | null;
 };
 
 export type TodayStats = {

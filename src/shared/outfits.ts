@@ -73,9 +73,19 @@ export type SeasonalOutfit = {
   label: Record<Language, string>;
 };
 
-export function seasonalOutfitForDate(now: Date): SeasonalOutfit | null {
+export function seasonalOutfitForDate(
+  now: Date,
+  userBirthday?: { month: number; day: number } | null
+): SeasonalOutfit | null {
   const m = now.getMonth() + 1; // 1-12
   const d = now.getDate();
+  // New Year's Day
+  if (m === 1 && d === 1) {
+    return {
+      hat: "beanie",
+      label: { "zh-CN": "元旦", en: "New Year's Day" }
+    };
+  }
   // Spring Festival (lunar new year) — approximate using Feb 1-15 for now
   if (m === 2 && d <= 15) {
     return {
@@ -86,8 +96,51 @@ export function seasonalOutfitForDate(now: Date): SeasonalOutfit | null {
   // Valentine's Day
   if (m === 2 && d === 14) {
     return {
-      bow: "crown", // reuse a part as decorative
+      bow: "crown",
       label: { "zh-CN": "情人节", en: "Valentine's Day" }
+    };
+  }
+  // Arbor Day (3/12, US tradition)
+  if (m === 3 && d === 12) {
+    return {
+      glasses: "sunglasses",
+      label: { "zh-CN": "植树节", en: "Arbor Day" }
+    };
+  }
+  // Easter (rough: first Sunday after first full moon after spring equinox — approximate Apr 15)
+  if (m === 4 && d === 15) {
+    return {
+      bow: "crown",
+      label: { "zh-CN": "复活节", en: "Easter" }
+    };
+  }
+  // Labor Day (5/1)
+  if (m === 5 && d === 1) {
+    return {
+      glasses: "sunglasses",
+      label: { "zh-CN": "劳动节", en: "Labor Day" }
+    };
+  }
+  // Dragon Boat Festival (端午, approximate 6/1)
+  if (m === 6 && d === 1) {
+    return {
+      scarf: "red-scarf",
+      label: { "zh-CN": "端午", en: "Dragon Boat" }
+    };
+  }
+  // Mid-Autumn Festival (中秋, approximate 9/15)
+  if (m === 9 && d === 15) {
+    return {
+      hat: "crown",
+      label: { "zh-CN": "中秋", en: "Mid-Autumn" }
+    };
+  }
+  // National Day (10/1)
+  if (m === 10 && d === 1) {
+    return {
+      hat: "crown",
+      scarf: "red-scarf",
+      label: { "zh-CN": "国庆", en: "National Day" }
     };
   }
   // Halloween
@@ -97,12 +150,28 @@ export function seasonalOutfitForDate(now: Date): SeasonalOutfit | null {
       label: { "zh-CN": "万圣节", en: "Halloween" }
     };
   }
+  // Thanksgiving (US, 4th Thursday of Nov — approximate Nov 25)
+  if (m === 11 && d === 25) {
+    return {
+      hat: "beanie",
+      label: { "zh-CN": "感恩节", en: "Thanksgiving" }
+    };
+  }
   // Christmas
   if (m === 12 && d >= 20) {
     return {
       hat: "beanie",
       scarf: "red-scarf",
       label: { "zh-CN": "圣诞", en: "Christmas" }
+    };
+  }
+  // User's own birthday
+  if (userBirthday && m === userBirthday.month && d === userBirthday.day) {
+    return {
+      hat: "crown",
+      glasses: "sunglasses",
+      scarf: "red-scarf",
+      label: { "zh-CN": "你的生日", en: "Your birthday" }
     };
   }
   return null;

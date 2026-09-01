@@ -20,6 +20,8 @@ export const DEFAULT_SETTINGS: Settings = {
   outfit: {},
   outfitMode: "seasonal",
   soundEnabled: true,
+  birthdayMonth: null,
+  birthdayDay: null,
   distractionBlockedApps: [
     "Steam",
     "Discord",
