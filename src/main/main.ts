@@ -28,6 +28,7 @@ import type {
   DistractionStatus,
   DemoTrigger,
   PetFacing,
+  PetReaction,
   PetState,
   Settings,
   StatsHistory,
@@ -881,6 +882,65 @@ function resumeLongTermState(): void {
   sendToAll("app:snapshot", snapshot());
 }
 
+let petReactionRevertTimeout: NodeJS.Timeout | null = null;
+
+function cancelPetReactionRevert(): void {
+  if (petReactionRevertTimeout) {
+    clearTimeout(petReactionRevertTimeout);
+    petReactionRevertTimeout = null;
+  }
+}
+
+function schedulePetReactionRevert(delayMs: number, returnState: PetState): void {
+  cancelPetReactionRevert();
+  petReactionRevertTimeout = setTimeout(() => {
+    hideBubble();
+    setPetState(returnState);
+    petReactionRevertTimeout = null;
+  }, delayMs);
+}
+
+function petReact(reaction: PetReaction, holding: boolean): void {
+  if (blockingMode) return;
+  const returnState = focusActive ? "focusGuard" : "idle";
+
+  switch (reaction) {
+    case "single":
+      cancelPetReactionRevert();
+      setPetState("happy");
+      showBubble({
+        id: "pet-react-single",
+        message: pick(text().bubble.singleClick),
+        autoDismissMs: 1500
+      });
+      schedulePetReactionRevert(1600, returnState);
+      break;
+    case "double":
+      cancelPetReactionRevert();
+      setPetState("happy");
+      showBubble({
+        id: "pet-react-double",
+        message: pick(text().bubble.doubleClick),
+        autoDismissMs: 2000
+      });
+      schedulePetReactionRevert(2100, returnState);
+      break;
+    case "longPress":
+      if (holding) {
+        cancelPetReactionRevert();
+        setPetState("petted");
+        showBubble({
+          id: "pet-react-pet",
+          message: pick(text().bubble.longPress),
+          autoDismissMs: 2500
+        });
+      } else {
+        schedulePetReactionRevert(1000, returnState);
+      }
+      break;
+  }
+}
+
 function happyFeedback(message: string | null = pick(text().bubble.woof), after?: () => void): void {
   if (blockingMode) return;
   const returnState = focusActive ? "focusGuard" : "idle";
@@ -1159,6 +1219,12 @@ function registerIpc(): void {
     if (blockingMode) return;
     happyFeedback(null);
   });
+  ipcMain.on(
+    "pet:react",
+    (_event, payload: { reaction: PetReaction; holding: boolean }) => {
+      petReact(payload.reaction, payload.holding);
+    }
+  );
   ipcMain.on("pet:context-menu", showPetContextMenu);
   ipcMain.on("pet:drag-start", (_event, offset: { offsetX: number; offsetY: number }) =>
     startPetDrag(offset)

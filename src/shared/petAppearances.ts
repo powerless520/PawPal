@@ -24,6 +24,7 @@ export const PET_STATE_ORDER: PetState[] = [
   "idle",
   "sitting",
   "happy",
+  "petted",
   "breakPrompt",
   "breakRunning",
   "breakDone",
@@ -303,6 +304,7 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
         ]
       },
       happy: { path: dino("happy", "欢呼.gif") },
+      petted: { path: dino("happy", "欢呼.gif"), isPlaceholder: true },
       breakPrompt: { path: dino("breakPrompt", "戳你.gif") },
       breakRunning: {
         path: dino("breakRunning", "跑.gif"),
@@ -334,6 +336,7 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
         ]
       },
       happy: { path: totodile("happy", "蹦跳欢呼.gif") },
+      petted: { path: totodile("happy", "蹦跳欢呼.gif"), isPlaceholder: true },
       breakPrompt: { path: totodile("breakPrompt", "拍屏幕.gif") },
       breakRunning: {
         path: totodile("breakRunning", "狂奔.gif"),

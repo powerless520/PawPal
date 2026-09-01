@@ -11,11 +11,17 @@ type DragRef = {
   startX: number;
   startY: number;
   dragging: boolean;
+  longPressTimer: number | null;
+  longPressActive: boolean;
+  clickTimer: number | null;
+  clickState: "idle" | "pending";
 };
 
 const CONTINUOUS_ASSET_STATES = new Set<PetState>(["idle", "focusGuard"]);
 const CONTINUOUS_ASSET_ROTATION_MS = 15 * 60 * 1000;
 const DRAG_START_DISTANCE_PX = 10;
+const LONG_PRESS_MS = 500;
+const DOUBLE_CLICK_MS = 300;
 const PET_BUTTON_SELECTOR = ".pet-button";
 const BUBBLE_INTERACTIVE_SELECTOR = ".speech-bubble";
 
@@ -152,6 +158,11 @@ export function PetView(): JSX.Element {
       window.removeEventListener("pointerup", cancelActiveDrag);
       window.removeEventListener("pointercancel", cancelActiveDrag);
       window.removeEventListener("blur", cancelActiveDrag);
+      const leftover = dragRef.current;
+      if (leftover) {
+        if (leftover.longPressTimer !== null) window.clearTimeout(leftover.longPressTimer);
+        if (leftover.clickTimer !== null) window.clearTimeout(leftover.clickTimer);
+      }
       window.pawpal.setMouseInteractive(true);
     };
   }, []);
@@ -168,7 +179,16 @@ export function PetView(): JSX.Element {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      dragging: false
+      dragging: false,
+      longPressTimer: window.setTimeout(() => {
+        if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
+        if (dragRef.current.dragging) return;
+        dragRef.current.longPressActive = true;
+        window.pawpal.petReact("longPress", true);
+      }, LONG_PRESS_MS),
+      longPressActive: false,
+      clickTimer: null,
+      clickState: "idle"
     };
   }
 
@@ -178,6 +198,15 @@ export function PetView(): JSX.Element {
     const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
     if (!drag.dragging && distance > DRAG_START_DISTANCE_PX) {
       drag.dragging = true;
+      if (drag.longPressTimer !== null) {
+        window.clearTimeout(drag.longPressTimer);
+        drag.longPressTimer = null;
+      }
+      if (drag.clickTimer !== null) {
+        window.clearTimeout(drag.clickTimer);
+        drag.clickTimer = null;
+        drag.clickState = "idle";
+      }
       window.pawpal.petDragStart({ offsetX: drag.startX, offsetY: drag.startY });
     }
   }
@@ -186,7 +215,46 @@ export function PetView(): JSX.Element {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     const shouldReleaseCapture = event.currentTarget.hasPointerCapture(event.pointerId);
+
+    if (drag.longPressTimer !== null) {
+      window.clearTimeout(drag.longPressTimer);
+      drag.longPressTimer = null;
+    }
+
+    if (drag.longPressActive) {
+      drag.longPressActive = false;
+      finishPointerDrag(false);
+      window.pawpal.petReact("longPress", false);
+      if (shouldReleaseCapture) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+      return;
+    }
+
     finishPointerDrag(true);
+
+    if (!drag.dragging) {
+      const pointerId = drag.pointerId;
+      if (drag.clickState === "idle") {
+        drag.clickState = "pending";
+        drag.clickTimer = window.setTimeout(() => {
+          const current = dragRef.current;
+          if (current && current.pointerId === pointerId) {
+            current.clickState = "idle";
+            current.clickTimer = null;
+          }
+          window.pawpal.petReact("single", false);
+        }, DOUBLE_CLICK_MS);
+      } else {
+        if (drag.clickTimer !== null) {
+          window.clearTimeout(drag.clickTimer);
+          drag.clickTimer = null;
+        }
+        drag.clickState = "idle";
+        window.pawpal.petReact("double", false);
+      }
+    }
+
     if (shouldReleaseCapture) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -195,6 +263,14 @@ export function PetView(): JSX.Element {
   function cancelPointer(event: PointerEvent<HTMLButtonElement>): void {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
+    if (drag.longPressTimer !== null) {
+      window.clearTimeout(drag.longPressTimer);
+      drag.longPressTimer = null;
+    }
+    if (drag.clickTimer !== null) {
+      window.clearTimeout(drag.clickTimer);
+      drag.clickTimer = null;
+    }
     finishPointerDrag(false);
   }
 

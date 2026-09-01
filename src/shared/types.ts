@@ -10,6 +10,7 @@ export type PetState =
   | "idle"
   | "sitting"
   | "happy"
+  | "petted"
   | "breakPrompt"
   | "breakRunning"
   | "breakDone"
@@ -21,6 +22,8 @@ export type PetState =
   | "focusDone"
   | "sad"
   | "sleeping";
+
+export type PetReaction = "single" | "double" | "longPress";
 
 export type CustomPetAsset = {
   relativePath: string;

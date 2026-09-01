@@ -17,6 +17,25 @@ export const I18N = {
   "zh-CN": {
     bubble: {
       woof: ["woof!", "汪！", "汪汪~"],
+      singleClick: [
+        "嗯？",
+        "叫我？",
+        "在呢~",
+        "干嘛呀",
+        "摸摸？"
+      ],
+      doubleClick: [
+        "耶~再来一次！",
+        "好好玩！",
+        "嘿嘿~",
+        "再来再来！"
+      ],
+      longPress: [
+        "好舒服~",
+        "再撸一会儿嘛",
+        "嘿嘿，舒服~",
+        "呼噜呼噜~"
+      ],
       breakReminder: [
         "坐太久啦，去走一分钟吧",
         "我想和你玩儿一会儿，去走一分钟吧",
@@ -149,6 +168,7 @@ export const I18N = {
         idle: "默认状态",
         sitting: "坐下",
         happy: "开心",
+        petted: "被撸中",
         breakPrompt: "休息提醒",
         breakRunning: "休息中",
         breakDone: "休息完成",
@@ -165,6 +185,7 @@ export const I18N = {
         idle: "没有提醒或专注任务时显示",
         sitting: "需要安静陪伴或占位时显示",
         happy: "点击宠物或完成小互动后显示",
+        petted: "长按宠物时被撸时显示",
         breakPrompt: "休息提醒弹出时显示",
         breakRunning: "强制离屏休息倒计时时显示",
         breakDone: "确认完成休息后显示",
@@ -255,6 +276,25 @@ export const I18N = {
   en: {
     bubble: {
       woof: ["woof!", "bark bark!", "arf~"],
+      singleClick: [
+        "Hm?",
+        "Yes?",
+        "Here~",
+        "What?",
+        "Pet me?"
+      ],
+      doubleClick: [
+        "Yay~ do it again!",
+        "So fun!",
+        "Hehe~",
+        "More more!"
+      ],
+      longPress: [
+        "So comfy~",
+        "Keep petting me",
+        "Hehe, nice~",
+        "Purrr~"
+      ],
       breakReminder: [
         "You've been sitting too long, walk for a minute!",
         "I wanna play with you~ walk for a minute!",
@@ -390,6 +430,7 @@ export const I18N = {
         idle: "Idle",
         sitting: "Sitting",
         happy: "Happy",
+        petted: "Being Petted",
         breakPrompt: "Break Prompt",
         breakRunning: "Break Running",
         breakDone: "Break Done",
@@ -406,6 +447,7 @@ export const I18N = {
         idle: "Shown when no reminder or focus task is active",
         sitting: "Shown for quiet companionship or placeholder moments",
         happy: "Shown after pet clicks or small completed interactions",
+        petted: "Shown while long-pressing the pet (being petted)",
         breakPrompt: "Shown when a break reminder appears",
         breakRunning: "Shown during the away-from-screen break countdown",
         breakDone: "Shown after the user confirms a break",

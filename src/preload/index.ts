@@ -3,6 +3,7 @@ import type {
   AppSnapshot,
   CustomPetAsset,
   DemoTrigger,
+  PetReaction,
   PetState,
   Settings,
   SpeechBubble,
@@ -28,6 +29,8 @@ const api = {
     ipcRenderer.invoke("custom-pet:import-asset", state, sourcePath),
   pathForFile: (file: File): string => webUtils.getPathForFile(file),
   petClicked: (): void => ipcRenderer.send("pet:clicked"),
+  petReact: (reaction: PetReaction, holding: boolean): void =>
+    ipcRenderer.send("pet:react", { reaction, holding }),
   petContextMenu: (): void => ipcRenderer.send("pet:context-menu"),
   petDragStart: (offset: { offsetX: number; offsetY: number }): void =>
     ipcRenderer.send("pet:drag-start", offset),
