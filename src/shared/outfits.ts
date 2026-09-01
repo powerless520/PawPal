@@ -86,18 +86,18 @@ export function seasonalOutfitForDate(
       label: { "zh-CN": "元旦", en: "New Year's Day" }
     };
   }
+  // Valentine's Day (overrides the Feb 1-15 Spring window)
+  if (m === 2 && d === 14) {
+    return {
+      bow: "crown",
+      label: { "zh-CN": "情人节", en: "Valentine's Day" }
+    };
+  }
   // Spring Festival (lunar new year) — approximate using Feb 1-15 for now
   if (m === 2 && d <= 15) {
     return {
       hat: "beanie",
       label: { "zh-CN": "新年", en: "New Year" }
-    };
-  }
-  // Valentine's Day
-  if (m === 2 && d === 14) {
-    return {
-      bow: "crown",
-      label: { "zh-CN": "情人节", en: "Valentine's Day" }
     };
   }
   // Arbor Day (3/12, US tradition)
