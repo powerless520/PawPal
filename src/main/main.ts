@@ -401,6 +401,74 @@ async function performChatter(): Promise<void> {
   scheduleNextChatter();
 }
 
+function petPlayCatch(targetX: number, targetY: number): void {
+  if (blockingMode) return;
+  if (!petWindow || petWindow.isDestroyed()) return;
+  if (dragTimer) return;
+
+  cancelWander();
+  cancelChatter();
+  lastInteractionAt = Date.now();
+  maybeWakeUp();
+  refreshMood();
+  scheduleNextWander();
+  scheduleNextChatter();
+
+  const bounds = petWindow.getBounds();
+  const display = displayForBounds(currentDisplays(), bounds, primaryDisplay());
+  const workArea = display.workArea;
+  const clampedX = Math.min(Math.max(targetX, workArea.x), workArea.x + workArea.width - bounds.width);
+  const clampedY = Math.min(Math.max(targetY, workArea.y), workArea.y + workArea.height - bounds.height);
+  const distance = Math.hypot(clampedX - bounds.x, clampedY - bounds.y);
+  if (distance < 30) {
+    setPetState("happy");
+    showBubble({ id: "play-catch", message: pick(text().bubble.woof), autoDismissMs: 1500 });
+    setTimeout(() => {
+      if (!blockingMode) setPetState(focusActive ? "focusGuard" : "idle");
+    }, 1700);
+    return;
+  }
+
+  const totalMs = Math.min(2500, Math.max(600, distance * 1.2));
+  const stepMs = 16;
+  const totalSteps = Math.max(1, Math.ceil(totalMs / stepMs));
+  let currentStep = 0;
+  const startX = bounds.x;
+  const startY = bounds.y;
+  const dx = clampedX - startX;
+  const dy = clampedY - startY;
+
+  setPetFacing(dx >= 0 ? "right" : "left");
+  setPetState("walking");
+
+  if (walkAnimationTimer) clearInterval(walkAnimationTimer);
+  walkAnimationTimer = setInterval(() => {
+    if (!petWindow || petWindow.isDestroyed()) {
+      cancelWander();
+      scheduleNextWander();
+      return;
+    }
+    currentStep++;
+    const t = Math.min(1, currentStep / totalSteps);
+    const easeT = 1 - Math.pow(1 - t, 3);
+    const newX = Math.round(startX + dx * easeT);
+    const newY = Math.round(startY + dy * easeT);
+    petWindow.setBounds({ ...bounds, x: newX, y: newY });
+    if (currentStep >= totalSteps) {
+      if (walkAnimationTimer) {
+        clearInterval(walkAnimationTimer);
+        walkAnimationTimer = null;
+      }
+      persistPetPosition();
+      setPetState("happy");
+      showBubble({ id: "play-catch-got", message: pick(text().bubble.woof), autoDismissMs: 1500 });
+      setTimeout(() => {
+        if (!blockingMode) setPetState(focusActive ? "focusGuard" : "idle");
+      }, 1700);
+    }
+  }, stepMs);
+}
+
 function petAppearanceLabel(id: PetAppearanceId, language: Language): string {
   if (id === "custom") {
     const custom = getSettings().customPetAppearance;
@@ -1566,6 +1634,12 @@ function registerIpc(): void {
     "pet:react",
     (_event, payload: { reaction: PetReaction; holding: boolean }) => {
       petReact(payload.reaction, payload.holding);
+    }
+  );
+  ipcMain.on(
+    "pet:play-catch",
+    (_event, payload: { targetX: number; targetY: number }) => {
+      petPlayCatch(payload.targetX, payload.targetY);
     }
   );
   ipcMain.on("pet:context-menu", showPetContextMenu);

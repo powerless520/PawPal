@@ -33,6 +33,8 @@ const api = {
   petClicked: (): void => ipcRenderer.send("pet:clicked"),
   petReact: (reaction: PetReaction, holding: boolean): void =>
     ipcRenderer.send("pet:react", { reaction, holding }),
+  petPlayCatch: (targetX: number, targetY: number): void =>
+    ipcRenderer.send("pet:play-catch", { targetX, targetY }),
   petContextMenu: (): void => ipcRenderer.send("pet:context-menu"),
   petDragStart: (offset: { offsetX: number; offsetY: number }): void =>
     ipcRenderer.send("pet:drag-start", offset),

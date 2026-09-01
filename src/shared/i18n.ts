@@ -188,6 +188,7 @@ export const I18N = {
       diaryEmpty: "还没有日记，点上面的按钮让宠物写一篇吧~",
       diarySourceAi: "AI 生成",
       diarySourceFallback: "本地灵感",
+      playCatch: "扔球给我",
       customPet: "自定义",
       customPetAssets: "自定义素材",
       customPetRequirements: "仅支持 GIF；默认状态素材必填，其它状态可选；建议使用透明背景并保持主体大小一致",
@@ -495,6 +496,7 @@ export const I18N = {
       diaryEmpty: "No entries yet — tap the button above to have the pet write one.",
       diarySourceAi: "AI generated",
       diarySourceFallback: "Local inspiration",
+      playCatch: "Throw ball",
       customPet: "Custom",
       customPetAssets: "Custom Assets",
       customPetRequirements:

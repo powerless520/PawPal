@@ -24,7 +24,7 @@ export type PetState =
   | "sad"
   | "sleeping";
 
-export type PetReaction = "single" | "double" | "longPress";
+export type PetReaction = "single" | "double" | "longPress" | "play";
 
 export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
 

@@ -267,6 +267,15 @@ function updateCustomPetAsset(
   };
 }
 
+function throwRandomBall(): void {
+  if (!window.pawpal) return;
+  // Throw roughly toward the screen center plus a random offset,
+  // picked within a 600x400 region so the ball lands on the desktop.
+  const cx = Math.round(window.innerWidth / 2 + (Math.random() - 0.5) * 600);
+  const cy = Math.round(window.innerHeight / 2 + (Math.random() - 0.5) * 400);
+  window.pawpal.petPlayCatch(cx, cy);
+}
+
 function DiaryPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const snapshot = useSnapshot();
   const [generating, setGenerating] = useState(false);
@@ -809,6 +818,13 @@ export function SettingsView(): JSX.Element {
             <DemoChip trigger="hydration" label={labels.demoWater} />
             <DemoChip trigger="focusWarning" label={labels.demoFocusWarning} />
             <DemoChip trigger="happy" label={labels.demoHappy} />
+            <button
+              type="button"
+              className="pref-chip-button"
+              onClick={() => throwRandomBall()}
+            >
+              {labels.playCatch}
+            </button>
             <button type="button" className="pref-chip-button" onClick={window.pawpal.resetToday}>
               {labels.resetToday}
             </button>
