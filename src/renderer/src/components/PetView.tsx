@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { JSX, PointerEvent } from "react";
 import { i18n, resolveLanguage } from "../../../shared/i18n";
-import type { PetState, SpeechBubble } from "../../../shared/types";
+import { outfitItemById, OUTFIT_SLOTS } from "../../../shared/outfits";
+import type { OutfitPart, PetState, SpeechBubble } from "../../../shared/types";
 import { getPetAsset, getPetAssetVariantCount } from "../assets";
 import { useNow, useSnapshot } from "../hooks";
 import { pointInElementHitbox } from "../petHitbox";
@@ -72,6 +73,7 @@ export function PetView(): JSX.Element {
   const appearanceId = snapshot.settings.petAppearanceId;
   const customAppearance = snapshot.settings.customPetAppearance;
   const asset = getPetAsset(appearanceId, state, assetVariant, assetReplayKey, customAppearance);
+  const outfit = snapshot.settings.outfit;
 
   function finishPointerDrag(clicked: boolean): void {
     const drag = dragRef.current;
@@ -322,6 +324,25 @@ export function PetView(): JSX.Element {
         type="button"
       >
         <img draggable={false} src={asset.src} alt={altText} />
+        {outfit ? (
+          <div className="pet-outfits" aria-hidden="true">
+            {OUTFIT_SLOTS.map((slot) => {
+              const equipped = outfit[slot.part];
+              if (!equipped) return null;
+              const item = outfitItemById(slot.part, equipped);
+              if (!item) return null;
+              return (
+                <img
+                  key={slot.part}
+                  draggable={false}
+                  className={`pet-outfit pet-outfit--${slot.part}`}
+                  src={window.pawpal.assetUrl(item.relativePath)}
+                  alt=""
+                />
+              );
+            })}
+          </div>
+        ) : null}
       </button>
     </main>
   );

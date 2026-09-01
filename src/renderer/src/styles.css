@@ -66,6 +66,46 @@ textarea {
   transform: scaleX(-1);
 }
 
+.pet-outfits {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.pet-outfit {
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.pet-outfit--hat {
+  top: 8%;
+  width: 70%;
+}
+
+.pet-outfit--glasses {
+  top: 38%;
+  width: 70%;
+}
+
+.pet-outfit--scarf {
+  top: 70%;
+  width: 80%;
+}
+
+.pet-outfit--bow {
+  right: 14%;
+  top: 12%;
+  transform: none;
+  width: 36%;
+}
+
+.pet-button.facing-left .pet-outfit--bow {
+  left: 14%;
+  right: auto;
+}
+
 .state-breakRunning {
   animation: pet-bob 1.4s ease-in-out infinite;
 }

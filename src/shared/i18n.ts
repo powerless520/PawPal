@@ -180,6 +180,8 @@ export const I18N = {
       aiTesting: "测试中…",
       aiConnected: "已连接",
       aiConnectionFailed: "连接失败",
+      outfit: "装扮",
+      outfitNone: "不戴",
       customPet: "自定义",
       customPetAssets: "自定义素材",
       customPetRequirements: "仅支持 GIF；默认状态素材必填，其它状态可选；建议使用透明背景并保持主体大小一致",
@@ -479,6 +481,8 @@ export const I18N = {
       aiTesting: "Testing…",
       aiConnected: "Connected",
       aiConnectionFailed: "Connection failed",
+      outfit: "Outfit",
+      outfitNone: "None",
       customPet: "Custom",
       customPetAssets: "Custom Assets",
       customPetRequirements:

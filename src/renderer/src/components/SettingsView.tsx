@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent, JSX, ReactNode } from "react";
 import { i18n, LANGUAGE_OPTIONS, resolveLanguage } from "../../../shared/i18n";
+import { OUTFIT_SLOTS } from "../../../shared/outfits";
 import {
   hasRequiredCustomPetAssets,
   PET_STATE_ORDER,
@@ -362,6 +363,60 @@ function removeCustomPetState(
   };
 }
 
+function OutfitPicker({
+  labels,
+  draft,
+  updateDraft
+}: {
+  labels: SettingsCopy;
+  draft: Settings;
+  updateDraft: (partial: Partial<Settings>) => void;
+}): JSX.Element | null {
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.outfit}</h2>
+      {OUTFIT_SLOTS.map((slot) => (
+        <Row
+          key={slot.part}
+          label={slot.label[draft.language]}
+          control={
+            <div className="pref-chip-group">
+              <button
+                type="button"
+                className={`pref-chip-button ${draft.outfit[slot.part] === undefined ? "is-active" : ""}`}
+                onClick={() => {
+                  const outfit = { ...draft.outfit };
+                  delete outfit[slot.part];
+                  updateDraft({ outfit });
+                }}
+              >
+                {labels.outfitNone}
+              </button>
+              {slot.items.map((item) => {
+                const isActive = draft.outfit[slot.part] === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`pref-chip-button ${isActive ? "is-active" : ""}`}
+                    onClick={() =>
+                      updateDraft({
+                        outfit: { ...draft.outfit, [slot.part]: item.id }
+                      })
+                    }
+                  >
+                    {item.label[draft.language]}
+                  </button>
+                );
+              })}
+            </div>
+          }
+        />
+      ))}
+    </section>
+  );
+}
+
 function customPetStateKind(state: PetState, labels: SettingsCopy): string {
   return REQUIRED_CUSTOM_PET_STATES.includes(state)
     ? labels.customPetRequired
@@ -551,6 +606,8 @@ export function SettingsView(): JSX.Element {
           />
         ) : null}
       </section>
+
+      <OutfitPicker labels={labels} draft={draft} updateDraft={updateDraft} />
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.reminders}</h2>

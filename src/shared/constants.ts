@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   distractionGraceSeconds: 8,
   aiProvider: "none",
   aiApiKey: "",
+  outfit: {},
   distractionBlockedApps: [
     "Steam",
     "Discord",

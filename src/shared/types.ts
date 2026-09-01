@@ -42,6 +42,23 @@ export type PetInstance = {
   lastInteractionAt: number | null;
 };
 
+export type OutfitPart = "hat" | "glasses" | "scarf" | "bow";
+
+export type Outfit = Partial<Record<OutfitPart, string>>;
+
+export type OutfitItem = {
+  id: string;
+  part: OutfitPart;
+  label: Record<Language, string>;
+  relativePath: string;
+};
+
+export type OutfitSlot = {
+  part: OutfitPart;
+  label: Record<Language, string>;
+  items: OutfitItem[];
+};
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -97,6 +114,7 @@ export type Settings = {
   distractionBlockedKeywords: string[];
   aiProvider: AiProvider;
   aiApiKey: string;
+  outfit: Outfit;
 };
 
 export type TodayStats = {
