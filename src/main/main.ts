@@ -30,6 +30,7 @@ import type {
   DemoTrigger,
   Language,
   PetAppearanceId,
+  PetAction,
   PetDiary,
   PetFacing,
   PetGrowth,
@@ -1068,8 +1069,10 @@ function menuActions() {
     stopFocusFromMenu: () => stopFocusMode(true),
     stopFocusFromContext: () => stopFocusMode(false),
     openSettings: createSettingsWindow,
+    openChat: () => createChatWindow(),
     quit: () => app.quit(),
-    triggerDemo
+    triggerDemo,
+    performAction: (action: PetAction) => performPetAction(action)
   };
 }
 
@@ -1303,6 +1306,41 @@ function scheduleHydrationReminderTimer(delayMs?: number): void {
   hydrationDueAt = Date.now() + nextDelayMs;
   hydrationTimer = setTimeout(() => triggerHydrationReminder(false), nextDelayMs);
   publishSnapshot();
+}
+
+function performPetAction(action: PetAction): void {
+  if (blockingMode) return;
+  cancelPetReactionRevert();
+  const returnState = focusActive ? "focusGuard" : "idle";
+  const soundOn = getSettings().soundEnabled;
+
+  const bubbleFor: Record<PetAction, string[]> = {
+    dance: ["♪~ 蹦蹦跳跳 ~♪", "转一圈！再转一圈！", "看我跳舞~"],
+    sing: ["♪ 啦啦啦 ~", "哼个小曲儿~", "🎵 这首歌送给你 ~"],
+    spin: ["转呀转呀~", "看我翻跟头！", "呼啦~"],
+    heart: ["比心 ❤️", "喜欢你哦~", "❤ 给你比个心"],
+    stretch: ["啊——伸个懒腰", "呼~舒服~", "伸完懒腰精神好！"]
+  };
+  const useHappy = action !== "spin"; // spin uses walking state to suggest motion
+  if (useHappy) {
+    setPetState("happy");
+  } else {
+    setPetFacing(petFacing === "right" ? "left" : "right");
+    setPetState("walking");
+  }
+  showBubble({
+    id: `pet-action-${action}`,
+    message: pick(bubbleFor[action]),
+    autoDismissMs: 2200
+  });
+  if (soundOn) playSound("happy", true);
+
+  const revertMs = useHappy ? 2100 : 1700;
+  schedulePetReactionRevert(revertMs, returnState);
+  lastInteractionAt = Date.now();
+  bumpInteraction();
+  maybeWakeUp();
+  refreshMood();
 }
 
 function scheduleReminderTimers(): void {

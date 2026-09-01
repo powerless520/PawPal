@@ -26,6 +26,8 @@ export type PetState =
 
 export type PetReaction = "single" | "double" | "longPress" | "play";
 
+export type PetAction = "dance" | "sing" | "spin" | "heart" | "stretch";
+
 export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
 
 export type AiProvider = "none" | "deepseek";

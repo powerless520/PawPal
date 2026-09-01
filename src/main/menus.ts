@@ -1,5 +1,5 @@
 import type { I18nBundle } from "../shared/i18n";
-import type { DemoTrigger } from "../shared/types";
+import type { DemoTrigger, PetAction } from "../shared/types";
 
 type MenuLabels = I18nBundle["menu"];
 
@@ -17,9 +17,19 @@ type MenuActions = {
   stopFocusFromMenu: () => void;
   stopFocusFromContext: () => void;
   openSettings: () => void;
+  openChat: () => void;
   quit: () => void;
   triggerDemo: (trigger: DemoTrigger) => void;
+  performAction: (action: PetAction) => void;
 };
+
+const PET_ACTIONS: { id: PetAction; labelKey: keyof MenuLabels }[] = [
+  { id: "dance", labelKey: "petActionDance" },
+  { id: "sing", labelKey: "petActionSing" },
+  { id: "spin", labelKey: "petActionSpin" },
+  { id: "heart", labelKey: "petActionHeart" },
+  { id: "stretch", labelKey: "petActionStretch" }
+];
 
 function demoItems(
   labels: MenuLabels,
@@ -97,6 +107,17 @@ export function buildPetContextMenuTemplate(
 ): Electron.MenuItemConstructorOptions[] {
   return [
     { label: labels.settings, click: actions.openSettings },
+    {
+      label: labels.chatWithPet,
+      click: actions.openChat
+    },
+    {
+      label: labels.petActions,
+      submenu: PET_ACTIONS.map((a) => ({
+        label: labels[a.labelKey],
+        click: () => actions.performAction(a.id)
+      }))
+    },
     {
       label: state.focusActive ? labels.stopFocusMode : labels.startFocusMode,
       click: state.focusActive ? actions.stopFocusFromContext : actions.startFocus
