@@ -51,6 +51,8 @@ import {
   STORE_NAME
 } from "./config";
 import {
+  clampBoundsToWorkArea,
+  displayForBounds,
   initialWindowBounds,
   savedPositionFromBounds,
   visibleWindowBounds
@@ -161,7 +163,129 @@ function refreshMood(): void {
   if (next === petMood) return;
   petMood = next;
   sendToAll("app:snapshot", snapshot());
+  if (next === "sleepy") maybeAutoSleep();
 }
+
+function maybeAutoSleep(): void {
+  if (blockingMode) return;
+  if (petState === "idle" || petState === "walking") setPetState("sleeping");
+}
+
+function maybeWakeUp(): void {
+  if (petState === "sleeping") {
+    setPetState(focusActive ? "focusGuard" : "idle");
+  }
+}
+
+let wanderTimer: NodeJS.Timeout | null = null;
+let walkAnimationTimer: NodeJS.Timeout | null = null;
+
+function wanderIntervalMs(): number {
+  const [minS, maxS] = ((): [number, number] => {
+    switch (petMood) {
+      case "playful": return [30, 60];
+      case "energetic": return [45, 90];
+      case "calm": return [90, 180];
+      case "bored": return [60, 120];
+      case "sleepy": return [300, 600];
+    }
+  })();
+  return (minS + Math.random() * (maxS - minS)) * 1000;
+}
+
+function scheduleNextWander(): void {
+  if (wanderTimer) {
+    clearTimeout(wanderTimer);
+    wanderTimer = null;
+  }
+  wanderTimer = setTimeout(() => {
+    wanderTimer = null;
+    performWander();
+  }, wanderIntervalMs());
+}
+
+function cancelWander(): void {
+  if (wanderTimer) {
+    clearTimeout(wanderTimer);
+    wanderTimer = null;
+  }
+  if (walkAnimationTimer) {
+    clearInterval(walkAnimationTimer);
+    walkAnimationTimer = null;
+  }
+}
+
+function performWander(): void {
+  if (!petWindow || petWindow.isDestroyed()) {
+    scheduleNextWander();
+    return;
+  }
+  if (blockingMode) {
+    scheduleNextWander();
+    return;
+  }
+  if (dragTimer) {
+    scheduleNextWander();
+    return;
+  }
+  if (petState === "walking" || petState === "sleeping") {
+    scheduleNextWander();
+    return;
+  }
+
+  const bounds = petWindow.getBounds();
+  const display = displayForBounds(currentDisplays(), bounds, primaryDisplay());
+  const workArea = display.workArea;
+  const maxX = Math.max(0, workArea.width - bounds.width);
+  const maxY = Math.max(0, workArea.height - bounds.height);
+  if (maxX === 0 && maxY === 0) {
+    scheduleNextWander();
+    return;
+  }
+  const targetX = workArea.x + Math.round(Math.random() * maxX);
+  const targetY = workArea.y + Math.round(Math.random() * maxY);
+  const distance = Math.hypot(targetX - bounds.x, targetY - bounds.y);
+  if (distance < 30) {
+    scheduleNextWander();
+    return;
+  }
+
+  const totalMs = Math.min(3000, Math.max(800, distance * 1.5));
+  const stepMs = 16;
+  const totalSteps = Math.max(1, Math.ceil(totalMs / stepMs));
+  let currentStep = 0;
+  const startX = bounds.x;
+  const startY = bounds.y;
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+
+  setPetFacing(dx >= 0 ? "right" : "left");
+  setPetState("walking");
+
+  walkAnimationTimer = setInterval(() => {
+    if (!petWindow || petWindow.isDestroyed()) {
+      cancelWander();
+      scheduleNextWander();
+      return;
+    }
+    currentStep++;
+    const t = Math.min(1, currentStep / totalSteps);
+    const easeT = 1 - Math.pow(1 - t, 3);
+    const newX = Math.round(startX + dx * easeT);
+    const newY = Math.round(startY + dy * easeT);
+    petWindow.setBounds({ ...bounds, x: newX, y: newY });
+    if (currentStep >= totalSteps) {
+      if (walkAnimationTimer) {
+        clearInterval(walkAnimationTimer);
+        walkAnimationTimer = null;
+      }
+      persistPetPosition();
+      setPetState(petMood === "sleepy" ? "sleeping" : focusActive ? "focusGuard" : "idle");
+      scheduleNextWander();
+    }
+  }, stepMs);
+}
+
 let updateCheck: UpdateCheckResult = createInitialUpdateCheck();
 
 function setPetMouseInteractive(interactive: boolean): void {
@@ -443,9 +567,11 @@ function createPetWindow(): void {
   petWindow.on("show", () => {
     updateTrayMenu();
     publishSnapshot();
+    scheduleNextWander();
   });
   petWindow.on("hide", () => {
     stopPetDrag();
+    cancelWander();
     updateTrayMenu();
     publishSnapshot();
   });
@@ -598,6 +724,7 @@ function movePetWithCursor(): void {
 
 function startPetDrag(offset: { offsetX: number; offsetY: number }): void {
   if (blockingMode === "breakRun" || !petWindow || petWindow.isDestroyed()) return;
+  cancelWander();
   dragOffset = {
     x: Math.min(Math.max(Math.round(offset.offsetX), 0), PET_WINDOW.width),
     y: Math.min(Math.max(Math.round(offset.offsetY), 0), PET_WINDOW.height)
@@ -622,6 +749,7 @@ function stopPetDrag(): void {
   if (wasDragging) {
     persistPetPosition();
     sendToAll("app:snapshot", snapshot());
+    scheduleNextWander();
   }
 }
 
@@ -934,12 +1062,16 @@ function petReact(reaction: PetReaction, holding: boolean): void {
     case "single":
     case "double":
       lastInteractionAt = Date.now();
+      maybeWakeUp();
       refreshMood();
+      scheduleNextWander();
       break;
     case "longPress":
       if (holding) {
         lastInteractionAt = Date.now();
+        maybeWakeUp();
         refreshMood();
+        scheduleNextWander();
       }
       break;
   }
@@ -985,7 +1117,9 @@ function happyFeedback(message: string | null = pick(text().bubble.woof), after?
   if (blockingMode) return;
   const returnState = focusActive ? "focusGuard" : "idle";
   lastInteractionAt = Date.now();
+  maybeWakeUp();
   refreshMood();
+  scheduleNextWander();
   setPetState("happy");
   if (message) {
     showBubble({ id: "happy", message, autoDismissMs: 1800 });
@@ -1326,6 +1460,7 @@ app.whenReady().then(() => {
   scheduleDistractionDetection();
   refreshMood();
   setInterval(refreshMood, 60_000);
+  scheduleNextWander();
   if (IS_DEV) {
     createSettingsWindow();
   }

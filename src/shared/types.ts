@@ -11,6 +11,7 @@ export type PetState =
   | "sitting"
   | "happy"
   | "petted"
+  | "walking"
   | "breakPrompt"
   | "breakRunning"
   | "breakDone"
