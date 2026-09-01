@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { DEFAULT_SETTINGS } from "../../shared/constants";
+import { MAIN_PET_ID } from "../../shared/types";
 import type { AppSnapshot, TodayStats } from "../../shared/types";
 
 const initialStats: TodayStats = {
@@ -45,6 +46,15 @@ export function useSnapshot(): AppSnapshot {
     petFacing: "right",
     petMood: "calm",
     lastInteractionAt: null,
+    pets: {
+      [MAIN_PET_ID]: {
+        id: MAIN_PET_ID,
+        state: "idle",
+        facing: "right",
+        mood: "calm",
+        lastInteractionAt: null
+      }
+    },
     blockingMode: null,
     focusActive: false,
     dogVisible: true

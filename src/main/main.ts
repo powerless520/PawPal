@@ -28,6 +28,8 @@ import type {
   DistractionStatus,
   DemoTrigger,
   PetFacing,
+  PetId,
+  PetInstance,
   PetMood,
   PetReaction,
   PetState,
@@ -37,6 +39,7 @@ import type {
   TodayStats,
   UpdateCheckResult
 } from "../shared/types";
+import { MAIN_PET_ID } from "../shared/types";
 import {
   APP_NAME,
   BREAK_RUN_TICK_MS,
@@ -107,6 +110,21 @@ const store = new Store<StoreSchema>({
 let petWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
+
+// petsById: returns the per-pet view of state. Today only "main" is
+// populated, but the shape is already a Record so future commits can
+// create additional pet windows without touching snapshot callers.
+function petsById(): Record<PetId, PetInstance> {
+  return {
+    [MAIN_PET_ID]: {
+      id: MAIN_PET_ID,
+      state: petState,
+      facing: petFacing,
+      mood: petMood,
+      lastInteractionAt
+    }
+  };
+}
 let petState: PetState = "idle";
 let petFacing: PetFacing = "right";
 let blockingMode: BlockingMode = null;
@@ -490,6 +508,7 @@ function snapshot(): AppSnapshot {
     petFacing,
     petMood,
     lastInteractionAt,
+    pets: petsById(),
     blockingMode,
     dogVisible: Boolean(petWindow?.isVisible()),
     focusActive

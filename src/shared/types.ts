@@ -30,6 +30,18 @@ export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
 
 export type AiProvider = "none" | "deepseek";
 
+export type PetId = string;
+
+export const MAIN_PET_ID: PetId = "main";
+
+export type PetInstance = {
+  id: PetId;
+  state: PetState;
+  facing: PetFacing;
+  mood: PetMood;
+  lastInteractionAt: number | null;
+};
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -125,6 +137,7 @@ export type AppSnapshot = {
   petFacing: PetFacing;
   petMood: PetMood;
   lastInteractionAt: number | null;
+  pets: Record<PetId, PetInstance>;
   blockingMode: BlockingMode;
   focusActive: boolean;
   dogVisible: boolean;
