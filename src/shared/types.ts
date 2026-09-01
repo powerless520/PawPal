@@ -1,6 +1,6 @@
 export type Language = "zh-CN" | "en";
 
-export type BuiltInPetAppearanceId = "lovartPuppy" | "lineDog" | "xiaoJiMao" | "dino";
+export type BuiltInPetAppearanceId = "lovartPuppy" | "lineDog" | "xiaoJiMao" | "dino" | "totodile";
 
 export type PetAppearanceId = BuiltInPetAppearanceId | "custom";
 

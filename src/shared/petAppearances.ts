@@ -44,6 +44,7 @@ const goldenPuppy = (state: PetState, name: string): string =>
 const lineDog = (state: PetState, name: string): string => `pet_assets/线条小狗/${state}/${name}`;
 const xiaoJiMao = (state: PetState, name: string): string => `pet_assets/小鸡毛/${state}/${name}`;
 const dino = (state: PetState, name: string): string => `pet_assets/小恐龙/${state}/${name}`;
+const totodile = (state: PetState, name: string): string => `pet_assets/小锯鳄/${state}/${name}`;
 
 const STATE_FALLBACKS: Partial<Record<PetState, PetState>> = {
   breakDone: "happy",
@@ -314,18 +315,49 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
       sad: { path: dino("sad", "委屈.gif"), isPlaceholder: true },
       sleeping: { path: dino("sleeping", "睡.gif"), isPlaceholder: true }
     }
+  },
+  totodile: {
+    id: "totodile",
+    label: {
+      "zh-CN": "小锯鳄",
+      en: "Totodile"
+    },
+    fallback: {
+      path: totodile("idle", "站立.gif"),
+      isPlaceholder: true
+    },
+    states: {
+      idle: {
+        path: [
+          totodile("idle", "站立.gif"),
+          totodile("idle", "咬空气.gif")
+        ]
+      },
+      happy: { path: totodile("happy", "蹦跳欢呼.gif") },
+      breakPrompt: { path: totodile("breakPrompt", "拍屏幕.gif") },
+      breakRunning: {
+        path: totodile("breakRunning", "狂奔.gif"),
+        replayIntervalMs: 4500
+      },
+      hydrationPrompt: { path: totodile("hydrationPrompt", "指水.gif") },
+      drinking: { path: totodile("drinking", "喝水溅水.gif") },
+      focusAlert: { path: totodile("focusAlert", "愤怒脸.gif") },
+      focusGuard: { path: totodile("focusGuard", "啃键盘.gif") },
+      sad: { path: totodile("sad", "大哭.gif"), isPlaceholder: true },
+      sleeping: { path: totodile("sleeping", "抱着尾巴睡.gif"), isPlaceholder: true }
+    }
   }
 };
 
 export function resolvePetAppearanceId(value: unknown): PetAppearanceId {
-  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino" || value === "custom") {
+  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino" || value === "totodile" || value === "custom") {
     return value;
   }
   return "lineDog";
 }
 
 export function resolveBuiltInPetAppearanceId(value: unknown): BuiltInPetAppearanceId {
-  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino") return value;
+  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino" || value === "totodile") return value;
   return "lineDog";
 }
 
