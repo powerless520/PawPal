@@ -5,7 +5,9 @@ import type {
   CustomPetAsset,
   DemoTrigger,
   PetDiary,
+  PetId,
   PetReaction,
+  PetRoster,
   PetState,
   Settings,
   SpeechBubble,
@@ -55,6 +57,10 @@ const api = {
   aiTestConnection: (): Promise<AiTestResult> =>
     ipcRenderer.invoke("ai:test-connection"),
   generateDiary: (): Promise<PetDiary> => ipcRenderer.invoke("diary:generate"),
+  listRoster: (): Promise<PetRoster> => ipcRenderer.invoke("roster:list"),
+  switchPet: (petId: PetId): Promise<PetRoster> => ipcRenderer.invoke("roster:switch", petId),
+  addPet: (label: string): Promise<PetRoster> => ipcRenderer.invoke("roster:add", label),
+  removePet: (petId: PetId): Promise<PetRoster> => ipcRenderer.invoke("roster:remove", petId),
   onPetState: (callback: (state: PetState) => void): Unsubscribe =>
     onChannel("pet:set-state", callback),
   onShowBubble: (callback: (bubble: SpeechBubble) => void): Unsubscribe =>

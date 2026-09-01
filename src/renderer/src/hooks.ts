@@ -49,14 +49,41 @@ export function useSnapshot(): AppSnapshot {
     pets: {
       [MAIN_PET_ID]: {
         id: MAIN_PET_ID,
+        label: "Main",
         state: "idle",
         facing: "right",
         mood: "calm",
-        lastInteractionAt: null
+        lastInteractionAt: null,
+        appearanceId: DEFAULT_SETTINGS.petAppearanceId,
+        customPetAppearance: null,
+        outfit: {},
+        bornAt: 0,
+        totalInteractions: 0,
+        transient: null
       }
     },
     petDiary: { entries: [] },
     petGrowth: { bornAt: 0, totalInteractions: 0, lastMilestone: null },
+    activePetId: MAIN_PET_ID,
+    petRoster: {
+      activePetId: MAIN_PET_ID,
+      pets: [
+        {
+          id: MAIN_PET_ID,
+          label: "Main",
+          state: "idle",
+          facing: "right",
+          mood: "calm",
+          lastInteractionAt: null,
+          appearanceId: DEFAULT_SETTINGS.petAppearanceId,
+          customPetAppearance: null,
+          outfit: {},
+          bornAt: 0,
+          totalInteractions: 0,
+          transient: null
+        }
+      ]
+    },
     blockingMode: null,
     focusActive: false,
     dogVisible: true

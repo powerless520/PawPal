@@ -276,6 +276,94 @@ function throwRandomBall(): void {
   window.pawpal.petPlayCatch(cx, cy);
 }
 
+function RosterPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+  const snapshot = useSnapshot();
+  const [newLabel, setNewLabel] = useState("");
+  const roster = snapshot.petRoster;
+  const activeId = roster?.activePetId ?? snapshot.activePetId;
+
+  async function handleSwitch(petId: string): Promise<void> {
+    if (petId === activeId) return;
+    await window.pawpal.switchPet(petId);
+  }
+
+  async function handleAdd(): Promise<void> {
+    const label = newLabel.trim();
+    await window.pawpal.addPet(label);
+    setNewLabel("");
+  }
+
+  async function handleRemove(petId: string): Promise<void> {
+    if ((roster?.pets.length ?? 0) <= 1) return;
+    await window.pawpal.removePet(petId);
+  }
+
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.roster}</h2>
+      <div className="roster-list">
+        {(roster?.pets ?? []).map((pet) => {
+          const isActive = pet.id === activeId;
+          return (
+            <div
+              key={pet.id}
+              className={`roster-row ${isActive ? "is-active" : ""}`}
+            >
+              <div className="roster-row__main">
+                <span className="roster-row__label">{pet.label}</span>
+                {isActive ? (
+                  <span className="roster-row__active-tag">{labels.rosterActive}</span>
+                ) : null}
+              </div>
+              <div className="roster-row__actions">
+                {isActive ? null : (
+                  <button
+                    type="button"
+                    className="pref-chip-button"
+                    onClick={() => void handleSwitch(pet.id)}
+                  >
+                    {labels.rosterSwitch}
+                  </button>
+                )}
+                {(roster?.pets.length ?? 0) > 1 ? (
+                  <button
+                    type="button"
+                    className="pref-chip-button is-danger"
+                    onClick={() => void handleRemove(pet.id)}
+                  >
+                    {labels.rosterRemove}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <Row
+        label={labels.rosterAddLabel}
+        control={
+          <div className="pref-input-row">
+            <input
+              type="text"
+              className="pref-input"
+              value={newLabel}
+              placeholder={labels.rosterAddPlaceholder}
+              onChange={(event) => setNewLabel(event.target.value)}
+            />
+            <button
+              type="button"
+              className="pref-chip-button is-primary"
+              onClick={() => void handleAdd()}
+            >
+              {labels.rosterAdd}
+            </button>
+          </div>
+        }
+      />
+    </section>
+  );
+}
+
 function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const snapshot = useSnapshot();
   const growth = snapshot.petGrowth;
@@ -863,6 +951,8 @@ export function SettingsView(): JSX.Element {
       <DiaryPanel labels={labels} />
 
       <GrowthPanel labels={labels} />
+
+      <RosterPanel labels={labels} />
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.system}</h2>

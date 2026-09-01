@@ -36,10 +36,38 @@ export const MAIN_PET_ID: PetId = "main";
 
 export type PetInstance = {
   id: PetId;
+  label: string;
   state: PetState;
   facing: PetFacing;
   mood: PetMood;
   lastInteractionAt: number | null;
+  appearanceId: PetAppearanceId;
+  customPetAppearance: CustomPetAppearance | null;
+  outfit: Outfit;
+  bornAt: number;
+  totalInteractions: number;
+  transient: {
+    state: PetState;
+    facing: PetFacing;
+    mood: PetMood;
+    lastInteractionAt: number | null;
+  } | null;
+};
+
+export type PetRoster = {
+  activePetId: PetId;
+  pets: PetInstance[];
+};
+
+export type ActivePetSnapshot = {
+  id: PetId;
+  state: PetState;
+  facing: PetFacing;
+  mood: PetMood;
+  lastInteractionAt: number | null;
+  appearanceId: PetAppearanceId;
+  customPetAppearance: CustomPetAppearance | null;
+  outfit: Outfit;
 };
 
 export type OutfitPart = "hat" | "glasses" | "scarf" | "bow";
@@ -173,6 +201,8 @@ export type AppSnapshot = {
   petMood: PetMood;
   lastInteractionAt: number | null;
   pets: Record<PetId, PetInstance>;
+  activePetId: PetId;
+  petRoster: PetRoster;
   petDiary: PetDiary;
   petGrowth: PetGrowth;
   blockingMode: BlockingMode;

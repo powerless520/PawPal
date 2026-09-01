@@ -36,6 +36,7 @@ import type {
   PetInstance,
   PetMood,
   PetReaction,
+  PetRoster,
   PetState,
   Settings,
   StatsHistory,
@@ -116,19 +117,112 @@ let petWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
-// petsById: returns the per-pet view of state. Today only "main" is
-// populated, but the shape is already a Record so future commits can
-// create additional pet windows without touching snapshot callers.
-function petsById(): Record<PetId, PetInstance> {
-  return {
-    [MAIN_PET_ID]: {
+// petRoster: archive of every pet the user has configured. The window
+// always renders the active pet; switching the active id re-applies the
+// stored per-pet settings + transient state. Future commits can move
+// from 'one window' to 'one window per pet' by iterating roster.pets.
+type PetRosterEntry = PetInstance;
+
+const ROSTER_KEY = "petRoster";
+
+function defaultAppearanceId(): PetAppearanceId {
+  return getSettings().petAppearanceId;
+}
+
+function readRoster(): PetRoster {
+  const stored = store.get(ROSTER_KEY) as { activePetId?: PetId; pets?: PetRosterEntry[] } | undefined;
+  if (stored && Array.isArray(stored.pets) && stored.pets.length > 0) {
+    return {
+      activePetId: stored.activePetId ?? MAIN_PET_ID,
+      pets: stored.pets
+    };
+  }
+  const initial: PetRosterEntry[] = [
+    {
       id: MAIN_PET_ID,
-      state: petState,
-      facing: petFacing,
-      mood: petMood,
-      lastInteractionAt
+      label: "Main",
+      state: "idle",
+      facing: "right",
+      mood: "calm",
+      lastInteractionAt: null,
+      appearanceId: defaultAppearanceId(),
+      customPetAppearance: getSettings().customPetAppearance,
+      outfit: getSettings().outfit ?? {},
+      bornAt: Date.now(),
+      totalInteractions: 0,
+      transient: null
     }
+  ];
+  return { activePetId: MAIN_PET_ID, pets: initial };
+}
+
+function activeRosterEntry(roster: PetRoster): PetRosterEntry {
+  return roster.pets.find((p) => p.id === roster.activePetId) ?? roster.pets[0];
+}
+
+function writeRoster(roster: PetRoster): void {
+  store.set(ROSTER_KEY, roster);
+}
+
+function commitActiveToRoster(): void {
+  const roster = readRoster();
+  const active = activeRosterEntry(roster);
+  active.transient = {
+    state: petState,
+    facing: petFacing,
+    mood: petMood,
+    lastInteractionAt
   };
+  active.appearanceId = getSettings().petAppearanceId;
+  active.customPetAppearance = getSettings().customPetAppearance;
+  active.outfit = getSettings().outfit ?? {};
+  active.totalInteractions = readGrowth().totalInteractions;
+  active.bornAt = readGrowth().bornAt;
+  writeRoster(roster);
+}
+
+function loadActiveFromRoster(): void {
+  const roster = readRoster();
+  const active = activeRosterEntry(roster);
+  const transient = active.transient ?? {
+    state: "idle" as PetState,
+    facing: "right" as PetFacing,
+    mood: "calm" as PetMood,
+    lastInteractionAt: null
+  };
+  petState = transient.state;
+  petFacing = transient.facing;
+  petMood = transient.mood;
+  lastInteractionAt = transient.lastInteractionAt;
+}
+
+function petsById(): Record<PetId, PetInstance> {
+  const roster = readRoster();
+  const out: Record<PetId, PetInstance> = {};
+  for (const entry of roster.pets) {
+    const isActive = entry.id === roster.activePetId;
+    const transient = entry.transient ?? {
+      state: "idle",
+      facing: "right",
+      mood: "calm",
+      lastInteractionAt: null
+    };
+    out[entry.id] = {
+      id: entry.id,
+      label: entry.label,
+      state: isActive ? petState : transient.state,
+      facing: isActive ? petFacing : transient.facing,
+      mood: isActive ? petMood : transient.mood,
+      lastInteractionAt: isActive ? lastInteractionAt : transient.lastInteractionAt,
+      appearanceId: entry.appearanceId,
+      customPetAppearance: entry.customPetAppearance,
+      outfit: entry.outfit,
+      bornAt: entry.bornAt,
+      totalInteractions: entry.totalInteractions,
+      transient: isActive ? null : transient
+    };
+  }
+  return out;
 }
 let petState: PetState = "idle";
 let petFacing: PetFacing = "right";
@@ -641,6 +735,8 @@ function snapshot(): AppSnapshot {
     petMood,
     lastInteractionAt,
     pets: petsById(),
+    activePetId: readRoster().activePetId,
+    petRoster: readRoster(),
     petDiary: readDiary(),
     petGrowth: readGrowth(),
     blockingMode,
@@ -1688,6 +1784,58 @@ function registerIpc(): void {
       petPlayCatch(payload.targetX, payload.targetY);
     }
   );
+  ipcMain.handle("roster:list", (): PetRoster => readRoster());
+  ipcMain.handle("roster:switch", (_event, petId: PetId): PetRoster => {
+    commitActiveToRoster();
+    const roster = readRoster();
+    if (!roster.pets.some((p) => p.id === petId)) return roster;
+    roster.activePetId = petId;
+    writeRoster(roster);
+    loadActiveFromRoster();
+    sendToAll("app:snapshot", snapshot());
+    return roster;
+  });
+  ipcMain.handle(
+    "roster:add",
+    (_event, label: string): PetRoster => {
+      commitActiveToRoster();
+      const roster = readRoster();
+      const id = `pet-${Date.now().toString(36)}`;
+      roster.pets.push({
+        id,
+        label: label.trim() || `Pet ${roster.pets.length + 1}`,
+        state: "idle",
+        facing: "right",
+        mood: "calm",
+        lastInteractionAt: null,
+        appearanceId: defaultAppearanceId(),
+        customPetAppearance: null,
+        outfit: {},
+        bornAt: Date.now(),
+        totalInteractions: 0,
+        transient: null
+      });
+      roster.activePetId = id;
+      writeRoster(roster);
+      loadActiveFromRoster();
+      sendToAll("app:snapshot", snapshot());
+      return roster;
+    }
+  );
+  ipcMain.handle("roster:remove", (_event, petId: PetId): PetRoster => {
+    const roster = readRoster();
+    if (roster.pets.length <= 1) return roster;
+    const filtered = roster.pets.filter((p) => p.id !== petId);
+    const nextActive = roster.activePetId === petId ? filtered[0].id : roster.activePetId;
+    roster.pets = filtered;
+    roster.activePetId = nextActive;
+    writeRoster(roster);
+    if (roster.activePetId === petId) {
+      loadActiveFromRoster();
+    }
+    sendToAll("app:snapshot", snapshot());
+    return roster;
+  });
   ipcMain.on("pet:context-menu", showPetContextMenu);
   ipcMain.on("pet:drag-start", (_event, offset: { offsetX: number; offsetY: number }) =>
     startPetDrag(offset)
