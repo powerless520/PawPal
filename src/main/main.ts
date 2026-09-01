@@ -165,6 +165,7 @@ function refreshMood(): void {
   petMood = next;
   sendToAll("app:snapshot", snapshot());
   if (next === "sleepy") maybeAutoSleep();
+  scheduleNextChatter();
 }
 
 function maybeAutoSleep(): void {
@@ -285,6 +286,97 @@ function performWander(): void {
       scheduleNextWander();
     }
   }, stepMs);
+}
+
+let chatTimer: NodeJS.Timeout | null = null;
+
+function chatIntervalMs(): number {
+  const [minS, maxS] = ((): [number, number] => {
+    switch (petMood) {
+      case "playful": return [90, 180];
+      case "energetic": return [120, 240];
+      case "calm": return [240, 480];
+      case "bored": return [60, 150];
+      case "sleepy": return [480, 900];
+    }
+  })();
+  return (minS + Math.random() * (maxS - minS)) * 1000;
+}
+
+function cancelChatter(): void {
+  if (chatTimer) {
+    clearTimeout(chatTimer);
+    chatTimer = null;
+  }
+}
+
+function scheduleNextChatter(): void {
+  cancelChatter();
+  chatTimer = setTimeout(() => {
+    chatTimer = null;
+    void performChatter();
+  }, chatIntervalMs());
+}
+
+async function performChatter(): Promise<void> {
+  if (!petWindow || petWindow.isDestroyed()) {
+    scheduleNextChatter();
+    return;
+  }
+  if (blockingMode) {
+    scheduleNextChatter();
+    return;
+  }
+  if (bubbleTimer) {
+    scheduleNextChatter();
+    return;
+  }
+  if (petState === "walking" || petState === "sleeping") {
+    scheduleNextChatter();
+    return;
+  }
+
+  const settings = getSettings();
+  const client = createAiClient(settings.aiProvider, settings.aiApiKey);
+  let message = "";
+  const hour = new Date().getHours();
+
+  if (client.isConfigured() && Math.random() < 0.5) {
+    try {
+      message = await client.chat([
+        {
+          role: "system",
+          content:
+            "You are a tiny cute desktop pet (a small dinosaur). Reply with ONE short casual sentence in the user's language (Chinese if their system language is zh-CN, otherwise English). The current mood is: " +
+            petMood +
+            ". Current hour: " +
+            hour +
+            ". Keep it under 20 characters. Be playful and warm."
+        },
+        {
+          role: "user",
+          content: "随便说一句吧"
+        }
+      ]);
+    } catch {
+      // fall back to local phrase pool
+      message = pick(text().bubble.idleChatter);
+    }
+  } else {
+    message = pick(text().bubble.idleChatter);
+  }
+
+  if (!message) {
+    scheduleNextChatter();
+    return;
+  }
+
+  showBubble({
+    id: "idle-chatter",
+    message,
+    autoDismissMs: 3500
+  });
+  scheduleNextChatter();
 }
 
 let updateCheck: UpdateCheckResult = createInitialUpdateCheck();
@@ -569,10 +661,12 @@ function createPetWindow(): void {
     updateTrayMenu();
     publishSnapshot();
     scheduleNextWander();
+    scheduleNextChatter();
   });
   petWindow.on("hide", () => {
     stopPetDrag();
     cancelWander();
+    cancelChatter();
     updateTrayMenu();
     publishSnapshot();
   });
@@ -1066,6 +1160,7 @@ function petReact(reaction: PetReaction, holding: boolean): void {
       maybeWakeUp();
       refreshMood();
       scheduleNextWander();
+      scheduleNextChatter();
       break;
     case "longPress":
       if (holding) {
@@ -1073,6 +1168,7 @@ function petReact(reaction: PetReaction, holding: boolean): void {
         maybeWakeUp();
         refreshMood();
         scheduleNextWander();
+        scheduleNextChatter();
       }
       break;
   }
@@ -1121,6 +1217,7 @@ function happyFeedback(message: string | null = pick(text().bubble.woof), after?
   maybeWakeUp();
   refreshMood();
   scheduleNextWander();
+  scheduleNextChatter();
   setPetState("happy");
   if (message) {
     showBubble({ id: "happy", message, autoDismissMs: 1800 });
@@ -1467,6 +1564,7 @@ app.whenReady().then(() => {
   refreshMood();
   setInterval(refreshMood, 60_000);
   scheduleNextWander();
+  scheduleNextChatter();
   if (IS_DEV) {
     createSettingsWindow();
   }

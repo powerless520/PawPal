@@ -36,6 +36,23 @@ export const I18N = {
         "嘿嘿，舒服~",
         "呼噜呼噜~"
       ],
+      idleChatter: [
+        "今天天气真好~",
+        "主人你在干嘛呀？",
+        "我可以玩一会儿吗？",
+        "哼个小曲儿吧~",
+        "发呆中…",
+        "无聊…",
+        "想出去走走~",
+        "今天辛苦啦",
+        "陪我玩嘛~",
+        "嘿嘿~",
+        "在想什么呢？",
+        "我去溜达溜达~",
+        "主人喝水了吗？",
+        "想吃点东西~",
+        "风好舒服呀~"
+      ],
       breakReminder: [
         "坐太久啦，去走一分钟吧",
         "我想和你玩儿一会儿，去走一分钟吧",
@@ -315,6 +332,23 @@ export const I18N = {
         "Keep petting me",
         "Hehe, nice~",
         "Purrr~"
+      ],
+      idleChatter: [
+        "Nice weather today~",
+        "Whatcha doing?",
+        "Can we play a bit?",
+        "Hum hum~",
+        "Spacing out…",
+        "So bored…",
+        "Wanna go for a walk~",
+        "You worked hard today",
+        "Play with me~",
+        "Hehe~",
+        "What are you thinking?",
+        "Let me wander a bit~",
+        "Did you drink water?",
+        "Wanna snack~",
+        "Breezy~"
       ],
       breakReminder: [
         "You've been sitting too long, walk for a minute!",
