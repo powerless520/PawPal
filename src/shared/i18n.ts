@@ -149,6 +149,8 @@ export const I18N = {
       appearance: "外观",
       system: "系统",
       launchAtLogin: "开机自启",
+      soundEnabled: "音效",
+      soundEnabledHelp: "开启后，宠物互动和提醒会播放短音效。",
       launchAtLoginHelp: "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
       about: "关于",
       version: "版本",
@@ -472,6 +474,8 @@ export const I18N = {
       appearance: "Appearance",
       system: "System",
       launchAtLogin: "Launch at Login",
+      soundEnabled: "Sound effects",
+      soundEnabledHelp: "Plays a short sound for interactions and reminders.",
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",

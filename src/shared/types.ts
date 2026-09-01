@@ -163,6 +163,7 @@ export type Settings = {
   aiApiKey: string;
   outfit: Outfit;
   outfitMode: OutfitMode;
+  soundEnabled: boolean;
 };
 
 export type TodayStats = {

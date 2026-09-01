@@ -73,6 +73,7 @@ import { classifyDistraction, isPermissionError, readActiveWindow } from "./dist
 import { applyLaunchAtLoginPreference, getLaunchAtLoginState } from "./loginItem";
 import { createAiClient } from "./aiClient";
 import { appendDiary, composeDiaryEntry, emptyDiary } from "./diary";
+import { playSound } from "./soundPlayer";
 import {
   buildApplicationMenuTemplate,
   buildPetContextMenuTemplate,
@@ -1442,6 +1443,10 @@ function schedulePetReactionRevert(delayMs: number, returnState: PetState): void
 function petReact(reaction: PetReaction, holding: boolean): void {
   if (blockingMode) return;
   const returnState = focusActive ? "focusGuard" : "idle";
+  const soundOn = getSettings().soundEnabled;
+  if (reaction === "single") playSound("click", soundOn);
+  if (reaction === "longPress" && holding) playSound("petted", soundOn);
+  if (reaction === "double") playSound("happy", soundOn);
 
   switch (reaction) {
     case "single":
@@ -1579,6 +1584,7 @@ function triggerBreakReminder(fromDemo: boolean): void {
   breakDueAt = null;
   publishSnapshot();
   setPetState("breakPrompt");
+  if (getSettings().soundEnabled) playSound("warning", true);
   const labels = text();
   showBubble({
     id: "break",
@@ -1606,6 +1612,7 @@ function triggerHydrationReminder(fromDemo: boolean): void {
   hydrationDueAt = null;
   publishSnapshot();
   setPetState("hydrationPrompt");
+  if (getSettings().soundEnabled) playSound("idleChatter", true);
   const labels = text();
   showBubble({
     id: "hydration",
@@ -1624,6 +1631,7 @@ function triggerFocusWarning(rule?: string): void {
   blockingMode = "focusWarning";
   updateStats((stats) => ({ ...stats, focusWarnings: stats.focusWarnings + 1 }));
   setPetState("focusAlert");
+  if (getSettings().soundEnabled) playSound("warning", true);
   sendToAll("app:snapshot", snapshot());
   const labels = text();
   showBubble({

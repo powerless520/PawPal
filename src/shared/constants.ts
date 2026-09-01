@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS: Settings = {
   aiApiKey: "",
   outfit: {},
   outfitMode: "seasonal",
+  soundEnabled: true,
   distractionBlockedApps: [
     "Steam",
     "Discord",

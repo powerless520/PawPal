@@ -1014,6 +1014,17 @@ export function SettingsView(): JSX.Element {
             />
           }
         />
+        <Row
+          label={labels.soundEnabled}
+          hint={labels.soundEnabledHelp}
+          control={
+            <ToggleControl
+              checked={draft.soundEnabled}
+              onChange={(soundEnabled) => updateDraft({ soundEnabled })}
+              ariaLabel={labels.soundEnabled}
+            />
+          }
+        />
         {/* Local-only fork: update-check toggle removed (always off). */}
       </section>
 
