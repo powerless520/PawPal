@@ -31,6 +31,7 @@ import type {
   PetAppearanceId,
   PetDiary,
   PetFacing,
+  PetGrowth,
   PetId,
   PetInstance,
   PetMood,
@@ -409,6 +410,7 @@ function petPlayCatch(targetX: number, targetY: number): void {
   cancelWander();
   cancelChatter();
   lastInteractionAt = Date.now();
+  bumpInteraction();
   maybeWakeUp();
   refreshMood();
   scheduleNextWander();
@@ -485,6 +487,46 @@ function readDiary(): PetDiary {
     return stored as PetDiary;
   }
   return emptyDiary();
+}
+
+function readGrowth(): PetGrowth {
+  const stored = store.get("petGrowth") as Partial<PetGrowth> | undefined;
+  if (stored && typeof stored.bornAt === "number") {
+    return {
+      bornAt: stored.bornAt,
+      totalInteractions: stored.totalInteractions ?? 0,
+      lastMilestone: stored.lastMilestone ?? null
+    };
+  }
+  return {
+    bornAt: Date.now(),
+    totalInteractions: 0,
+    lastMilestone: null
+  };
+}
+
+const MILESTONE_THRESHOLDS = [10, 50, 100, 250, 500, 1000];
+
+function bumpInteraction(): void {
+  const current = readGrowth();
+  const nextCount = current.totalInteractions + 1;
+  const milestone = MILESTONE_THRESHOLDS.find(
+    (threshold) => nextCount >= threshold && current.lastMilestone !== `interactions-${threshold}`
+  );
+  const lastMilestone = milestone ? `interactions-${milestone}` : current.lastMilestone;
+  store.set("petGrowth", {
+    bornAt: current.bornAt,
+    totalInteractions: nextCount,
+    lastMilestone
+  });
+  if (milestone) {
+    showBubble({
+      id: "milestone",
+      message: pick(text().bubble.woof),
+      autoDismissMs: 2200
+    });
+  }
+  publishSnapshot();
 }
 
 let updateCheck: UpdateCheckResult = createInitialUpdateCheck();
@@ -600,6 +642,7 @@ function snapshot(): AppSnapshot {
     lastInteractionAt,
     pets: petsById(),
     petDiary: readDiary(),
+    petGrowth: readGrowth(),
     blockingMode,
     dogVisible: Boolean(petWindow?.isVisible()),
     focusActive
@@ -1267,6 +1310,7 @@ function petReact(reaction: PetReaction, holding: boolean): void {
     case "single":
     case "double":
       lastInteractionAt = Date.now();
+      bumpInteraction();
       maybeWakeUp();
       refreshMood();
       scheduleNextWander();
@@ -1275,6 +1319,7 @@ function petReact(reaction: PetReaction, holding: boolean): void {
     case "longPress":
       if (holding) {
         lastInteractionAt = Date.now();
+        bumpInteraction();
         maybeWakeUp();
         refreshMood();
         scheduleNextWander();
@@ -1324,6 +1369,7 @@ function happyFeedback(message: string | null = pick(text().bubble.woof), after?
   if (blockingMode) return;
   const returnState = focusActive ? "focusGuard" : "idle";
   lastInteractionAt = Date.now();
+  bumpInteraction();
   maybeWakeUp();
   refreshMood();
   scheduleNextWander();

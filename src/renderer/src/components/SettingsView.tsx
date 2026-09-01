@@ -276,6 +276,32 @@ function throwRandomBall(): void {
   window.pawpal.petPlayCatch(cx, cy);
 }
 
+function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+  const snapshot = useSnapshot();
+  const growth = snapshot.petGrowth;
+  const now = useNow(60_000);
+  const days = growth?.bornAt ? Math.max(0, Math.floor((now - growth.bornAt) / 86_400_000)) : 0;
+  const interactions = growth?.totalInteractions ?? 0;
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.growth}</h2>
+      <Row
+        label={labels.growth}
+        hint={
+          days <= 0
+            ? labels.growthAgeDaysOne
+            : labels.growthAgeDays(days)
+        }
+        control={
+          <span className="pref-static-value">
+            {labels.growthInteractions(interactions)}
+          </span>
+        }
+      />
+    </section>
+  );
+}
+
 function DiaryPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const snapshot = useSnapshot();
   const [generating, setGenerating] = useState(false);
@@ -835,6 +861,8 @@ export function SettingsView(): JSX.Element {
       <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} />
 
       <DiaryPanel labels={labels} />
+
+      <GrowthPanel labels={labels} />
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.system}</h2>

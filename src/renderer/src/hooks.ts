@@ -56,6 +56,7 @@ export function useSnapshot(): AppSnapshot {
       }
     },
     petDiary: { entries: [] },
+    petGrowth: { bornAt: 0, totalInteractions: 0, lastMilestone: null },
     blockingMode: null,
     focusActive: false,
     dogVisible: true

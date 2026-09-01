@@ -70,6 +70,12 @@ export type PetDiary = {
   entries: DiaryEntry[];
 };
 
+export type PetGrowth = {
+  bornAt: number;
+  totalInteractions: number;
+  lastMilestone: string | null;
+};
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -168,6 +174,7 @@ export type AppSnapshot = {
   lastInteractionAt: number | null;
   pets: Record<PetId, PetInstance>;
   petDiary: PetDiary;
+  petGrowth: PetGrowth;
   blockingMode: BlockingMode;
   focusActive: boolean;
   dogVisible: boolean;
