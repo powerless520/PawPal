@@ -1,4 +1,4 @@
-import type { Language, OutfitItem, OutfitSlot } from "./types";
+import type { Language, OutfitItem, OutfitPart, OutfitSlot } from "./types";
 
 const OUTFITS_BASE = "pet_assets/outfits";
 
@@ -64,4 +64,46 @@ export function outfitItemById(part: string, id: string): OutfitItem | null {
 export function outfitPartLabel(part: string, language: Language): string {
   const slot = OUTFIT_SLOTS.find((entry) => entry.part === part);
   return slot?.label[language] ?? part;
+}
+export type SeasonalOutfit = {
+  hat?: string;
+  scarf?: string;
+  bow?: string;
+  glasses?: string;
+  label: Record<Language, string>;
+};
+
+export function seasonalOutfitForDate(now: Date): SeasonalOutfit | null {
+  const m = now.getMonth() + 1; // 1-12
+  const d = now.getDate();
+  // Spring Festival (lunar new year) — approximate using Feb 1-15 for now
+  if (m === 2 && d <= 15) {
+    return {
+      hat: "beanie",
+      label: { "zh-CN": "新年", en: "New Year" }
+    };
+  }
+  // Valentine's Day
+  if (m === 2 && d === 14) {
+    return {
+      bow: "crown", // reuse a part as decorative
+      label: { "zh-CN": "情人节", en: "Valentine's Day" }
+    };
+  }
+  // Halloween
+  if (m === 10 && d >= 25) {
+    return {
+      hat: "crown",
+      label: { "zh-CN": "万圣节", en: "Halloween" }
+    };
+  }
+  // Christmas
+  if (m === 12 && d >= 20) {
+    return {
+      hat: "beanie",
+      scarf: "red-scarf",
+      label: { "zh-CN": "圣诞", en: "Christmas" }
+    };
+  }
+  return null;
 }

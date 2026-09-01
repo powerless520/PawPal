@@ -74,6 +74,8 @@ export type OutfitPart = "hat" | "glasses" | "scarf" | "bow";
 
 export type Outfit = Partial<Record<OutfitPart, string>>;
 
+export type OutfitMode = "manual" | "seasonal";
+
 export type OutfitItem = {
   id: string;
   part: OutfitPart;
@@ -160,6 +162,7 @@ export type Settings = {
   aiProvider: AiProvider;
   aiApiKey: string;
   outfit: Outfit;
+  outfitMode: OutfitMode;
 };
 
 export type TodayStats = {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { JSX, PointerEvent } from "react";
 import { i18n, resolveLanguage } from "../../../shared/i18n";
-import { outfitItemById, OUTFIT_SLOTS } from "../../../shared/outfits";
+import { outfitItemById, OUTFIT_SLOTS, seasonalOutfitForDate } from "../../../shared/outfits";
 import type { OutfitPart, PetState, SpeechBubble } from "../../../shared/types";
 import { getPetAsset, getPetAssetVariantCount } from "../assets";
 import { useNow, useSnapshot } from "../hooks";
@@ -73,7 +73,12 @@ export function PetView(): JSX.Element {
   const appearanceId = snapshot.settings.petAppearanceId;
   const customAppearance = snapshot.settings.customPetAppearance;
   const asset = getPetAsset(appearanceId, state, assetVariant, assetReplayKey, customAppearance);
-  const outfit = snapshot.settings.outfit;
+  const outfitMode = snapshot.settings.outfitMode;
+  const rawOutfit = snapshot.settings.outfit;
+  const outfit =
+    outfitMode === "seasonal"
+      ? seasonalOutfitForDate(new Date()) ?? rawOutfit
+      : rawOutfit;
 
   function finishPointerDrag(clicked: boolean): void {
     const drag = dragRef.current;

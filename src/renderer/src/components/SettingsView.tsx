@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent, JSX, ReactNode } from "react";
 import { i18n, LANGUAGE_OPTIONS, resolveLanguage } from "../../../shared/i18n";
-import { OUTFIT_SLOTS } from "../../../shared/outfits";
+import { OUTFIT_SLOTS, seasonalOutfitForDate } from "../../../shared/outfits";
 import {
   hasRequiredCustomPetAssets,
   PET_STATE_ORDER,
@@ -549,47 +549,78 @@ function OutfitPicker({
   draft: Settings;
   updateDraft: (partial: Partial<Settings>) => void;
 }): JSX.Element | null {
+  const now = new Date();
+  const seasonal = seasonalOutfitForDate(now);
+  const isAuto = draft.outfitMode === "seasonal";
   return (
     <section className="prefs__group">
       <h2 className="prefs__group-title">{labels.outfit}</h2>
-      {OUTFIT_SLOTS.map((slot) => (
-        <Row
-          key={slot.part}
-          label={slot.label[draft.language]}
-          control={
-            <div className="pref-chip-group">
-              <button
-                type="button"
-                className={`pref-chip-button ${draft.outfit[slot.part] === undefined ? "is-active" : ""}`}
-                onClick={() => {
-                  const outfit = { ...draft.outfit };
-                  delete outfit[slot.part];
-                  updateDraft({ outfit });
-                }}
-              >
-                {labels.outfitNone}
-              </button>
-              {slot.items.map((item) => {
-                const isActive = draft.outfit[slot.part] === item.id;
-                return (
+      <Row
+        label={labels.outfitMode}
+        hint={
+          isAuto && seasonal
+            ? labels.outfitSeasonalNow(seasonal.label[draft.language])
+            : labels.outfitModeHint
+        }
+        control={
+          <div className="pref-chip-group">
+            <button
+              type="button"
+              className={`pref-chip-button ${isAuto ? "is-active" : ""}`}
+              onClick={() => updateDraft({ outfitMode: "seasonal" })}
+            >
+              {labels.outfitModeAuto}
+            </button>
+            <button
+              type="button"
+              className={`pref-chip-button ${!isAuto ? "is-active" : ""}`}
+              onClick={() => updateDraft({ outfitMode: "manual" })}
+            >
+              {labels.outfitModeManual}
+            </button>
+          </div>
+        }
+      />
+      {!isAuto
+        ? OUTFIT_SLOTS.map((slot) => (
+            <Row
+              key={slot.part}
+              label={slot.label[draft.language]}
+              control={
+                <div className="pref-chip-group">
                   <button
-                    key={item.id}
                     type="button"
-                    className={`pref-chip-button ${isActive ? "is-active" : ""}`}
-                    onClick={() =>
-                      updateDraft({
-                        outfit: { ...draft.outfit, [slot.part]: item.id }
-                      })
-                    }
+                    className={`pref-chip-button ${draft.outfit[slot.part] === undefined ? "is-active" : ""}`}
+                    onClick={() => {
+                      const outfit = { ...draft.outfit };
+                      delete outfit[slot.part];
+                      updateDraft({ outfit });
+                    }}
                   >
-                    {item.label[draft.language]}
+                    {labels.outfitNone}
                   </button>
-                );
-              })}
-            </div>
-          }
-        />
-      ))}
+                  {slot.items.map((item) => {
+                    const isActive = draft.outfit[slot.part] === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`pref-chip-button ${isActive ? "is-active" : ""}`}
+                        onClick={() =>
+                          updateDraft({
+                            outfit: { ...draft.outfit, [slot.part]: item.id }
+                          })
+                        }
+                      >
+                        {item.label[draft.language]}
+                      </button>
+                    );
+                  })}
+                </div>
+              }
+            />
+          ))
+        : null}
     </section>
   );
 }
