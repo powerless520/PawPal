@@ -24,6 +24,7 @@ import { PET_STATE_ORDER, petAppearanceOptions } from "../shared/petAppearances"
 import type {
   AppSnapshot,
   BlockingMode,
+  ChatMessage,
   CustomPetAsset,
   DistractionStatus,
   DemoTrigger,
@@ -55,7 +56,9 @@ import {
   PRELOAD_PATH,
   RELEASES_URL,
   RENDERER_HTML_PATH,
+  CHAT_HTML_PATH,
   SETTINGS_WINDOW,
+  CHAT_WINDOW,
   STORE_NAME
 } from "./config";
 import {
@@ -115,6 +118,7 @@ const store = new Store<StoreSchema>({
 
 let petWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
+let chatWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
 // petRoster: archive of every pet the user has configured. The window
@@ -983,6 +987,43 @@ function createSettingsWindow(): void {
   });
 }
 
+function createChatWindow(): void {
+  if (chatWindow && !chatWindow.isDestroyed()) {
+    chatWindow.focus();
+    return;
+  }
+  const devServer = process.env.ELECTRON_RENDERER_URL;
+  chatWindow = new BrowserWindow({
+    width: CHAT_WINDOW.width,
+    height: CHAT_WINDOW.height,
+    title: `${APP_NAME} — Chat`,
+    resizable: true,
+    minWidth: 360,
+    minHeight: 420,
+    show: false,
+    backgroundColor: "#faf6ee",
+    ...(process.platform === "darwin"
+      ? { titleBarStyle: "hiddenInset" as const, trafficLightPosition: { x: 14, y: 14 } }
+      : {}),
+    webPreferences: {
+      preload: PRELOAD_PATH,
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      webSecurity: !IS_DEV
+    }
+  });
+  if (devServer) {
+    void chatWindow.loadURL(`${devServer}#/chat`);
+  } else {
+    void chatWindow.loadFile(CHAT_HTML_PATH);
+  }
+  chatWindow.once("ready-to-show", () => chatWindow?.show());
+  chatWindow.on("closed", () => {
+    chatWindow = null;
+  });
+}
+
 function createTray(): void {
   tray = new Tray(createTrayImage());
   tray.setToolTip(APP_NAME);
@@ -1785,6 +1826,36 @@ function registerIpc(): void {
     }
   );
   ipcMain.handle("roster:list", (): PetRoster => readRoster());
+  ipcMain.handle("chat:open", () => {
+    createChatWindow();
+  });
+  ipcMain.handle(
+    "chat:reply",
+    async (
+      _e,
+      payload: { history: ChatMessage[]; language: Language }
+    ): Promise<string> => {
+      const settings = getSettings();
+      const client = createAiClient(settings.aiProvider, settings.aiApiKey);
+      if (!client.isConfigured()) {
+        throw new Error("AI not configured");
+      }
+      const appearanceName = petAppearanceLabel(settings.petAppearanceId, settings.language);
+      const systemPrompt =
+        payload.language === "zh-CN"
+          ? `你是一只名叫"${appearanceName}"的小型桌面宠物，正和主人自由聊天。` +
+            `用第一人称、简短中文回复（<= 60 字），语气温暖、有点调皮。` +
+            `不要用 markdown，不要用引号开头，不要说自己是 AI。`
+          : `You are a tiny desktop pet named "${appearanceName}" chatting with your owner. ` +
+            `Reply in first-person, in short English (under 60 words), warm and a little playful. ` +
+            `Do not use markdown, do not start with quotes, do not mention being an AI.`;
+      const messages: ChatMessage[] = [
+        { role: "system", content: systemPrompt },
+        ...payload.history.slice(-12) // keep last 12 turns for context
+      ];
+      return client.chat(messages);
+    }
+  );
   ipcMain.handle("roster:switch", (_event, petId: PetId): PetRoster => {
     commitActiveToRoster();
     const roster = readRoster();

@@ -19,8 +19,14 @@ export const SETTINGS_WINDOW = {
   height: 680
 } as const;
 
+export const CHAT_WINDOW = {
+  width: 480,
+  height: 560
+} as const;
+
 export const PRELOAD_PATH = join(__dirname, "../preload/index.cjs");
 export const RENDERER_HTML_PATH = join(__dirname, "../renderer/index.html");
+export const CHAT_HTML_PATH = join(__dirname, "../renderer/chat.html");
 export const IS_DEV = Boolean(process.env.ELECTRON_RENDERER_URL);
 
 export const DISTRACTION_CHECK_INTERVAL_MS = 3000;

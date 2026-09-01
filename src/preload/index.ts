@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, webUtils } from "electron";
 import type {
   AiTestResult,
   AppSnapshot,
+  ChatMessage,
   CustomPetAsset,
   DemoTrigger,
   PetDiary,
@@ -54,6 +55,9 @@ const api = {
   startFocus: (): void => ipcRenderer.send("focus:start"),
   stopFocus: (): void => ipcRenderer.send("focus:stop"),
   resetToday: (): void => ipcRenderer.send("stats:reset-today"),
+  openChat: (): Promise<void> => ipcRenderer.invoke("chat:open"),
+  petChat: (history: ChatMessage[], language: "zh-CN" | "en"): Promise<string> =>
+    ipcRenderer.invoke("chat:reply", { history, language }),
   aiTestConnection: (): Promise<AiTestResult> =>
     ipcRenderer.invoke("ai:test-connection"),
   generateDiary: (): Promise<PetDiary> => ipcRenderer.invoke("diary:generate"),

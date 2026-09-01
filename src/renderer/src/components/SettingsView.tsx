@@ -955,6 +955,22 @@ export function SettingsView(): JSX.Element {
       <RosterPanel labels={labels} />
 
       <section className="prefs__group">
+        <h2 className="prefs__group-title">{labels.chatWithPet}</h2>
+        <Row
+          label={labels.chatWithPet}
+          control={
+            <button
+              type="button"
+              className="pref-button is-primary"
+              onClick={() => void window.pawpal.openChat()}
+            >
+              {labels.chatWithPet}
+            </button>
+          }
+        />
+      </section>
+
+      <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.system}</h2>
         <Row
           label={labels.launchAtLogin}
