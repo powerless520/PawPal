@@ -22,17 +22,32 @@
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
-        { "target": "dmg", "arch": ["arm64", "x64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
       ],
-      "hardenedRuntime": true,
+      "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "notarize": false
+      "notarize": false,
+      "extendInfo": {
+        "CFBundleName": "PawPal Local",
+        "CFBundleDisplayName": "PawPal Local",
+        "CFBundleExecutable": "PawPal Local",
+        "CFBundleIdentifier": "com.powerless520.pawpal-local"
+      }
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.png"
     },
@@ -43,8 +58,16 @@
     "dmg": {
       "title": "PawPal",
       "contents": [
-        { "x": 130, "y": 220 },
-        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ]
     },
     "directories": {
@@ -57,7 +80,10 @@
       {
         "from": "pet_assets",
         "to": "pet_assets",
-        "filter": ["**/*", "!.DS_Store"]
+        "filter": [
+          "**/*",
+          "!.DS_Store"
+        ]
       }
     ]
   },
@@ -67,6 +93,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@electron/asar": "^4.3.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

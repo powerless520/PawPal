@@ -1,7 +1,7 @@
 import { basename, extname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { copyFile, mkdir } from "node:fs/promises";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import {
   app,
   BrowserWindow,
@@ -111,14 +111,35 @@ type PetPosition = {
 };
 
 app.setName(APP_NAME);
+const appDataPath = app.getPath("appData");
+const userDataPath = join(appDataPath, APP_NAME);
+if (app.getPath("userData") !== userDataPath) {
+  app.setPath("userData", userDataPath);
+}
+try {
+  mkdirSync(userDataPath, { recursive: true });
+} catch (_) {
+  // ignore
+}
+
+const defaultStoreSnapshot = {
+  settings: DEFAULT_SETTINGS,
+  stats: createEmptyStats(),
+  statsHistory: {}
+};
+const storeFilePath = join(userDataPath, `${STORE_NAME}.json`);
+if (!existsSync(storeFilePath)) {
+  try {
+    writeFileSync(storeFilePath, JSON.stringify(defaultStoreSnapshot, undefined, 2), { mode: 0o600 });
+  } catch (_) {
+    // ignore: if we can't pre-create, let electron-store try
+  }
+}
 
 const store = new Store<StoreSchema>({
   name: STORE_NAME,
-  defaults: {
-    settings: DEFAULT_SETTINGS,
-    stats: createEmptyStats(),
-    statsHistory: {}
-  }
+  cwd: userDataPath,
+  defaults: defaultStoreSnapshot
 });
 
 let petWindow: BrowserWindow | null = null;
