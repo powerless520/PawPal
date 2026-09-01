@@ -15,6 +15,8 @@ export const DEFAULT_SETTINGS: Settings = {
   focusDurationMinutes: 25,
   distractionDetectionEnabled: false,
   distractionGraceSeconds: 8,
+  aiProvider: "none",
+  aiApiKey: "",
   distractionBlockedApps: [
     "Steam",
     "Discord",

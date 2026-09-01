@@ -266,6 +266,88 @@ function updateCustomPetAsset(
   };
 }
 
+function AiSettingsPanel({
+  labels,
+  draft,
+  updateDraft
+}: {
+  labels: SettingsCopy;
+  draft: Settings;
+  updateDraft: (partial: Partial<Settings>) => void;
+}): JSX.Element {
+  const [showKey, setShowKey] = useState(false);
+  const [testing, setTesting] = useState<null | true | false>(null);
+  const [testMessage, setTestMessage] = useState<string>("");
+
+  async function handleTest(): Promise<void> {
+    setTesting(null);
+    const result = await window.pawpal.aiTestConnection();
+    setTesting(result.ok);
+    setTestMessage(result.message);
+  }
+
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.ai}</h2>
+      <Row
+        label={labels.aiProvider}
+        hint={labels.aiProviderHelp}
+        control={
+          <SelectControl
+            value={draft.aiProvider}
+            options={[
+              { value: "none", label: labels.aiProviderNone },
+              { value: "deepseek", label: labels.aiProviderDeepseek }
+            ]}
+            onChange={(value) => updateDraft({ aiProvider: value as Settings["aiProvider"] })}
+          />
+        }
+      />
+      <Row
+        label={labels.aiApiKey}
+        control={
+          <div className="pref-input-row">
+            <input
+              type={showKey ? "text" : "password"}
+              className="pref-input"
+              value={draft.aiApiKey}
+              placeholder={labels.aiApiKeyPlaceholder}
+              onChange={(event) => updateDraft({ aiApiKey: event.target.value })}
+            />
+            <button
+              type="button"
+              className="pref-chip-button"
+              onClick={() => setShowKey((value) => !value)}
+            >
+              {showKey ? "🙈" : "👁"}
+            </button>
+          </div>
+        }
+      />
+      <Row
+        label={labels.aiTestConnection}
+        control={
+          <div className="pref-button-group">
+            <button
+              type="button"
+              className="pref-button"
+              disabled={testing === null}
+              onClick={() => void handleTest()}
+            >
+              {testing === null ? labels.aiTestConnection : labels.aiTesting}
+            </button>
+            {testing !== null && testMessage ? (
+              <span className={`pref-status ${testing ? "is-ok" : "is-error"}`}>
+                {testMessage}
+              </span>
+            ) : null}
+          </div>
+        }
+      />
+    </section>
+  );
+}
+
 function removeCustomPetState(
   customPetAppearance: CustomPetAppearance | null,
   state: PetState,
@@ -622,6 +704,8 @@ export function SettingsView(): JSX.Element {
           </div>
         </section>
       )}
+
+      <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} />
 
       <section className="prefs__group">
         <h2 className="prefs__group-title">{labels.system}</h2>

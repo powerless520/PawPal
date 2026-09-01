@@ -28,6 +28,18 @@ export type PetReaction = "single" | "double" | "longPress";
 
 export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
 
+export type AiProvider = "none" | "deepseek";
+
+export type ChatMessage = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
+export type AiTestResult = {
+  ok: boolean;
+  message: string;
+};
+
 export type CustomPetAsset = {
   relativePath: string;
   originalName: string;
@@ -71,6 +83,8 @@ export type Settings = {
   distractionGraceSeconds: number;
   distractionBlockedApps: string[];
   distractionBlockedKeywords: string[];
+  aiProvider: AiProvider;
+  aiApiKey: string;
 };
 
 export type TodayStats = {

@@ -60,6 +60,7 @@ import {
 import type { DisplayBounds, SavedWindowPosition } from "./displayPosition";
 import { classifyDistraction, isPermissionError, readActiveWindow } from "./distraction";
 import { applyLaunchAtLoginPreference, getLaunchAtLoginState } from "./loginItem";
+import { createAiClient } from "./aiClient";
 import {
   buildApplicationMenuTemplate,
   buildPetContextMenuTemplate,
@@ -1391,6 +1392,11 @@ function registerIpc(): void {
     importCustomPetAsset(state, sourcePath)
   );
   ipcMain.on("app:open-release-notes", openReleaseNotes);
+  ipcMain.handle("ai:test-connection", async (): Promise<{ ok: boolean; message: string }> => {
+    const settings = getSettings();
+    const client = createAiClient(settings.aiProvider, settings.aiApiKey);
+    return client.testConnection();
+  });
   ipcMain.on("pet:clicked", () => {
     if (blockingMode) return;
     happyFeedback(null);

@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import type {
+  AiTestResult,
   AppSnapshot,
   CustomPetAsset,
   DemoTrigger,
@@ -48,6 +49,8 @@ const api = {
   startFocus: (): void => ipcRenderer.send("focus:start"),
   stopFocus: (): void => ipcRenderer.send("focus:stop"),
   resetToday: (): void => ipcRenderer.send("stats:reset-today"),
+  aiTestConnection: (): Promise<AiTestResult> =>
+    ipcRenderer.invoke("ai:test-connection"),
   onPetState: (callback: (state: PetState) => void): Unsubscribe =>
     onChannel("pet:set-state", callback),
   onShowBubble: (callback: (bubble: SpeechBubble) => void): Unsubscribe =>
