@@ -279,6 +279,13 @@ export const I18N = {
         sleepy: "困了",
         bored: "无聊"
       },
+      petMoodEmoji: {
+        energetic: "✨",
+        playful: "🎉",
+        calm: "🌿",
+        sleepy: "💤",
+        bored: "🫠"
+      },
       reminders: "提醒",
       enableBreakReminder: "开启休息提醒",
       breakInterval: "休息间隔",
@@ -622,6 +629,13 @@ export const I18N = {
         calm: "Calm",
         sleepy: "Sleepy",
         bored: "Bored"
+      },
+      petMoodEmoji: {
+        energetic: "✨",
+        playful: "🎉",
+        calm: "🌿",
+        sleepy: "💤",
+        bored: "🫠"
       },
       reminders: "Reminders",
       enableBreakReminder: "Enable Break Reminder",

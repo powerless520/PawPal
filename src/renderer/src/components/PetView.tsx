@@ -68,6 +68,7 @@ export function PetView(): JSX.Element {
   }, []);
 
   const state = snapshot.petState;
+  const moodEmoji = labels.petMoodEmoji[snapshot.petMood];
   const altText = `PawPal ${state}`;
   const facingClass = snapshot.petFacing === "left" ? "facing-left" : "facing-right";
   const appearanceId = snapshot.settings.petAppearanceId;
@@ -320,6 +321,10 @@ export function PetView(): JSX.Element {
           <strong>{formatFocusCountdown(snapshot.timers.focusEndsAt, now)}</strong>
         </div>
       ) : null}
+
+      <div className={`mood-pill mood-pill--${snapshot.petMood}`} aria-hidden="true">
+        <span className="mood-pill__emoji">{moodEmoji}</span>
+      </div>
 
       <button
         className={`pet-button state-${state} ${facingClass} ${
