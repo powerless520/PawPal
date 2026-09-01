@@ -294,30 +294,36 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
       en: "Little Dino"
     },
     fallback: {
-      path: dino("idle", "站.gif"),
+      path: dino("idle", "default.gif"),
       isPlaceholder: true
     },
     states: {
-      idle: {
-        path: [
-          dino("idle", "站.gif"),
-          dino("idle", "眨眼.gif")
-        ]
-      },
-      happy: { path: dino("happy", "欢呼.gif") },
-      petted: { path: dino("happy", "欢呼.gif"), isPlaceholder: true },
-      walking: { path: dino("walking", "走.gif"), isPlaceholder: true },
-      breakPrompt: { path: dino("breakPrompt", "戳你.gif") },
+      idle: { path: dino("idle", "default.gif") },
+      sitting: { path: dino("sitting", "default.gif"), isPlaceholder: true },
+      happy: { path: dino("happy", "default.gif"), isPlaceholder: true },
+      petted: { path: dino("petted", "default.gif"), isPlaceholder: true },
+      walking: { path: dino("walking", "default.gif"), isPlaceholder: true },
+      breakPrompt: { path: dino("breakPrompt", "default.gif"), isPlaceholder: true },
       breakRunning: {
-        path: dino("breakRunning", "跑.gif"),
-        replayIntervalMs: 4500
+        path: dino("breakRunning", "default.gif"),
+        replayIntervalMs: 4500,
+        isPlaceholder: true
       },
-      hydrationPrompt: { path: dino("hydrationPrompt", "指嘴.gif") },
-      drinking: { path: dino("drinking", "喝水.gif") },
-      focusAlert: { path: dino("focusAlert", "皱眉.gif") },
-      focusGuard: { path: dino("focusGuard", "盯屏幕.gif") },
-      sad: { path: dino("sad", "委屈.gif"), isPlaceholder: true },
-      sleeping: { path: dino("sleeping", "睡.gif"), isPlaceholder: true }
+      breakDone: { path: dino("breakDone", "default.gif"), isPlaceholder: true },
+      hydrationPrompt: {
+        path: dino("hydrationPrompt", "default.gif"),
+        isPlaceholder: true
+      },
+      drinking: { path: dino("drinking", "default.gif"), isPlaceholder: true },
+      hydrationDone: {
+        path: dino("hydrationDone", "default.gif"),
+        isPlaceholder: true
+      },
+      focusGuard: { path: dino("focusGuard", "default.gif"), isPlaceholder: true },
+      focusAlert: { path: dino("focusAlert", "default.gif"), isPlaceholder: true },
+      focusDone: { path: dino("focusDone", "default.gif"), isPlaceholder: true },
+      sad: { path: dino("sad", "default.gif"), isPlaceholder: true },
+      sleeping: { path: dino("sleeping", "default.gif"), isPlaceholder: true }
     }
   },
   totodile: {
@@ -327,30 +333,39 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
       en: "Totodile"
     },
     fallback: {
-      path: totodile("idle", "站立.gif"),
+      path: totodile("idle", "default.gif"),
       isPlaceholder: true
     },
     states: {
-      idle: {
-        path: [
-          totodile("idle", "站立.gif"),
-          totodile("idle", "咬空气.gif")
-        ]
+      idle: { path: totodile("idle", "default.gif") },
+      sitting: { path: totodile("sitting", "default.gif"), isPlaceholder: true },
+      happy: { path: totodile("happy", "default.gif"), isPlaceholder: true },
+      petted: { path: totodile("petted", "default.gif"), isPlaceholder: true },
+      walking: { path: totodile("walking", "default.gif"), isPlaceholder: true },
+      breakPrompt: {
+        path: totodile("breakPrompt", "default.gif"),
+        isPlaceholder: true
       },
-      happy: { path: totodile("happy", "蹦跳欢呼.gif") },
-      petted: { path: totodile("happy", "蹦跳欢呼.gif"), isPlaceholder: true },
-      walking: { path: totodile("walking", "走.gif"), isPlaceholder: true },
-      breakPrompt: { path: totodile("breakPrompt", "拍屏幕.gif") },
       breakRunning: {
-        path: totodile("breakRunning", "狂奔.gif"),
-        replayIntervalMs: 4500
+        path: totodile("breakRunning", "default.gif"),
+        replayIntervalMs: 4500,
+        isPlaceholder: true
       },
-      hydrationPrompt: { path: totodile("hydrationPrompt", "指水.gif") },
-      drinking: { path: totodile("drinking", "喝水溅水.gif") },
-      focusAlert: { path: totodile("focusAlert", "愤怒脸.gif") },
-      focusGuard: { path: totodile("focusGuard", "啃键盘.gif") },
-      sad: { path: totodile("sad", "大哭.gif"), isPlaceholder: true },
-      sleeping: { path: totodile("sleeping", "抱着尾巴睡.gif"), isPlaceholder: true }
+      breakDone: { path: totodile("breakDone", "default.gif"), isPlaceholder: true },
+      hydrationPrompt: {
+        path: totodile("hydrationPrompt", "default.gif"),
+        isPlaceholder: true
+      },
+      drinking: { path: totodile("drinking", "default.gif"), isPlaceholder: true },
+      hydrationDone: {
+        path: totodile("hydrationDone", "default.gif"),
+        isPlaceholder: true
+      },
+      focusGuard: { path: totodile("focusGuard", "default.gif"), isPlaceholder: true },
+      focusAlert: { path: totodile("focusAlert", "default.gif"), isPlaceholder: true },
+      focusDone: { path: totodile("focusDone", "default.gif"), isPlaceholder: true },
+      sad: { path: totodile("sad", "default.gif"), isPlaceholder: true },
+      sleeping: { path: totodile("sleeping", "default.gif"), isPlaceholder: true }
     }
   }
 };
