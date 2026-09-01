@@ -664,6 +664,7 @@ export function SettingsView(): JSX.Element {
           <div className="prefs__diag">
             <DiagGroup title={labels.runtime}>
               <DiagCard label={labels.state} value={snapshot.petState} />
+              <DiagCard label={labels.mood} value={labels.petMoods[snapshot.petMood]} />
               <DiagCard
                 label={labels.mode}
                 value={

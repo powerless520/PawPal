@@ -43,6 +43,8 @@ export function useSnapshot(): AppSnapshot {
     },
     petState: "idle",
     petFacing: "right",
+    petMood: "calm",
+    lastInteractionAt: null,
     blockingMode: null,
     focusActive: false,
     dogVisible: true

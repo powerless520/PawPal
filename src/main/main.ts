@@ -28,6 +28,7 @@ import type {
   DistractionStatus,
   DemoTrigger,
   PetFacing,
+  PetMood,
   PetReaction,
   PetState,
   Settings,
@@ -138,6 +139,29 @@ let distractionStatus: DistractionStatus = {
   lastWarningAt: null,
   error: null
 };
+
+let petMood: PetMood = "calm";
+let lastInteractionAt: number | null = null;
+
+function computeMood(now: Date, lastInteraction: number | null): PetMood {
+  const hour = now.getHours();
+  if (hour >= 23 || hour < 7) return "sleepy";
+  const minutesSinceInteraction = lastInteraction
+    ? (now.getTime() - lastInteraction) / 60_000
+    : Infinity;
+  if (lastInteraction !== null && minutesSinceInteraction < 10) return "playful";
+  if (hour >= 7 && hour < 9) return "energetic";
+  if (lastInteraction !== null && minutesSinceInteraction >= 30) return "bored";
+  if (hour >= 17 && hour < 21 && lastInteraction !== null) return "playful";
+  return "calm";
+}
+
+function refreshMood(): void {
+  const next = computeMood(new Date(), lastInteractionAt);
+  if (next === petMood) return;
+  petMood = next;
+  sendToAll("app:snapshot", snapshot());
+}
 let updateCheck: UpdateCheckResult = createInitialUpdateCheck();
 
 function setPetMouseInteractive(interactive: boolean): void {
@@ -247,6 +271,8 @@ function snapshot(): AppSnapshot {
     distraction: distractionStatus,
     petState,
     petFacing,
+    petMood,
+    lastInteractionAt,
     blockingMode,
     dogVisible: Boolean(petWindow?.isVisible()),
     focusActive
@@ -906,6 +932,20 @@ function petReact(reaction: PetReaction, holding: boolean): void {
 
   switch (reaction) {
     case "single":
+    case "double":
+      lastInteractionAt = Date.now();
+      refreshMood();
+      break;
+    case "longPress":
+      if (holding) {
+        lastInteractionAt = Date.now();
+        refreshMood();
+      }
+      break;
+  }
+
+  switch (reaction) {
+    case "single":
       cancelPetReactionRevert();
       setPetState("happy");
       showBubble({
@@ -944,6 +984,8 @@ function petReact(reaction: PetReaction, holding: boolean): void {
 function happyFeedback(message: string | null = pick(text().bubble.woof), after?: () => void): void {
   if (blockingMode) return;
   const returnState = focusActive ? "focusGuard" : "idle";
+  lastInteractionAt = Date.now();
+  refreshMood();
   setPetState("happy");
   if (message) {
     showBubble({ id: "happy", message, autoDismissMs: 1800 });
@@ -1282,6 +1324,8 @@ app.whenReady().then(() => {
   registerDisplayChangeHandlers();
   scheduleReminderTimers();
   scheduleDistractionDetection();
+  refreshMood();
+  setInterval(refreshMood, 60_000);
   if (IS_DEV) {
     createSettingsWindow();
   }

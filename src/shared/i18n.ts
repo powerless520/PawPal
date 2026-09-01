@@ -198,6 +198,13 @@ export const I18N = {
         sad: "拒绝或忽略提醒时显示",
         sleeping: "长时间安静或休息状态显示"
       },
+      petMoods: {
+        energetic: "精神饱满",
+        playful: "想玩",
+        calm: "平静",
+        sleepy: "困了",
+        bored: "无聊"
+      },
       reminders: "提醒",
       enableBreakReminder: "开启休息提醒",
       breakInterval: "休息间隔",
@@ -223,6 +230,7 @@ export const I18N = {
       runtime: "运行状态",
       state: "状态",
       mode: "模式",
+      mood: "心情",
       reminder: "提醒",
       dog: "小狗",
       distraction: "分心检测",
@@ -460,6 +468,13 @@ export const I18N = {
         sad: "Shown after reminders are refused or ignored",
         sleeping: "Shown during quiet or resting moments"
       },
+      petMoods: {
+        energetic: "Energetic",
+        playful: "Playful",
+        calm: "Calm",
+        sleepy: "Sleepy",
+        bored: "Bored"
+      },
       reminders: "Reminders",
       enableBreakReminder: "Enable Break Reminder",
       breakInterval: "Break Interval",
@@ -485,6 +500,7 @@ export const I18N = {
       runtime: "Runtime",
       state: "State",
       mode: "Mode",
+      mood: "Mood",
       reminder: "Reminder",
       dog: "Dog",
       distraction: "Distraction",

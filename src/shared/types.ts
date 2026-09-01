@@ -25,6 +25,8 @@ export type PetState =
 
 export type PetReaction = "single" | "double" | "longPress";
 
+export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
+
 export type CustomPetAsset = {
   relativePath: string;
   originalName: string;
@@ -106,6 +108,8 @@ export type AppSnapshot = {
   distraction: DistractionStatus;
   petState: PetState;
   petFacing: PetFacing;
+  petMood: PetMood;
+  lastInteractionAt: number | null;
   blockingMode: BlockingMode;
   focusActive: boolean;
   dogVisible: boolean;
