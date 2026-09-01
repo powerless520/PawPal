@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent, JSX, ReactNode } from "react";
 import { i18n, LANGUAGE_OPTIONS, resolveLanguage } from "../../../shared/i18n";
-import { OUTFIT_SLOTS, seasonalOutfitForDate } from "../../../shared/outfits";
+import { OUTFIT_SLOTS, seasonalOutfitForDate, seasonalOutfitsForDate } from "../../../shared/outfits";
 import {
   hasRequiredCustomPetAssets,
   PET_STATE_ORDER,
@@ -611,6 +611,7 @@ function OutfitPicker({
   updateDraft: (partial: Partial<Settings>) => void;
 }): JSX.Element | null {
   const now = new Date();
+  const seasonalCollection = seasonalOutfitsForDate(now);
   const seasonal = seasonalOutfitForDate(now);
   const isAuto = draft.outfitMode === "seasonal";
   const [customOutfits, setCustomOutfits] = useState<
@@ -638,9 +639,11 @@ function OutfitPicker({
       <Row
         label={labels.outfitMode}
         hint={
-          isAuto && seasonal
-            ? labels.outfitSeasonalNow(seasonal.label[draft.language])
-            : labels.outfitModeHint
+          isAuto && seasonalCollection && seasonal
+            ? labels.outfitSeasonalVariant(seasonal.label[draft.language], seasonalCollection.outfits.length)
+            : isAuto
+              ? labels.outfitModeHint
+              : labels.outfitSeasonalNow(seasonalCollection?.label[draft.language] ?? labels.none)
         }
         control={
           <div className="pref-chip-group">
