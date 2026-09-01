@@ -24,11 +24,14 @@ type MenuActions = {
 };
 
 const PET_ACTIONS: { id: PetAction; labelKey: keyof MenuLabels }[] = [
+  { id: "wave", labelKey: "petActionWave" },
   { id: "dance", labelKey: "petActionDance" },
-  { id: "sing", labelKey: "petActionSing" },
   { id: "spin", labelKey: "petActionSpin" },
-  { id: "heart", labelKey: "petActionHeart" },
-  { id: "stretch", labelKey: "petActionStretch" }
+  { id: "stretch", labelKey: "petActionStretch" },
+  { id: "yawn", labelKey: "petActionYawn" },
+  { id: "shy", labelKey: "petActionShy" },
+  { id: "sing", labelKey: "petActionSing" },
+  { id: "heart", labelKey: "petActionHeart" }
 ];
 
 function demoItems(

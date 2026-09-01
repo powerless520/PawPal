@@ -1388,18 +1388,35 @@ function performPetAction(action: PetAction): void {
   const soundOn = getSettings().soundEnabled;
 
   const bubbleFor: Record<PetAction, string[]> = {
+    wave: ["嗨~ 挥手", "👋 见到你真开心", "哈喽！"],
     dance: ["♪~ 蹦蹦跳跳 ~♪", "转一圈！再转一圈！", "看我跳舞~"],
-    sing: ["♪ 啦啦啦 ~", "哼个小曲儿~", "🎵 这首歌送给你 ~"],
     spin: ["转呀转呀~", "看我翻跟头！", "呼啦~"],
-    heart: ["比心 ❤️", "喜欢你哦~", "❤ 给你比个心"],
-    stretch: ["啊——伸个懒腰", "呼~舒服~", "伸完懒腰精神好！"]
+    stretch: ["啊——伸个懒腰", "呼~舒服~", "伸完懒腰精神好！"],
+    yawn: ["啊呜~ 好困…", "ZZZ…", "困了困了…"],
+    shy: ["(*/ω＼*)", "人家有点害羞…", "别、别看我啦~"],
+    sing: ["♪ 啦啦啦 ~", "哼个小曲儿~", "🎵 这首歌送给你 ~"],
+    heart: ["比心 ❤️", "喜欢你哦~", "❤ 给你比个心"]
   };
-  const useHappy = action !== "spin"; // spin uses walking state to suggest motion
-  if (useHappy) {
-    setPetState("happy");
-  } else {
+  const actionType: Record<PetAction, "happy" | "walk" | "sleepy" | "shy"> = {
+    wave: "happy",
+    dance: "happy",
+    spin: "walk",
+    stretch: "happy",
+    yawn: "sleepy",
+    shy: "shy",
+    sing: "happy",
+    heart: "happy"
+  };
+  const target = actionType[action];
+  if (target === "walk") {
     setPetFacing(petFacing === "right" ? "left" : "right");
     setPetState("walking");
+  } else if (target === "sleepy") {
+    setPetState("sleeping");
+  } else if (target === "shy") {
+    setPetState("happy");
+  } else {
+    setPetState("happy");
   }
   showBubble({
     id: `pet-action-${action}`,
@@ -1408,7 +1425,7 @@ function performPetAction(action: PetAction): void {
   });
   if (soundOn) playSound("happy", true);
 
-  const revertMs = useHappy ? 2100 : 1700;
+  const revertMs = target === "walk" ? 1700 : target === "sleepy" ? 1500 : 2100;
   schedulePetReactionRevert(revertMs, returnState);
   lastInteractionAt = Date.now();
   bumpInteraction();
