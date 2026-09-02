@@ -679,21 +679,31 @@ function AiSettingsPanel({
             value={draft.aiProvider}
             options={[
               { value: "none", label: labels.aiProviderNone },
-              { value: "deepseek", label: labels.aiProviderDeepseek }
+              { value: "deepseek", label: labels.aiProviderDeepseek },
+              { value: "ollama", label: labels.aiProviderOllama }
             ]}
             onChange={(value) => updateDraft({ aiProvider: value as Settings["aiProvider"] })}
           />
         }
       />
       <Row
-        label={labels.aiApiKey}
+        label={draft.aiProvider === "ollama" ? labels.aiOllamaUrl : labels.aiApiKey}
+        hint={
+          draft.aiProvider === "ollama"
+            ? labels.aiOllamaUrlHint
+            : undefined
+        }
         control={
           <div className="pref-input-row">
             <input
               type={showKey ? "text" : "password"}
               className="pref-input"
               value={draft.aiApiKey}
-              placeholder={labels.aiApiKeyPlaceholder}
+              placeholder={
+                draft.aiProvider === "ollama"
+                  ? labels.aiOllamaUrlPlaceholder
+                  : labels.aiApiKeyPlaceholder
+              }
               onChange={(event) => updateDraft({ aiApiKey: event.target.value })}
             />
             <button

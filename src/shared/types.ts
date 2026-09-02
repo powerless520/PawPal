@@ -41,7 +41,7 @@ export type MoodHistory = {
   samples: MoodSample[];
 };
 
-export type AiProvider = "none" | "deepseek";
+export type AiProvider = "none" | "deepseek" | "ollama";
 
 export type PetId = string;
 
