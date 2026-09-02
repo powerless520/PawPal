@@ -276,3 +276,14 @@ export const PET_APPEARANCES = {
 | --- | --- | --- |
 | `lovartPuppy` | 金毛 puppy / Golden Puppy | 当前主 Demo 宠物。素材位于 `pet_assets/金毛 puppy/`，部分预留状态仍使用 placeholder 或状态级 fallback。 |
 | `lineDog` | 线条小狗 / Line Dog | 第二个内置宠物。部分状态使用语义接近的表情包 GIF 作为 placeholder。 |
+
+## AI 生成 Prompt 库
+
+新角色素材的 prompt（中英双版 + 16 状态全套）见 [`docs/ai-prompts.md`](./ai-prompts.md)。包含：
+
+- 通用前置 prompt 关键句
+- 工具推荐（可灵 / Pika / Runway / Midjourney）
+- 小恐龙 + 小锯鳄的完整 prompt 套
+- 极简 6 状态工作流（1 小时可出一只新角色）
+- 新角色 prompt 模板（直接复制填充）
+- 常见坑 + 应对表
