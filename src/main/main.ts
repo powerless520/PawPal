@@ -295,7 +295,42 @@ let distractionStatus: DistractionStatus = {
 let petMood: PetMood = "calm";
 let lastInteractionAt: number | null = null;
 
-// mood history: last 7 days, one sample per hour bucket
+const PET_GREETINGS = [
+  "嗨~ 我来啦",
+  "哈喽！换我值班啦",
+  "嘿嘿，见到你~",
+  "今天由我陪你~",
+  "我准备好啦~",
+  "✨ 来啦来啦"
+];
+
+const PET_GOODBYES = [
+  "轮到 {label} 啦，我先休息一下~",
+  "把主人交给 {label} 啦~",
+  "我先眯一会儿~",
+  "辛苦 {label} 啦~",
+  "拜拜~ {label} 上！"
+];
+
+// Append a diary entry attributed to a specific pet. We embed the
+// pet id in the entry body so future per-pet filtering is possible.
+function logDiaryForPet(petId: PetId, body: string, source: "ai" | "fallback"): void {
+  const current = readDiary();
+  const date = new Date();
+  const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const next: PetDiary = {
+    entries: [
+      {
+        date: dateKey,
+        body: `[${petId}] ${body}`,
+        generatedAt: Date.now(),
+        source
+      },
+      ...current.entries
+    ].slice(0, 30)
+  };
+  store.set("petDiary", next);
+}
 const MOOD_HISTORY_KEY = "petMoodHistory";
 const MOOD_HISTORY_MAX_SAMPLES = 7 * 24; // 168
 
@@ -2180,12 +2215,35 @@ function registerIpc(): void {
     }
   );
   ipcMain.handle("roster:switch", (_event, petId: PetId): PetRoster => {
+    const previous = readRoster().activePetId;
     commitActiveToRoster();
     const roster = readRoster();
     if (!roster.pets.some((p) => p.id === petId)) return roster;
+    if (previous === petId) return roster;
+    // Log the farewell into the previous pet's diary so the user can
+    // see 'X said goodbye' later even though we only render one window.
+    const previousPet = roster.pets.find((p) => p.id === previous);
+    if (previousPet) {
+      const farewell = pick(PET_GOODBYES);
+      logDiaryForPet(
+        previousPet.id,
+        farewell.replace("{label}", petAppearanceLabel(previousPet.appearanceId, getSettings().language)),
+        "fallback"
+      );
+    }
     roster.activePetId = petId;
     writeRoster(roster);
     loadActiveFromRoster();
+    // Greet the newly active pet with a small chat line.
+    const newPet = roster.pets.find((p) => p.id === petId);
+    if (newPet) {
+      const greeting = pick(PET_GREETINGS);
+      showBubble({
+        id: "pet-roster-greeting",
+        message: greeting.replace("{label}", petAppearanceLabel(newPet.appearanceId, getSettings().language)),
+        autoDismissMs: 2800
+      });
+    }
     sendToAll("app:snapshot", snapshot());
     return roster;
   });
