@@ -367,6 +367,30 @@ function maybeAutoSleep(): void {
   if (petState === "idle" || petState === "walking") setPetState("sleeping");
 }
 
+// Snoring: when sleeping, occasionally play a soft snore sample so the
+// desktop pet actually feels asleep. Capped at once per 4-9s to avoid
+// becoming annoying; cancelled when the pet wakes up.
+let snoringTimer: NodeJS.Timeout | null = null;
+
+function cancelSnoring(): void {
+  if (snoringTimer) {
+    clearTimeout(snoringTimer);
+    snoringTimer = null;
+  }
+}
+
+function scheduleSnoring(): void {
+  cancelSnoring();
+  const delay = 4_000 + Math.random() * 5_000;
+  snoringTimer = setTimeout(() => {
+    snoringTimer = null;
+    if (petState === "sleeping" && getSettings().soundEnabled) {
+      playSound("snoring", true);
+    }
+    if (petState === "sleeping") scheduleSnoring();
+  }, delay);
+}
+
 function maybeWakeUp(): void {
   if (petState === "sleeping") {
     setPetState(focusActive ? "focusGuard" : "idle");
@@ -850,8 +874,14 @@ function publishSnapshot(): void {
 }
 
 function setPetState(next: PetState): void {
+  const wasSleeping = petState === "sleeping";
   petState = next;
   sendToAll("pet:set-state", next);
+  if (next === "sleeping" && !wasSleeping) {
+    scheduleSnoring();
+  } else if (wasSleeping && next !== "sleeping") {
+    cancelSnoring();
+  }
 }
 
 function setPetFacing(next: PetFacing): void {

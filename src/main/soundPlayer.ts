@@ -9,14 +9,16 @@ export type SoundName =
   | "petted"
   | "happy"
   | "warning"
-  | "idleChatter";
+  | "idleChatter"
+  | "snoring";
 
 const VALID: ReadonlySet<SoundName> = new Set([
   "click",
   "petted",
   "happy",
   "warning",
-  "idleChatter"
+  "idleChatter",
+  "snoring"
 ]);
 
 export function isSoundName(value: unknown): value is SoundName {
