@@ -1982,6 +1982,84 @@ function registerIpc(): void {
   );
   ipcMain.handle("outfit:list-custom", (): OutfitItem[] => listCustomOutfits());
   ipcMain.handle(
+    "backup:export",
+    async (): Promise<string | null> => {
+      try {
+        const payload = {
+          formatVersion: 1,
+          exportedAt: Date.now(),
+          settings: store.get("settings") ?? null,
+          petGrowth: readGrowth(),
+          petDiary: readDiary(),
+          petRoster: readRoster(),
+          petMoodHistory: readMoodHistory(),
+          petPosition: store.get("petPosition") ?? null
+        };
+        const json = JSON.stringify(payload, null, 2);
+        const parent = settingsWindow && !settingsWindow.isDestroyed() ? settingsWindow : null;
+        const result = parent
+          ? await dialog.showSaveDialog(parent, {
+              title: "Export PawPal backup",
+              defaultPath: `pawpal-backup-${new Date().toISOString().slice(0, 10)}.json`,
+              filters: [{ name: "PawPal backup", extensions: ["json"] }]
+            })
+          : await dialog.showSaveDialog({
+              title: "Export PawPal backup",
+              defaultPath: `pawpal-backup-${new Date().toISOString().slice(0, 10)}.json`,
+              filters: [{ name: "PawPal backup", extensions: ["json"] }]
+            });
+        if (result.canceled || !result.filePath) return null;
+        const { writeFile } = await import("node:fs/promises");
+        await writeFile(result.filePath, json, "utf-8");
+        return result.filePath;
+      } catch {
+        return null;
+      }
+    }
+  );
+  ipcMain.handle(
+    "backup:import",
+    async (
+      _e,
+      payload: { sourcePath: string; mode: "merge" | "replace" }
+    ): Promise<{ ok: boolean; message: string }> => {
+      try {
+        const { readFile } = await import("node:fs/promises");
+        const text = await readFile(payload.sourcePath, "utf-8");
+        const data = JSON.parse(text) as {
+          formatVersion?: number;
+          settings?: unknown;
+          petGrowth?: PetGrowth;
+          petDiary?: PetDiary;
+          petRoster?: PetRoster;
+          petMoodHistory?: MoodHistory;
+          petPosition?: unknown;
+        };
+        if (data.formatVersion !== 1) {
+          return { ok: false, message: `Unsupported backup version: ${data.formatVersion}` };
+        }
+        const settings = normalizeSettings(
+          payload.mode === "replace" && data.settings
+            ? (data.settings as Partial<Settings>)
+            : { ...(store.get("settings") as Partial<Settings> | undefined), ...(data.settings as Partial<Settings> | undefined) }
+        );
+        if (data.settings) store.set("settings", settings);
+        if (data.petGrowth) store.set("petGrowth", data.petGrowth);
+        if (data.petDiary) store.set("petDiary", data.petDiary);
+        if (data.petRoster) store.set(ROSTER_KEY, data.petRoster);
+        if (data.petMoodHistory) store.set(MOOD_HISTORY_KEY, data.petMoodHistory);
+        if (data.petPosition) store.set("petPosition", data.petPosition);
+        sendToAll("app:snapshot", snapshot());
+        return { ok: true, message: "已导入备份" };
+      } catch (error) {
+        return {
+          ok: false,
+          message: error instanceof Error ? error.message : String(error)
+        };
+      }
+    }
+  );
+  ipcMain.handle(
     "outfit:select-file",
     async (_e, part: OutfitPart): Promise<string | null> => {
       try {

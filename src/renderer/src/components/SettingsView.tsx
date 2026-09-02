@@ -455,6 +455,119 @@ function MoodPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   );
 }
 
+function BackupPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+  const [status, setStatus] = useState<"idle" | "busy" | "ok" | "err">("idle");
+  const [message, setMessage] = useState<string>("");
+
+  async function handleExport(): Promise<void> {
+    setStatus("busy");
+    setMessage("");
+    const result = await window.pawpal.exportBackup();
+    if (result) {
+      setStatus("ok");
+      setMessage(result);
+    } else {
+      setStatus("idle");
+    }
+  }
+
+  async function handleImport(mode: "merge" | "replace"): Promise<void> {
+    setStatus("busy");
+    setMessage("");
+    const parent = window.pawpal;
+    const { dialog } = await import("electron").catch(() => ({ dialog: undefined as never }));
+    void parent;
+    void dialog;
+    // We don't have a synchronous file-pick API in the preload bridge;
+    // instead, route through a hidden input. Fallback: ask user to
+    // type a path. We add a minimal file-pick via a temporary input
+    // element.
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json,.json";
+    input.style.display = "none";
+    document.body.appendChild(input);
+    input.click();
+    const file = await new Promise<File | null>((resolve) => {
+      input.addEventListener(
+        "change",
+        () => {
+          resolve(input.files?.[0] ?? null);
+        },
+        { once: true }
+      );
+      input.addEventListener(
+        "cancel",
+        () => {
+          resolve(null);
+        },
+        { once: true }
+      );
+    });
+    document.body.removeChild(input);
+    if (!file) {
+      setStatus("idle");
+      return;
+    }
+    const result = await window.pawpal.importBackup(window.pawpal.pathForFile(file), mode);
+    if (result.ok) {
+      setStatus("ok");
+      setMessage(labels.backupImported);
+    } else {
+      setStatus("err");
+      setMessage(result.message);
+    }
+  }
+
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.backup}</h2>
+      <Row
+        label={labels.backupExport}
+        hint={labels.backupExportHint}
+        control={
+          <div className="pref-button-group">
+            <button
+              type="button"
+              className="pref-button"
+              disabled={status === "busy"}
+              onClick={() => void handleExport()}
+            >
+              {labels.backupExport}
+            </button>
+          </div>
+        }
+      />
+      <Row
+        label={labels.backupImport}
+        control={
+          <div className="pref-button-group">
+            <button
+              type="button"
+              className="pref-button"
+              disabled={status === "busy"}
+              onClick={() => void handleImport("merge")}
+            >
+              {labels.backupImportMerge}
+            </button>
+            <button
+              type="button"
+              className="pref-button is-danger"
+              disabled={status === "busy"}
+              onClick={() => void handleImport("replace")}
+            >
+              {labels.backupImportReplace}
+            </button>
+          </div>
+        }
+      />
+      {message ? (
+        <p className={`pref-hint ${status === "err" ? "is-error" : "is-ok"}`}>{message}</p>
+      ) : null}
+    </section>
+  );
+}
+
 function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const snapshot = useSnapshot();
   const growth = snapshot.petGrowth;
@@ -1183,6 +1296,7 @@ export function SettingsView(): JSX.Element {
       <DiaryPanel labels={labels} />
 
       <MoodPanel labels={labels} />
+      <BackupPanel labels={labels} />
 
       <GrowthPanel labels={labels} />
 

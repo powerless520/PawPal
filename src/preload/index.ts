@@ -68,6 +68,9 @@ const api = {
     ipcRenderer.invoke("outfit:import", { part, sourcePath, label }),
   listCustomOutfits: (): Promise<OutfitItem[]> =>
     ipcRenderer.invoke("outfit:list-custom"),
+  exportBackup: (): Promise<string | null> => ipcRenderer.invoke("backup:export"),
+  importBackup: (sourcePath: string, mode: "merge" | "replace"): Promise<{ ok: boolean; message: string }> =>
+    ipcRenderer.invoke("backup:import", { sourcePath, mode }),
   generateDiary: (): Promise<PetDiary> => ipcRenderer.invoke("diary:generate"),
   listRoster: (): Promise<PetRoster> => ipcRenderer.invoke("roster:list"),
   switchPet: (petId: PetId): Promise<PetRoster> => ipcRenderer.invoke("roster:switch", petId),
