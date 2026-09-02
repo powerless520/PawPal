@@ -32,6 +32,8 @@ import type {
   Language,
   PetAppearanceId,
   PetAction,
+  MoodHistory,
+  MoodSample,
   OutfitItem,
   OutfitPart,
   PetDiary,
@@ -293,6 +295,50 @@ let distractionStatus: DistractionStatus = {
 let petMood: PetMood = "calm";
 let lastInteractionAt: number | null = null;
 
+// mood history: last 7 days, one sample per hour bucket
+const MOOD_HISTORY_KEY = "petMoodHistory";
+const MOOD_HISTORY_MAX_SAMPLES = 7 * 24; // 168
+
+function readMoodHistory(): MoodHistory {
+  const stored = store.get(MOOD_HISTORY_KEY) as { samples?: MoodSample[] } | undefined;
+  if (!stored || !Array.isArray(stored.samples)) {
+    return { samples: [] };
+  }
+  return { samples: stored.samples.slice(-MOOD_HISTORY_MAX_SAMPLES) };
+}
+
+function currentHourBucket(now: Date): number {
+  return Math.floor(now.getTime() / 3_600_000) * 3_600_000;
+}
+
+function recordMoodSample(now: Date): void {
+  const history = readMoodHistory();
+  const bucket = currentHourBucket(now);
+  // overwrite last sample in this bucket if it exists, else append
+  const last = history.samples[history.samples.length - 1];
+  const next: MoodSample = last && last.bucket === bucket ? { bucket, mood: petMood } : { bucket, mood: petMood };
+  const samples = last && last.bucket === bucket
+    ? [...history.samples.slice(0, -1), next]
+    : [...history.samples, next];
+  const trimmed = samples.slice(-MOOD_HISTORY_MAX_SAMPLES);
+  store.set(MOOD_HISTORY_KEY, { samples: trimmed });
+}
+
+let moodHistoryTimer: NodeJS.Timeout | null = null;
+function scheduleMoodHistoryFlush(): void {
+  if (moodHistoryTimer) clearTimeout(moodHistoryTimer);
+  // flush at the next hour boundary
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(now.getHours() + 1, 0, 0, 0);
+  const delay = Math.max(1000, next.getTime() - now.getTime());
+  moodHistoryTimer = setTimeout(() => {
+    recordMoodSample(new Date());
+    sendToAll("app:snapshot", snapshot());
+    scheduleMoodHistoryFlush();
+  }, delay);
+}
+
 function computeMood(now: Date, lastInteraction: number | null): PetMood {
   const hour = now.getHours();
   if (hour >= 23 || hour < 7) return "sleepy";
@@ -313,6 +359,7 @@ function refreshMood(): void {
   sendToAll("app:snapshot", snapshot());
   if (next === "sleepy") maybeAutoSleep();
   scheduleNextChatter();
+  recordMoodSample(new Date());
 }
 
 function maybeAutoSleep(): void {
@@ -769,6 +816,7 @@ function snapshot(): AppSnapshot {
     petRoster: readRoster(),
     petDiary: readDiary(),
     petGrowth: readGrowth(),
+    petMoodHistory: readMoodHistory(),
     blockingMode,
     dogVisible: Boolean(petWindow?.isVisible()),
     focusActive
@@ -2137,7 +2185,9 @@ app.whenReady().then(() => {
   scheduleReminderTimers();
   scheduleDistractionDetection();
   refreshMood();
+  recordMoodSample(new Date());
   setInterval(refreshMood, 60_000);
+  scheduleMoodHistoryFlush();
   scheduleNextWander();
   scheduleNextChatter();
   if (IS_DEV) {

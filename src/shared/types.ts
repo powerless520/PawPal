@@ -30,6 +30,17 @@ export type PetAction = "dance" | "sing" | "spin" | "heart" | "stretch" | "wave"
 
 export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
 
+export type MoodSample = {
+  // 1-hour bucket start (epoch ms)
+  bucket: number;
+  mood: PetMood;
+};
+
+export type MoodHistory = {
+  // Last 7 days, one entry per hour bucket. Old buckets get pruned.
+  samples: MoodSample[];
+};
+
 export type AiProvider = "none" | "deepseek";
 
 export type PetId = string;
@@ -214,6 +225,7 @@ export type AppSnapshot = {
   petRoster: PetRoster;
   petDiary: PetDiary;
   petGrowth: PetGrowth;
+  petMoodHistory: MoodHistory;
   blockingMode: BlockingMode;
   focusActive: boolean;
   dogVisible: boolean;

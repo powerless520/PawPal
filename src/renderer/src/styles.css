@@ -2097,3 +2097,22 @@ textarea {
   display: flex;
   gap: 6px;
 }
+
+.mood-chart {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mood-chart svg {
+  background: rgba(60, 47, 28, 0.04);
+  border-radius: 6px;
+  display: block;
+}
+
+.mood-chart__legend {
+  color: rgba(60, 47, 28, 0.6);
+  font-size: 11px;
+  margin: 0;
+}

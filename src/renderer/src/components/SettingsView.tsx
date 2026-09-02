@@ -15,6 +15,8 @@ import type {
   CustomPetAppearance,
   CustomPetAsset,
   DemoTrigger,
+  MoodSample,
+  PetMood,
   PetState,
   Settings
 } from "../../../shared/types";
@@ -359,6 +361,95 @@ function RosterPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
             </button>
           </div>
         }
+      />
+    </section>
+  );
+}
+
+// mood ordinal y-position (top -> bottom): energetic 0, playful 1, calm 2, bored 3, sleepy 4
+const MOOD_Y_INDEX: Record<PetMood, number> = {
+  energetic: 0,
+  playful: 1,
+  calm: 2,
+  bored: 3,
+  sleepy: 4
+};
+
+const MOOD_CHART_WIDTH = 320;
+const MOOD_CHART_HEIGHT = 80;
+
+function MoodChart({ samples, labels }: { samples: MoodSample[]; labels: SettingsCopy }): JSX.Element {
+  if (samples.length === 0) {
+    return <p className="pref-hint">—</p>;
+  }
+  // bucket: x = ((bucket - firstBucket) / totalSpan) * width, clamped 0..width
+  const first = samples[0].bucket;
+  const last = samples[samples.length - 1].bucket;
+  const totalSpan = Math.max(1, last - first);
+  const xOf = (bucket: number): number =>
+    Math.max(0, Math.min(MOOD_CHART_WIDTH, ((bucket - first) / totalSpan) * MOOD_CHART_WIDTH));
+  const yOf = (mood: PetMood): number => {
+    const idx = MOOD_Y_INDEX[mood] ?? 2;
+    return (idx / 4) * MOOD_CHART_HEIGHT;
+  };
+  const points = samples
+    .map((s) => `${xOf(s.bucket).toFixed(1)},${yOf(s.mood).toFixed(1)}`)
+    .join(" ");
+  const latest = samples[samples.length - 1];
+  return (
+    <div className="mood-chart">
+      <svg
+        viewBox={`0 0 ${MOOD_CHART_WIDTH} ${MOOD_CHART_HEIGHT}`}
+        width={MOOD_CHART_WIDTH}
+        height={MOOD_CHART_HEIGHT}
+        aria-label="pet mood over time"
+      >
+        {[0, 1, 2, 3, 4].map((i) => (
+          <line
+            key={i}
+            x1={0}
+            x2={MOOD_CHART_WIDTH}
+            y1={(i / 4) * MOOD_CHART_HEIGHT}
+            y2={(i / 4) * MOOD_CHART_HEIGHT}
+            stroke="rgba(60, 47, 28, 0.08)"
+            strokeWidth={1}
+          />
+        ))}
+        {samples.length > 1 ? (
+          <polyline
+            fill="none"
+            stroke="rgba(74, 144, 226, 0.7)"
+            strokeWidth={1.6}
+            points={points}
+          />
+        ) : null}
+        {samples.map((s, idx) => (
+          <circle
+            key={idx}
+            cx={xOf(s.bucket)}
+            cy={yOf(s.mood)}
+            r={idx === samples.length - 1 ? 2.6 : 1.6}
+            fill={idx === samples.length - 1 ? "#4a90e2" : "rgba(74, 144, 226, 0.55)"}
+          />
+        ))}
+      </svg>
+      <p className="mood-chart__legend">
+        {labels.petMoods[latest.mood]} · {new Date(latest.bucket).getHours()}:00
+      </p>
+    </div>
+  );
+}
+
+function MoodPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+  const snapshot = useSnapshot();
+  const samples = snapshot.petMoodHistory?.samples ?? [];
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.moodChart}</h2>
+      <Row
+        label={labels.moodChart}
+        hint={labels.moodChartHint}
+        control={<MoodChart samples={samples} labels={labels} />}
       />
     </section>
   );
@@ -1090,6 +1181,8 @@ export function SettingsView(): JSX.Element {
       <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} />
 
       <DiaryPanel labels={labels} />
+
+      <MoodPanel labels={labels} />
 
       <GrowthPanel labels={labels} />
 
