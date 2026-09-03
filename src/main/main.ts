@@ -2432,6 +2432,11 @@ function registerIpc(): void {
       }
     }
   );
+  ipcMain.on("tts:speak", (_event, text: string) => {
+    if (typeof text !== "string" || text.length === 0) return;
+    const ttsSettings = getSettings();
+    speak(text, { voice: ttsSettings.ttsVoice, rate: ttsSettings.ttsRate });
+  });
   ipcMain.handle("diary:generate", async (): Promise<PetDiary> => {
     const settings = getSettings();
     const client = createAiClient(settings.aiProvider, settings.aiApiKey);

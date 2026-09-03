@@ -1195,6 +1195,39 @@ textarea {
   justify-content: flex-end;
 }
 
+.diary-entry__meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diary-entry__source {
+  margin-right: auto;
+}
+
+.diary-listen {
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px 9px;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.diary-listen:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.diary-listen:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
 .pref-chip-button {
   background: transparent;
   border: 1px dashed var(--rule-strong);

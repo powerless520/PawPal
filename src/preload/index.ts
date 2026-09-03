@@ -73,6 +73,7 @@ const api = {
     ipcRenderer.invoke("backup:import", { sourcePath, mode }),
   exportSnapshot: (): Promise<string | null> => ipcRenderer.invoke("snapshot:export"),
   generateDiary: (): Promise<PetDiary> => ipcRenderer.invoke("diary:generate"),
+  speakText: (text: string): void => ipcRenderer.send("tts:speak", text),
   listRoster: (): Promise<PetRoster> => ipcRenderer.invoke("roster:list"),
   switchPet: (petId: PetId): Promise<PetRoster> => ipcRenderer.invoke("roster:switch", petId),
   addPet: (label: string): Promise<PetRoster> => ipcRenderer.invoke("roster:add", label),

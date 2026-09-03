@@ -755,10 +755,12 @@ function GrowthPanel({
 
 function DiaryPanel({
   labels,
-  sectionId
+  sectionId,
+  ttsEnabled
 }: {
   labels: SettingsCopy;
   sectionId?: string;
+  ttsEnabled: boolean;
 }): JSX.Element {
   const snapshot = useSnapshot();
   const [generating, setGenerating] = useState(false);
@@ -803,6 +805,16 @@ function DiaryPanel({
                 >
                   {entry.source === "ai" ? labels.diarySourceAi : labels.diarySourceFallback}
                 </span>
+                <button
+                  type="button"
+                  className="diary-listen"
+                  aria-label={labels.diaryPlay}
+                  title={labels.diaryPlay}
+                  disabled={!ttsEnabled}
+                  onClick={() => window.pawpal.speakText(entry.body)}
+                >
+                  🔊
+                </button>
               </header>
               <p className="diary-entry__body">{entry.body}</p>
             </article>
@@ -1553,7 +1565,7 @@ export function SettingsView(): JSX.Element {
 
       <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} sectionId="pref-ai" />
 
-      <DiaryPanel labels={labels} sectionId="pref-diary" />
+      <DiaryPanel labels={labels} sectionId="pref-diary" ttsEnabled={snapshot.settings.ttsEnabled} />
 
       <MoodPanel labels={labels} sectionId="pref-mood" />
       <SnapshotPanel labels={labels} sectionId="pref-snapshot" />
