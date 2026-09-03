@@ -34,6 +34,15 @@ import {
 import { OUTFIT_SLOTS, outfitItemById } from "../shared/outfits";
 import { nextHolidayEvent } from "../shared/holidays";
 import { seasonOfMonth, timeAwareKind, type TimeAwareKind } from "../shared/timeaware";
+import {
+  canMentionWorkStart,
+  crossedFocusHour,
+  favoriteAction,
+  focusNoteFor,
+  markHabitNote,
+  minuteOfDay,
+  noteAlreadyTaken
+} from "../shared/habits";
 import type {
   AppSnapshot,
   BlockingMode,
@@ -641,6 +650,49 @@ function timeBubbleMessage(kind: TimeAwareKind, hour: number): string | null {
   }
 }
 
+function petActionLabel(action: PetAction): string {
+  const labels = text().menu;
+  switch (action) {
+    case "dance":
+      return labels.petActionDance;
+    case "sing":
+      return labels.petActionSing;
+    case "spin":
+      return labels.petActionSpin;
+    case "heart":
+      return labels.petActionHeart;
+    case "stretch":
+      return labels.petActionStretch;
+    case "wave":
+      return labels.petActionWave;
+    case "shy":
+      return labels.petActionShy;
+    case "yawn":
+      return labels.petActionYawn;
+  }
+}
+
+/**
+ * Habit heads-up (T1.8): while idling, occasionally reference what the pet
+ * learned about today's routine. Each kind fires at most once per day via
+ * `stats.habitNotes`, and there is a chance it stays quiet instead.
+ */
+function habitBubbleMessage(): string | null {
+  const pool = text().bubble;
+  const stats = getStats();
+  const startMinute = stats.workStartMinute;
+  if (startMinute !== null && canMentionWorkStart(stats) && Math.random() < 0.4) {
+    updateStats((s) => markHabitNote(s, "workStart"));
+    return pick(pool.habitWorkStart)(Math.floor(startMinute / 60), startMinute % 60);
+  }
+  const fav = favoriteAction(stats);
+  if (fav && !noteAlreadyTaken(stats.habitNotes, "favAction") && Math.random() < 0.5) {
+    updateStats((s) => markHabitNote(s, "favAction"));
+    return pick(pool.habitFavAction)(petActionLabel(fav.action), fav.count);
+  }
+  return null;
+}
+
 function scheduleNextChatter(): void {
   cancelChatter();
   // Observer mode: the pet never initiates conversation on its own.
@@ -695,6 +747,16 @@ async function performChatter(): Promise<void> {
       scheduleNextChatter();
       return;
     }
+  }
+
+  // Habit heads-up (T1.8): on top of the clock check, the pet occasionally
+  // brings up something it learned about the user's routine today. Each kind
+  // is limited to once per day via stats.habitNotes.
+  const habitMessage = habitBubbleMessage();
+  if (habitMessage) {
+    showBubble({ id: "habit-bubble", message: habitMessage, autoDismissMs: 3800 });
+    scheduleNextChatter();
+    return;
   }
 
   if (client.isConfigured() && Math.random() < 0.5) {
@@ -959,6 +1021,13 @@ function launchGreetingMessage(): string | null {
   // Late-night nudge (3-5am) already fires its own easter egg, so skip.
   const hour = new Date().getHours();
   if (hour >= 3 && hour < 5) return null;
+  // T1.8 habits: from the second launch of the day, the pet may acknowledge
+  // the routine (once per day, and not always).
+  const stats = getStats();
+  if (stats.launches >= 2 && !noteAlreadyTaken(stats.habitNotes, "launch") && Math.random() < 0.5) {
+    updateStats((s) => markHabitNote(s, "launch"));
+    return pick(pool.habitLaunchAgain)(stats.launches);
+  }
   // The last known mood shapes the greeting.
   if (petMood === "sleepy") return pick(pool.greetSleepy);
   if (petMood === "bored") return pick(pool.greetBored);
@@ -1895,6 +1964,14 @@ function performPetAction(action: PetAction): void {
 
   const revertMs = target === "walk" ? 1700 : target === "sleepy" ? 1500 : 2100;
   schedulePetReactionRevert(revertMs, returnState);
+  // T1.8 habits: keep a tally of today's favourite actions.
+  updateStats((stats) => ({
+    ...stats,
+    actionCounts: {
+      ...stats.actionCounts,
+      [action]: (stats.actionCounts[action] ?? 0) + 1
+    }
+  }));
   lastInteractionAt = Date.now();
   bumpInteraction();
   maybeWakeUp();
@@ -2252,6 +2329,12 @@ function startFocusMode(): void {
   focusActive = true;
   focusStartedAt = Date.now();
   blockingMode = null;
+  // T1.8 habits: remember when today's first focus session began.
+  updateStats((stats) =>
+    stats.workStartMinute === null
+      ? { ...stats, workStartMinute: minuteOfDay(new Date()) }
+      : stats
+  );
   setPetState("focusGuard");
   focusEndsAt = Date.now() + settings.focusDurationMinutes * 60 * 1000;
   sendToAll("app:snapshot", snapshot());
@@ -2282,15 +2365,37 @@ function stopFocusMode(completed: boolean): void {
   }
   focusEndsAt = null;
   scheduleDistractionDetection();
+  // T1.8 habits: cheer when today's accumulated focus crosses a whole-hour
+  // milestone (1h/2h/…) after this session — at most once per milestone.
+  const beforeMinutes = getStats().focusMinutes;
   updateStats((stats) => ({
     ...stats,
     focusMinutes: stats.focusMinutes + elapsedMinutes
   }));
+  const pool = text().bubble;
+  let message: string;
+  if (completed) {
+    const crossed = crossedFocusHour(beforeMinutes, beforeMinutes + elapsedMinutes);
+    if (crossed !== null) {
+      const note = focusNoteFor(crossed);
+      const currentStats = getStats();
+      if (!noteAlreadyTaken(currentStats.habitNotes, note)) {
+        updateStats((s) => markHabitNote(s, note));
+        message = pick(pool.habitFocusHours)(crossed);
+      } else {
+        message = pick(pool.focusComplete);
+      }
+    } else {
+      message = pick(pool.focusComplete);
+    }
+  } else {
+    message = pick(pool.focusCancelled);
+  }
   sendToAll("app:snapshot", snapshot());
   setPetState("focusDone");
   showBubble({
     id: "focus-complete",
-    message: completed ? pick(text().bubble.focusComplete) : pick(text().bubble.focusCancelled),
+    message,
     autoDismissMs: 2800
   });
   setTimeout(() => {
@@ -2727,7 +2832,8 @@ app.whenReady().then(() => {
     return net.fetch(pathToFileURL(assetPath).href);
   });
 
-  getStats();
+  // T1.8 habits: count this launch (also rolls today's stats over to a new day).
+  updateStats((stats) => ({ ...stats, launches: stats.launches + 1 }));
   registerIpc();
   createPetWindow();
   createTray();

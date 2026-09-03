@@ -1,4 +1,4 @@
-import { createEmptyStats, todayKey } from "../shared/constants";
+import { createEmptyStats, normalizeTodayStats, PET_ACTION_ORDER, todayKey } from "../shared/constants";
 import type { StatsHistory, TodayStats } from "../shared/types";
 
 export type StatsStore = {
@@ -13,14 +13,25 @@ export function getStatsHistory(store: StatsStore): StatsHistory {
 }
 
 export function isSameStats(left: TodayStats | undefined, right: TodayStats): boolean {
-  return Boolean(
-    left &&
-      left.date === right.date &&
-      left.breaksTaken === right.breaksTaken &&
-      left.watersLogged === right.watersLogged &&
-      left.focusMinutes === right.focusMinutes &&
-      left.focusWarnings === right.focusWarnings
-  );
+  if (!left || left.date !== right.date) return false;
+  if (
+    left.breaksTaken !== right.breaksTaken ||
+    left.watersLogged !== right.watersLogged ||
+    left.focusMinutes !== right.focusMinutes ||
+    left.focusWarnings !== right.focusWarnings ||
+    left.launches !== right.launches ||
+    left.workStartMinute !== right.workStartMinute
+  ) {
+    return false;
+  }
+  for (const action of PET_ACTION_ORDER) {
+    if ((left.actionCounts[action] ?? 0) !== (right.actionCounts[action] ?? 0)) return false;
+  }
+  return sameNotes(left.habitNotes ?? [], right.habitNotes ?? []);
+}
+
+function sameNotes(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((note, i) => note === b[i]);
 }
 
 export function saveStatsToHistory(store: StatsStore, stats: TodayStats): void {
@@ -34,13 +45,14 @@ export function saveStatsToHistory(store: StatsStore, stats: TodayStats): void {
 }
 
 export function getCurrentStats(store: StatsStore, date = todayKey()): TodayStats {
-  const stats = store.get("stats", createEmptyStats());
+  const stats = normalizeTodayStats(store.get("stats", createEmptyStats()));
   if (stats.date !== date) {
     saveStatsToHistory(store, stats);
     const current = getStatsHistory(store)[date] ?? createEmptyStats(date);
-    store.set("stats", current);
-    saveStatsToHistory(store, current);
-    return current;
+    const normalized = normalizeTodayStats(current);
+    store.set("stats", normalized);
+    saveStatsToHistory(store, normalized);
+    return normalized;
   }
 
   saveStatsToHistory(store, stats);
@@ -51,7 +63,7 @@ export function updateCurrentStats(
   store: StatsStore,
   mutator: (stats: TodayStats) => TodayStats
 ): TodayStats {
-  const next = mutator(getCurrentStats(store));
+  const next = normalizeTodayStats(mutator(getCurrentStats(store)));
   store.set("stats", next);
   saveStatsToHistory(store, next);
   return next;

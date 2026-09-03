@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DEFAULT_SETTINGS } from "../../shared/constants";
+import { createEmptyActionCounts, DEFAULT_SETTINGS } from "../../shared/constants";
 import { MAIN_PET_ID } from "../../shared/types";
 import type { AppSnapshot, TodayStats } from "../../shared/types";
 
@@ -8,7 +8,11 @@ const initialStats: TodayStats = {
   breaksTaken: 0,
   watersLogged: 0,
   focusMinutes: 0,
-  focusWarnings: 0
+  focusWarnings: 0,
+  launches: 0,
+  workStartMinute: null,
+  actionCounts: createEmptyActionCounts(),
+  habitNotes: []
 };
 
 export function useSnapshot(): AppSnapshot {

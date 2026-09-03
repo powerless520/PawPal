@@ -239,6 +239,14 @@ export type TodayStats = {
   watersLogged: number;
   focusMinutes: number;
   focusWarnings: number;
+  /** T1.8 habits: times the app was opened today */
+  launches: number;
+  /** T1.8 habits: minute-of-day (0-1439) of today's first focus session, null if none */
+  workStartMinute: number | null;
+  /** T1.8 habits: how many times each pet action was used today */
+  actionCounts: Record<PetAction, number>;
+  /** T1.8 habits: habit mentions already said today (each fires at most once) */
+  habitNotes: string[];
 };
 
 export type StatsHistory = Record<string, TodayStats>;

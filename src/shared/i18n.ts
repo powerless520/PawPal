@@ -31,6 +31,16 @@ function enHourWord(hour: number): string {
   return `${display} ${hour < 12 ? "AM" : "PM"}`;
 }
 
+function zhClockOf(hour: number, minute: number): string {
+  return minute === 0 ? `${hour}点整` : `${hour}点${minute}分`;
+}
+
+function enClockOf(hour: number, minute: number): string {
+  const display = hour % 12 === 0 ? 12 : hour % 12;
+  const mm = String(minute).padStart(2, "0");
+  return `${display}:${mm} ${hour < 12 ? "AM" : "PM"}`;
+}
+
 export const I18N = {
   "zh-CN": {
     bubble: {
@@ -115,7 +125,23 @@ export const I18N = {
       greetSpring: ["春天来啦，一起出去走走吧~", "外面花开了哦，春意满满~"],
       greetSummer: ["夏天好呀，记得多喝水~", "天气热热的，注意防暑哦~"],
       greetAutumn: ["秋天到了，一起看落叶吧~", "秋风凉凉，记得添件衣服哦"],
-      greetWinter: ["冬天来啦，注意保暖哦~", "天冷了，想和你一起暖暖的~"]
+      greetWinter: ["冬天来啦，注意保暖哦~", "天冷了，想和你一起暖暖的~"],
+      habitLaunchAgain: [
+        (n: number) => `今天已经第 ${n} 次见到我啦，这么想我呀~`,
+        (n: number) => `又见面啦！今天第 ${n} 次打开我，好开心~`
+      ],
+      habitWorkStart: [
+        (hour: number, minute: number) => `你今天 ${zhClockOf(hour, minute)} 就开始专注啦，好自律！`,
+        (hour: number, minute: number) => `这么早就开始认真工作了呀（${zhClockOf(hour, minute)}），太拼啦~`
+      ],
+      habitFocusHours: [
+        (hours: number) => `专注打卡！今天已经专注 ${hours} 小时啦，超厉害~`,
+        (hours: number) => `今天的专注时长到 ${hours} 小时了，给你一个大大的赞！`
+      ],
+      habitFavAction: [
+        (name: string, count: number) => `你今天最喜欢${name}，已经 ${count} 次啦~`,
+        (name: string, count: number) => `悄悄记下：你今天做了 ${count} 次${name}，是真爱呀~`
+      ]
     },
     holidayNames: {
       newYear: "元旦",
@@ -558,7 +584,27 @@ export const I18N = {
       greetSpring: ["Spring's here — let's go for a walk~", "Flowers are blooming out there~"],
       greetSummer: ["Summer, huh? Drink lots of water~", "Stay cool in this heat, okay?"],
       greetAutumn: ["Autumn leaves are falling — let's watch~", "The air's turning crisp; grab a sweater!"],
-      greetWinter: ["Winter's here — bundle up~", "So cold out there… let's get cozy~"]
+      greetWinter: ["Winter's here — bundle up~", "So cold out there… let's get cozy~"],
+      habitLaunchAgain: [
+        (n: number) => `This is the ${n}th time you've opened me today — miss me that much?~`,
+        (n: number) => `Back again! That's #${n} today~`
+      ],
+      habitWorkStart: [
+        (hour: number, minute: number) =>
+          `You started focusing at ${enClockOf(hour, minute)} today — so disciplined!`,
+        (hour: number, minute: number) =>
+          `Focusing since ${enClockOf(hour, minute)}? You're a machine~`
+      ],
+      habitFocusHours: [
+        (hours: number) =>
+          `Focus check-in! ${hours} hour${hours > 1 ? "s" : ""} of focus today — awesome~`,
+        (hours: number) =>
+          `${hours} hour${hours > 1 ? "s" : ""} of deep work today — high five!`
+      ],
+      habitFavAction: [
+        (name: string, count: number) => `${name} is your favourite today — ${count} times!`,
+        (name: string, count: number) => `I noticed you love ${name} — ${count} times so far~`
+      ]
     },
     holidayNames: {
       newYear: "New Year's Day",

@@ -1,4 +1,29 @@
-import type { PetStats, Settings, TodayStats } from "./types";
+import type { PetAction, PetStats, Settings, TodayStats } from "./types";
+
+/** Stable iteration order for the eight pet actions (must match `PetAction`). */
+export const PET_ACTION_ORDER: readonly PetAction[] = [
+  "dance",
+  "sing",
+  "spin",
+  "heart",
+  "stretch",
+  "wave",
+  "shy",
+  "yawn"
+];
+
+export function createEmptyActionCounts(): Record<PetAction, number> {
+  return {
+    dance: 0,
+    sing: 0,
+    spin: 0,
+    heart: 0,
+    stretch: 0,
+    wave: 0,
+    shy: 0,
+    yawn: 0
+  };
+}
 
 export const DEFAULT_SETTINGS: Settings = {
   language: "zh-CN",
@@ -74,7 +99,33 @@ export function createEmptyStats(date = todayKey()): TodayStats {
     breaksTaken: 0,
     watersLogged: 0,
     focusMinutes: 0,
-    focusWarnings: 0
+    focusWarnings: 0,
+    launches: 0,
+    workStartMinute: null,
+    actionCounts: createEmptyActionCounts(),
+    habitNotes: []
+  };
+}
+
+/**
+ * Back-fills habit fields (T1.8) on stats saved by older versions, so legacy
+ * archives are upgraded in place the first time they are touched.
+ */
+export function normalizeTodayStats(stats: TodayStats): TodayStats {
+  const empty = createEmptyStats(stats.date || todayKey());
+  return {
+    ...empty,
+    date: stats.date || empty.date,
+    breaksTaken: stats.breaksTaken ?? 0,
+    watersLogged: stats.watersLogged ?? 0,
+    focusMinutes: stats.focusMinutes ?? 0,
+    focusWarnings: stats.focusWarnings ?? 0,
+    launches: stats.launches ?? 0,
+    workStartMinute: stats.workStartMinute ?? null,
+    actionCounts: stats.actionCounts
+      ? { ...createEmptyActionCounts(), ...stats.actionCounts }
+      : createEmptyActionCounts(),
+    habitNotes: Array.isArray(stats.habitNotes) ? stats.habitNotes : []
   };
 }
 

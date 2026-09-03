@@ -56,19 +56,17 @@ export const tests = [
   {
     name: "getCurrentStats rolls over to an existing history entry for today",
     run(): void {
-      const yesterday = {
-        date: "2026-05-04",
+      const yesterday: TodayStats = {
+        ...createEmptyStats("2026-05-04"),
         breaksTaken: 1,
-        watersLogged: 0,
         focusMinutes: 25,
         focusWarnings: 1
       };
-      const today = {
-        date: "2026-05-05",
+      const today: TodayStats = {
+        ...createEmptyStats("2026-05-05"),
         breaksTaken: 3,
         watersLogged: 2,
-        focusMinutes: 50,
-        focusWarnings: 0
+        focusMinutes: 50
       };
       const store = new MemoryStatsStore(yesterday, { "2026-05-05": today });
 
