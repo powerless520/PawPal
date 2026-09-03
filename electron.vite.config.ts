@@ -33,7 +33,8 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve(__dirname, "src/renderer/index.html"),
-          chat: resolve(__dirname, "src/renderer/chat.html")
+          chat: resolve(__dirname, "src/renderer/chat.html"),
+          snapshot: resolve(__dirname, "src/renderer/snapshot.html")
         }
       }
     }

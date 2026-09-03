@@ -455,6 +455,47 @@ function MoodPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   );
 }
 
+function SnapshotPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+  const [status, setStatus] = useState<"idle" | "busy" | "ok" | "err">("idle");
+  const [path, setPath] = useState<string>("");
+
+  async function handleExport(): Promise<void> {
+    setStatus("busy");
+    setPath("");
+    const result = await window.pawpal.exportSnapshot();
+    if (result) {
+      setStatus("ok");
+      setPath(result);
+    } else {
+      setStatus("idle");
+    }
+  }
+
+  return (
+    <section className="prefs__group">
+      <h2 className="prefs__group-title">{labels.snapshot}</h2>
+      <Row
+        label={labels.snapshotExport}
+        control={
+          <div className="pref-button-group">
+            <button
+              type="button"
+              className="pref-button is-primary"
+              disabled={status === "busy"}
+              onClick={() => void handleExport()}
+            >
+              {labels.snapshotExport}
+            </button>
+            {path ? (
+              <span className="pref-status is-ok">✓ {path.split("/").pop()}</span>
+            ) : null}
+          </div>
+        }
+      />
+    </section>
+  );
+}
+
 function BackupPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const [status, setStatus] = useState<"idle" | "busy" | "ok" | "err">("idle");
   const [message, setMessage] = useState<string>("");
@@ -1306,6 +1347,7 @@ export function SettingsView(): JSX.Element {
       <DiaryPanel labels={labels} />
 
       <MoodPanel labels={labels} />
+      <SnapshotPanel labels={labels} />
       <BackupPanel labels={labels} />
 
       <GrowthPanel labels={labels} />

@@ -27,6 +27,7 @@ export const CHAT_WINDOW = {
 export const PRELOAD_PATH = join(__dirname, "../preload/index.cjs");
 export const RENDERER_HTML_PATH = join(__dirname, "../renderer/index.html");
 export const CHAT_HTML_PATH = join(__dirname, "../renderer/chat.html");
+export const SNAPSHOT_HTML_PATH = join(__dirname, "../renderer/snapshot.html");
 export const IS_DEV = Boolean(process.env.ELECTRON_RENDERER_URL);
 
 export const DISTRACTION_CHECK_INTERVAL_MS = 3000;

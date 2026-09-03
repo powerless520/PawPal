@@ -1,13 +1,15 @@
 import { basename, extname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { copyFile, mkdir } from "node:fs/promises";
+import { copyFile, mkdir, readFile } from "node:fs/promises";
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   ipcMain,
   Menu,
+  nativeImage,
   nativeTheme,
   net,
   protocol,
@@ -20,8 +22,14 @@ import {
   createEmptyStats,
   DEFAULT_SETTINGS
 } from "../shared/constants";
-import { i18n, pick } from "../shared/i18n";
-import { PET_STATE_ORDER, petAppearanceOptions } from "../shared/petAppearances";
+import { i18n, pick, resolveLanguage } from "../shared/i18n";
+import {
+  PET_APPEARANCES,
+  PET_STATE_ORDER,
+  petAppearanceOptions,
+  resolveBuiltInPetAppearanceId
+} from "../shared/petAppearances";
+import { OUTFIT_SLOTS, outfitItemById } from "../shared/outfits";
 import type {
   AppSnapshot,
   BlockingMode,
@@ -65,6 +73,7 @@ import {
   CHAT_HTML_PATH,
   SETTINGS_WINDOW,
   CHAT_WINDOW,
+  SNAPSHOT_HTML_PATH,
   STORE_NAME
 } from "./config";
 import {
@@ -2196,6 +2205,20 @@ function registerIpc(): void {
     }
   );
   ipcMain.handle("roster:list", (): PetRoster => readRoster());
+  ipcMain.handle("snapshot:export", async (): Promise<string | null> => {
+    try {
+      const path = await renderPetSnapshot();
+      if (path) {
+        const { copyFile } = await import("node:fs/promises");
+        const buffer = await readFile(path);
+        clipboard.writeImage(nativeImage.createFromBuffer(buffer));
+        return path;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
   ipcMain.handle("chat:open", () => {
     createChatWindow();
   });
@@ -2400,3 +2423,138 @@ app.on("before-quit", () => {
 app.on("window-all-closed", () => {
   // Keep the menu-bar utility alive after the settings window is closed.
 });
+
+// Render a shareable PNG of the pet's current state into a hidden
+// snapshot window, then return the saved file path. Used by the
+// "Export snapshot" action in Settings and from the pet right-click
+// menu. Returns null if the user cancels or the pet window is not
+// alive.
+async function renderPetSnapshot(): Promise<string | null> {
+  if (!petWindow || petWindow.isDestroyed()) return null;
+  const settings = getSettings();
+  const active = activeRosterEntry(readRoster());
+  const stats = getStats();
+  const growth = readGrowth();
+
+  // 1. Determine the pet's current visible GIF so the snapshot
+  //    matches what the user is looking at.
+  const appearanceId = active.appearanceId;
+  const visibleState = petState;
+  const stateDef =
+    PET_APPEARANCES[resolveBuiltInPetAppearanceId(appearanceId)].states[visibleState] ??
+    PET_APPEARANCES[resolveBuiltInPetAppearanceId(appearanceId)].fallback;
+  const gifPath = Array.isArray(stateDef.path) ? stateDef.path[0] : stateDef.path;
+  const petGif = await readFile(gifPath);
+
+  // 2. Walk the equipped outfit parts and read their PNGs.
+  const equippedOutfit = active.outfit ?? {};
+  const outfitPngs: string[] = [];
+  for (const slot of OUTFIT_SLOTS) {
+    const id = equippedOutfit[slot.part];
+    if (!id) continue;
+    const item = outfitItemById(slot.part, id);
+    if (!item) continue;
+    const buf = await readFile(join(process.cwd(), item.relativePath));
+    outfitPngs.push(`data:image/png;base64,${buf.toString("base64")}`);
+  }
+
+  // 3. Pick a single context line that gives the snapshot character.
+  const moodEmoji = snapshotMoodEmojiFor(settings.language)[petMood] ?? "✨";
+  const now = new Date();
+  const ageDays = growth.bornAt
+    ? Math.max(0, Math.floor((now.getTime() - growth.bornAt) / 86_400_000))
+    : 0;
+  const contextLine = pickSnapshotLine(petMood, now.getHours(), ageDays, settings.language);
+
+  // 4. Build the snapshot data payload.
+  const data = {
+    petLabel: petAppearanceLabel(appearanceId, settings.language),
+    petState: visibleState,
+    mood: petMood,
+    moodEmoji,
+    petPngDataUrl: `data:image/gif;base64,${petGif.toString("base64")}`,
+    outfitPngDataUrls: outfitPngs,
+    ageDays,
+    totalInteractions: growth.totalInteractions,
+    contextLine,
+    capturedAt: now.toISOString().slice(0, 16).replace("T", " ")
+  };
+
+  // 5. Spin up a hidden snapshot window, inject data, wait for paint.
+  const win = new BrowserWindow({
+    width: 800,
+    height: 1000,
+    show: false,
+    webPreferences: {
+      preload: PRELOAD_PATH,
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false
+    }
+  });
+  try {
+    if (IS_DEV && process.env.ELECTRON_RENDERER_URL) {
+      await win.loadURL(`${process.env.ELECTRON_RENDERER_URL}#/snapshot`);
+    } else {
+      await win.loadFile(SNAPSHOT_HTML_PATH);
+    }
+    await win.webContents.executeJavaScript(
+      `window.__snapshotData = ${JSON.stringify(data)}; true;`
+    );
+    // Give React one frame to mount + paint
+    await new Promise((r) => setTimeout(r, 250));
+    const image = await win.webContents.capturePage();
+    const png = image.toPNG();
+    const buffer = png.toString("base64");
+    const fileName = `pawpal-${now.toISOString().slice(0, 10)}-${data.petLabel}.png`;
+    const parent = settingsWindow && !settingsWindow.isDestroyed() ? settingsWindow : null;
+    const result = parent
+      ? await dialog.showSaveDialog(parent, {
+          title: "Export pet snapshot",
+          defaultPath: `~/Downloads/${fileName}`,
+          filters: [{ name: "PNG image", extensions: ["png"] }]
+        })
+      : await dialog.showSaveDialog({
+          title: "Export pet snapshot",
+          defaultPath: `~/Downloads/${fileName}`,
+          filters: [{ name: "PNG image", extensions: ["png"] }]
+        });
+    if (result.canceled || !result.filePath) return null;
+    const { writeFile: writeFileAsync } = await import("node:fs/promises");
+    await writeFileAsync(result.filePath, Buffer.from(buffer, "base64"));
+    return result.filePath;
+  } finally {
+    if (!win.isDestroyed()) win.close();
+  }
+}
+
+function pickSnapshotLine(mood: PetMood, hour: number, ageDays: number, language: Language): string {
+  const greetings: Record<string, string[]> = {
+    "zh-CN": [
+      `已经陪伴你 ${Math.max(1, ageDays)} 天啦~`,
+      `${hour} 点了，今天也辛苦啦~`,
+      "我在屏幕上看着你呢 ✨",
+      "想你了，来打个招呼~"
+    ],
+    en: [
+      `${Math.max(1, ageDays)} days together, and counting.`,
+      `It's ${hour}:00 — you got this.`,
+      "Just chilling on your screen ✨",
+      "Wanted to say hi~"
+    ]
+  };
+  const moodSpecific: Record<PetMood, Record<string, string>> = {
+    playful: { "zh-CN": "今天能量满满！一起玩吧~", en: "Full of energy today!" },
+    energetic: { "zh-CN": "新的一天，新的开始 ✨", en: "New day, fresh start ✨" },
+    calm: { "zh-CN": "安静地陪着你。", en: "Quietly keeping you company." },
+    sleepy: { "zh-CN": "有点困了…让我眯一会儿…", en: "A bit sleepy… let me nap…" },
+    bored: { "zh-CN": "主人都不理我…", en: "When are you coming back~" }
+  };
+  const pool = [moodSpecific[mood][language], ...greetings[language]];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function snapshotMoodEmojiFor(language: Language): Record<PetMood, string> {
+  const labels = i18n(resolveLanguage(language)).settings;
+  return labels.petMoodEmoji as unknown as Record<PetMood, string>;
+}
