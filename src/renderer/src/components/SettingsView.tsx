@@ -286,7 +286,13 @@ function throwRandomBall(): void {
   window.pawpal.petPlayCatch(cx, cy);
 }
 
-function RosterPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+function RosterPanel({
+  labels,
+  sectionId
+}: {
+  labels: SettingsCopy;
+  sectionId?: string;
+}): JSX.Element {
   const snapshot = useSnapshot();
   const [newLabel, setNewLabel] = useState("");
   const roster = snapshot.petRoster;
@@ -309,7 +315,7 @@ function RosterPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   }
 
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.roster}</h2>
       <div className="roster-list">
         {(roster?.pets ?? []).map((pet) => {
@@ -448,11 +454,17 @@ function MoodChart({ samples, labels }: { samples: MoodSample[]; labels: Setting
   );
 }
 
-function MoodPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+function MoodPanel({
+  labels,
+  sectionId
+}: {
+  labels: SettingsCopy;
+  sectionId?: string;
+}): JSX.Element {
   const snapshot = useSnapshot();
   const samples = snapshot.petMoodHistory?.samples ?? [];
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.moodChart}</h2>
       <Row
         label={labels.moodChart}
@@ -463,7 +475,13 @@ function MoodPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   );
 }
 
-function SnapshotPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+function SnapshotPanel({
+  labels,
+  sectionId
+}: {
+  labels: SettingsCopy;
+  sectionId?: string;
+}): JSX.Element {
   const [status, setStatus] = useState<"idle" | "busy" | "ok" | "err">("idle");
   const [path, setPath] = useState<string>("");
 
@@ -480,7 +498,7 @@ function SnapshotPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   }
 
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.snapshot}</h2>
       <Row
         label={labels.snapshotExport}
@@ -504,7 +522,13 @@ function SnapshotPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   );
 }
 
-function BackupPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+function BackupPanel({
+  labels,
+  sectionId
+}: {
+  labels: SettingsCopy;
+  sectionId?: string;
+}): JSX.Element {
   const [status, setStatus] = useState<"idle" | "busy" | "ok" | "err">("idle");
   const [message, setMessage] = useState<string>("");
 
@@ -569,7 +593,7 @@ function BackupPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   }
 
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.backup}</h2>
       <Row
         label={labels.backupExport}
@@ -617,7 +641,13 @@ function BackupPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   );
 }
 
-function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+function GrowthPanel({
+  labels,
+  sectionId
+}: {
+  labels: SettingsCopy;
+  sectionId?: string;
+}): JSX.Element {
   const snapshot = useSnapshot();
   const now = useNow(60_000);
   const growth = snapshot.petGrowth;
@@ -649,7 +679,7 @@ function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const totalMilestones = ALL_MILESTONE_IDS.length;
 
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.growth}</h2>
 
       <div className="growth-stage">
@@ -722,7 +752,13 @@ function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   );
 }
 
-function DiaryPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
+function DiaryPanel({
+  labels,
+  sectionId
+}: {
+  labels: SettingsCopy;
+  sectionId?: string;
+}): JSX.Element {
   const snapshot = useSnapshot();
   const [generating, setGenerating] = useState(false);
 
@@ -738,7 +774,7 @@ function DiaryPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const entries = snapshot.petDiary?.entries ?? [];
 
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.diary}</h2>
       <Row
         label={labels.diary}
@@ -779,11 +815,13 @@ function DiaryPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
 function AiSettingsPanel({
   labels,
   draft,
-  updateDraft
+  updateDraft,
+  sectionId
 }: {
   labels: SettingsCopy;
   draft: Settings;
   updateDraft: (partial: Partial<Settings>) => void;
+  sectionId?: string;
 }): JSX.Element {
   const [showKey, setShowKey] = useState(false);
   const [testing, setTesting] = useState<null | true | false>(null);
@@ -797,7 +835,7 @@ function AiSettingsPanel({
   }
 
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.ai}</h2>
       <Row
         label={labels.aiProvider}
@@ -946,11 +984,13 @@ function BirthdayRow({
 function OutfitPicker({
   labels,
   draft,
-  updateDraft
+  updateDraft,
+  sectionId
 }: {
   labels: SettingsCopy;
   draft: Settings;
   updateDraft: (partial: Partial<Settings>) => void;
+  sectionId?: string;
 }): JSX.Element | null {
   const now = new Date();
   const seasonalCollection = seasonalOutfitsForDate(now);
@@ -976,7 +1016,7 @@ function OutfitPicker({
     updateDraft({ outfit: { ...draft.outfit, [part]: item.id } });
   }
   return (
-    <section className="prefs__group">
+    <section id={sectionId} className="prefs__group">
       <h2 className="prefs__group-title">{labels.outfit}</h2>
       <Row
         label={labels.outfitMode}
@@ -1097,11 +1137,28 @@ export function SettingsView(): JSX.Element {
   const [settingsDirty, setSettingsDirty] = useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [customEditorOpen, setCustomEditorOpen] = useState(settings.petAppearanceId === "custom");
+  const [activeNav, setActiveNav] = useState<string>("pref-appearance");
   const now = useNow();
   const savedSettingsKey = JSON.stringify(settings);
   const language = resolveLanguage(draft.language);
   const labels = i18n(language).settings;
   const customPetReady = hasRequiredCustomPetAssets(draft.customPetAppearance);
+  const navSections = [
+    { id: "pref-appearance", label: labels.appearance },
+    { id: "pref-outfit", label: labels.outfit },
+    { id: "pref-reminders", label: labels.reminders },
+    { id: "pref-focus", label: labels.focus },
+    { id: "pref-ai", label: labels.ai },
+    { id: "pref-diary", label: labels.diary },
+    { id: "pref-mood", label: labels.moodChart },
+    { id: "pref-snapshot", label: labels.snapshot },
+    { id: "pref-backup", label: labels.backup },
+    { id: "pref-growth", label: labels.growth },
+    { id: "pref-roster", label: labels.roster },
+    { id: "pref-chat", label: labels.chatWithPet },
+    { id: "pref-system", label: labels.system },
+    { id: "pref-about", label: labels.about }
+  ];
 
   const petAvatar = useMemo(
     () =>
@@ -1129,6 +1186,30 @@ export function SettingsView(): JSX.Element {
     }, 350);
     return () => window.clearTimeout(timer);
   }, [draft, settingsDirty]);
+
+  // T0.5: keep the sticky section nav in sync with the visible group.
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll<HTMLElement>(".prefs__group[id]"));
+    if (sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const top = visible[0];
+        if (top) setActiveNav(top.target.id);
+      },
+      { rootMargin: "-118px 0px -60% 0px", threshold: 0 }
+    );
+    for (const section of sections) observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  function scrollToPref(id: string): void {
+    setActiveNav(id);
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function updateDraft(partial: Partial<Settings>): void {
     setDraft((current) => ({ ...current, ...partial }));
@@ -1187,6 +1268,30 @@ export function SettingsView(): JSX.Element {
         </div>
       </header>
 
+      <nav className="prefs__nav">
+        <div className="prefs__nav-track">
+          {navSections.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              className={`prefs__nav-pill${activeNav === section.id ? " is-active" : ""}`}
+              onClick={() => scrollToPref(section.id)}
+            >
+              {section.label}
+            </button>
+          ))}
+          {!window.pawpal.isPackaged ? (
+            <button
+              type="button"
+              className={`prefs__nav-pill${activeNav === "pref-test-tools" ? " is-active" : ""}`}
+              onClick={() => scrollToPref("pref-test-tools")}
+            >
+              {labels.testTools}
+            </button>
+          ) : null}
+        </div>
+      </nav>
+
       <section className="prefs__stats" aria-label={labels.today}>
         <StatCard label={labels.breaks} value={stats.breaksTaken} unit={labels.countUnit} />
         <StatCard label={labels.waters} value={stats.watersLogged} unit={labels.countUnit} />
@@ -1209,7 +1314,7 @@ export function SettingsView(): JSX.Element {
         </aside>
       ) : null}
 
-      <section className="prefs__group">
+      <section id="pref-appearance" className="prefs__group">
         <h2 className="prefs__group-title">{labels.appearance}</h2>
         <Row
           label={labels.language}
@@ -1266,10 +1371,10 @@ export function SettingsView(): JSX.Element {
         ) : null}
       </section>
 
-      <OutfitPicker labels={labels} draft={draft} updateDraft={updateDraft} />
+      <OutfitPicker labels={labels} draft={draft} updateDraft={updateDraft} sectionId="pref-outfit" />
       <BirthdayRow labels={labels} draft={draft} updateDraft={updateDraft} />
 
-      <section className="prefs__group">
+      <section id="pref-reminders" className="prefs__group">
         <h2 className="prefs__group-title">{labels.reminders}</h2>
         <Row
           label={labels.enableBreakReminder}
@@ -1329,7 +1434,7 @@ export function SettingsView(): JSX.Element {
         />
       </section>
 
-      <section className="prefs__group">
+      <section id="pref-focus" className="prefs__group">
         <h2 className="prefs__group-title">{labels.focus}</h2>
         <Row
           label={labels.focusDuration}
@@ -1408,7 +1513,7 @@ export function SettingsView(): JSX.Element {
       </section>
 
       {!window.pawpal.isPackaged && (
-        <section className="prefs__group">
+        <section id="pref-test-tools" className="prefs__group">
           <h2 className="prefs__group-title">{labels.testTools}</h2>
           <div className="test-tools">
             <DemoChip trigger="break" label={labels.demoBreak} />
@@ -1429,19 +1534,19 @@ export function SettingsView(): JSX.Element {
         </section>
       )}
 
-      <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} />
+      <AiSettingsPanel labels={labels} draft={draft} updateDraft={updateDraft} sectionId="pref-ai" />
 
-      <DiaryPanel labels={labels} />
+      <DiaryPanel labels={labels} sectionId="pref-diary" />
 
-      <MoodPanel labels={labels} />
-      <SnapshotPanel labels={labels} />
-      <BackupPanel labels={labels} />
+      <MoodPanel labels={labels} sectionId="pref-mood" />
+      <SnapshotPanel labels={labels} sectionId="pref-snapshot" />
+      <BackupPanel labels={labels} sectionId="pref-backup" />
 
-      <GrowthPanel labels={labels} />
+      <GrowthPanel labels={labels} sectionId="pref-growth" />
 
-      <RosterPanel labels={labels} />
+      <RosterPanel labels={labels} sectionId="pref-roster" />
 
-      <section className="prefs__group">
+      <section id="pref-chat" className="prefs__group">
         <h2 className="prefs__group-title">{labels.chatWithPet}</h2>
         <Row
           label={labels.chatWithPet}
@@ -1457,7 +1562,7 @@ export function SettingsView(): JSX.Element {
         />
       </section>
 
-      <section className="prefs__group">
+      <section id="pref-system" className="prefs__group">
         <h2 className="prefs__group-title">{labels.system}</h2>
         <Row
           label={labels.launchAtLogin}
@@ -1543,7 +1648,7 @@ export function SettingsView(): JSX.Element {
         {/* Local-only fork: update-check toggle removed (always off). */}
       </section>
 
-      <section className="prefs__group">
+      <section id="pref-about" className="prefs__group">
         <h2 className="prefs__group-title">{labels.about}</h2>
         <Row
           label={labels.version}
