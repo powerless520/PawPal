@@ -130,6 +130,8 @@ export const I18N = {
       themeMidnight: "暗夜",
       themePaperwhite: "高对比",
       themeSakura: "樱花",
+      observerMode: "观察者模式",
+      observerModeHelp: "开启后宠物不主动搭话或游走，只在你点击、拖动或换装时回应",
       launchAtLoginHelp:
         "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
       about: "关于",
@@ -521,6 +523,8 @@ export const I18N = {
       themeMidnight: "Midnight",
       themePaperwhite: "Paperwhite",
       themeSakura: "Sakura",
+      observerMode: "Observer mode",
+      observerModeHelp: "When on, the pet never chats or wanders on its own — it only responds to your clicks, drags and dress-ups",
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",

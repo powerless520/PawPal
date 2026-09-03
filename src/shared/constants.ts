@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ttsVoice: null,
   easterEggsEnabled: true,
   theme: "default",
+  observerMode: false,
   birthdayMonth: null,
   birthdayDay: null,
   distractionBlockedApps: ["Steam", "Discord", "Telegram", "WeChat", "QQ"],

@@ -1645,6 +1645,17 @@ export function SettingsView(): JSX.Element {
             />
           }
         />
+        <Row
+          label={labels.observerMode}
+          hint={labels.observerModeHelp}
+          control={
+            <ToggleControl
+              checked={draft.observerMode}
+              onChange={(observerMode) => updateDraft({ observerMode })}
+              ariaLabel={labels.observerMode}
+            />
+          }
+        />
         {/* Local-only fork: update-check toggle removed (always off). */}
       </section>
 

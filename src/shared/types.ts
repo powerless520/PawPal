@@ -228,6 +228,7 @@ export type Settings = {
   ttsVoice: string | null;
   easterEggsEnabled: boolean;
   theme: Theme;
+  observerMode: boolean;
   birthdayMonth: number | null;
   birthdayDay: number | null;
 };

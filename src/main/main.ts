@@ -485,6 +485,8 @@ function scheduleNextWander(): void {
     clearTimeout(wanderTimer);
     wanderTimer = null;
   }
+  // Observer mode: the pet stays still and never wanders on its own.
+  if (getSettings().observerMode) return;
   wanderTimer = setTimeout(() => {
     wanderTimer = null;
     performWander();
@@ -597,6 +599,8 @@ function cancelChatter(): void {
 
 function scheduleNextChatter(): void {
   cancelChatter();
+  // Observer mode: the pet never initiates conversation on its own.
+  if (getSettings().observerMode) return;
   chatTimer = setTimeout(() => {
     chatTimer = null;
     void performChatter();
@@ -972,6 +976,8 @@ function setSettings(next: Settings): void {
   settingsWindow?.setTitle(`${APP_NAME} ${text().menu.settings}`);
   scheduleReminderTimers();
   scheduleDistractionDetection();
+  scheduleNextChatter();
+  scheduleNextWander();
   updateTrayMenu();
 }
 
