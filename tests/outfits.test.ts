@@ -4,56 +4,56 @@ import {
   outfitItemById,
   outfitItemsForPart,
   outfitPartLabel,
-  seasonalOutfitForDate
+  seasonalOutfitsForDate
 } from "../src/shared/outfits";
 
 export const tests = [
   {
     name: "seasonal: New Year's Day",
     run(): void {
-      const outfit = seasonalOutfitForDate(new Date(2025, 0, 1));
-      assert.equal(outfit?.label["zh-CN"], "元旦");
-      assert.equal(outfit?.hat, "beanie");
+      const collection = seasonalOutfitsForDate(new Date(2025, 0, 1));
+      assert.equal(collection?.label["zh-CN"], "元旦");
+      assert.ok(collection?.outfits.some((o) => o.hat === "beanie"));
     }
   },
   {
     name: "seasonal: Spring Festival window",
     run(): void {
-      const outfit = seasonalOutfitForDate(new Date(2025, 1, 5));
-      assert.equal(outfit?.label["zh-CN"], "新年");
+      const collection = seasonalOutfitsForDate(new Date(2025, 1, 5));
+      assert.equal(collection?.label["zh-CN"], "新年");
+      assert.ok(collection.outfits.length > 0);
     }
   },
   {
     name: "seasonal: Valentine's Day",
     run(): void {
-      const outfit = seasonalOutfitForDate(new Date(2025, 1, 14));
-      assert.equal(outfit?.label["en"], "Valentine's Day");
+      const collection = seasonalOutfitsForDate(new Date(2025, 1, 14));
+      assert.equal(collection?.label["en"], "Valentine's Day");
+      assert.ok(collection.outfits.length > 0);
     }
   },
   {
-    name: "seasonal: Christmas with red scarf",
+    name: "seasonal: Christmas includes a red-scarf combo",
     run(): void {
-      const outfit = seasonalOutfitForDate(new Date(2025, 11, 25));
-      assert.equal(outfit?.label["zh-CN"], "圣诞");
-      assert.equal(outfit?.hat, "beanie");
-      assert.equal(outfit?.scarf, "red-scarf");
+      const collection = seasonalOutfitsForDate(new Date(2025, 11, 25));
+      assert.equal(collection?.label["zh-CN"], "圣诞");
+      assert.ok(collection?.outfits.some((o) => o.hat === "beanie" && o.scarf === "red-scarf"));
     }
   },
   {
     name: "seasonal: user birthday overrides generic date",
     run(): void {
-      const outfit = seasonalOutfitForDate(new Date(2025, 6, 15), { month: 7, day: 15 });
-      assert.equal(outfit?.label["zh-CN"], "你的生日");
-      assert.equal(outfit?.hat, "crown");
-      assert.equal(outfit?.glasses, "sunglasses");
+      const collection = seasonalOutfitsForDate(new Date(2025, 6, 15), { month: 7, day: 15 });
+      assert.equal(collection?.label["zh-CN"], "你的生日");
+      assert.ok(collection?.outfits.some((o) => o.hat === "crown" && o.glasses === "sunglasses"));
     }
   },
   {
-    name: "seasonal: random non-holiday returns null",
+    name: "seasonal: non-holiday returns null",
     run(): void {
       // 3月20日 没映射节日
-      const outfit = seasonalOutfitForDate(new Date(2025, 2, 20));
-      assert.equal(outfit, null);
+      const collection = seasonalOutfitsForDate(new Date(2025, 2, 20));
+      assert.equal(collection, null);
     }
   },
   {

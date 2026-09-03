@@ -16,10 +16,21 @@ import type {
   CustomPetAsset,
   DemoTrigger,
   MoodSample,
+  PetGrowth,
   PetMood,
   PetState,
   Settings
 } from "../../../shared/types";
+import { createEmptyStats } from "../../../shared/constants";
+import {
+  ALL_MILESTONE_IDS,
+  daysKnown,
+  eligibleMilestoneIds,
+  GROWTH_STAGES,
+  healthTotals,
+  kindOfMilestone,
+  stageRank
+} from "../../../shared/growth";
 import { getPetAsset } from "../assets";
 import { distractionHelp, formatDistractionState, formatTimer, formatTimestamp, localeFor } from "../format";
 import { useNow, useSnapshot } from "../hooks";
@@ -611,26 +622,110 @@ function BackupPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
 
 function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   const snapshot = useSnapshot();
-  const growth = snapshot.petGrowth;
   const now = useNow(60_000);
-  const days = growth?.bornAt ? Math.max(0, Math.floor((now - growth.bornAt) / 86_400_000)) : 0;
-  const interactions = growth?.totalInteractions ?? 0;
+  const growth = snapshot.petGrowth;
+  const safeGrowth: PetGrowth = growth ?? {
+    bornAt: 0,
+    totalInteractions: 0,
+    lastMilestone: null,
+    stage: "acquaintance",
+    stageChangedAt: null,
+    milestones: []
+  };
+  const language = snapshot.settings.language;
+  const days = daysKnown(safeGrowth.bornAt, now);
+  const totals = healthTotals(
+    snapshot.stats ?? createEmptyStats(),
+    snapshot.statsHistory ?? {}
+  );
+  const eligible = eligibleMilestoneIds(safeGrowth, totals, now);
+  const unlockedAt = new Map<string, number>(
+    safeGrowth.milestones.map((m) => [m.id, m.unlockedAt])
+  );
+  const nextDef = GROWTH_STAGES[stageRank(safeGrowth.stage) + 1] ?? null;
+  const progressPercent = nextDef
+    ? Math.min(
+        100,
+        Math.round(
+          Math.min(
+            days / nextDef.requireDays,
+            safeGrowth.totalInteractions / nextDef.requireInteractions
+          ) * 100
+        )
+      )
+    : 100;
+  const totalMilestones = ALL_MILESTONE_IDS.length;
+
   return (
     <section className="prefs__group">
       <h2 className="prefs__group-title">{labels.growth}</h2>
-      <Row
-        label={labels.growth}
-        hint={
-          days <= 0
-            ? labels.growthAgeDaysOne
-            : labels.growthAgeDays(days)
-        }
-        control={
-          <span className="pref-static-value">
-            {labels.growthInteractions(interactions)}
+
+      <div className="growth-stage">
+        <div className="growth-stage__head">
+          <span className="growth-stage__name">{labels.growthStageName[safeGrowth.stage]}</span>
+          <span className="growth-stage__meta">
+            {days <= 0 ? labels.growthAgeDaysOne : labels.growthAgeDays(days)} ·{" "}
+            {labels.growthInteractions(safeGrowth.totalInteractions)}
           </span>
-        }
-      />
+        </div>
+        <p className="growth-stage__desc">{labels.growthStageDesc[safeGrowth.stage]}</p>
+        {nextDef ? (
+          <div className="growth-stage__progress">
+            <div className="growth-stage__bar">
+              <div
+                className="growth-stage__bar-fill"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <small>
+              {labels.growthNextStage}：{labels.growthStageName[nextDef.id]} ·{" "}
+              {labels.growthStageNeedsDaysAndInteractions(
+                Math.max(0, nextDef.requireDays - days),
+                Math.max(0, nextDef.requireInteractions - safeGrowth.totalInteractions)
+              )}
+            </small>
+          </div>
+        ) : (
+          <small className="growth-stage__max">{labels.growthStageMax}</small>
+        )}
+      </div>
+
+      <h3 className="prefs__group-subtitle">
+        <span>{labels.growthMilestones}</span>
+        <span className="pref-hint">
+          {labels.growthMilestoneCount(safeGrowth.milestones.length, totalMilestones)}
+        </span>
+      </h3>
+      <ul className="growth-milestones">
+        {ALL_MILESTONE_IDS.map((id) => {
+          const kind = kindOfMilestone(id);
+          const value = Number(id.slice(id.indexOf("-") + 1));
+          const label =
+            kind === "age"
+              ? labels.growthMilestoneAge(value)
+              : kind === "interaction"
+                ? labels.growthMilestoneInteractions(value)
+                : id.startsWith("breaks-")
+                  ? labels.growthMilestoneBreaks(value)
+                  : id.startsWith("waters-")
+                    ? labels.growthMilestoneWaters(value)
+                    : labels.growthMilestoneFocus(value);
+          const unlocked = unlockedAt.get(id);
+          return (
+            <li
+              key={id}
+              className={`growth-milestones__item${unlocked ? " growth-milestones__item--unlocked" : ""}`}
+            >
+              <span className="growth-milestones__label">{label}</span>
+              <span className="growth-milestones__meta">
+                {unlocked
+                  ? `${labels.growthUnlockedAt} ${formatTimestamp(unlocked, language, labels)}`
+                  : labels.growthLocked}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
@@ -1427,6 +1522,36 @@ export function SettingsView(): JSX.Element {
               checked={draft.easterEggsEnabled}
               onChange={(easterEggsEnabled) => updateDraft({ easterEggsEnabled })}
               ariaLabel={labels.easterEggsEnabled}
+            />
+          }
+        />
+        <Row
+          label={labels.theme}
+          control={
+            <SelectControl
+              value={draft.theme}
+              options={[
+                { value: "default", label: labels.themeDefault },
+                { value: "midnight", label: labels.themeMidnight },
+                { value: "paperwhite", label: labels.themePaperwhite },
+                { value: "sakura", label: labels.themeSakura }
+              ]}
+              onChange={(value) => {
+                const theme = value as Settings["theme"];
+                updateDraft({ theme });
+                // Hot-swap the chat window's theme class. The chat
+                // window reads this on next mount; for instant feel we
+                // also flip the body class here so a future reload
+                // picks the right one immediately.
+                document.documentElement.classList.remove(
+                  "theme-default",
+                  "theme-midnight",
+                  "theme-paperwhite",
+                  "theme-sakura"
+                );
+                document.documentElement.classList.add(`theme-${theme}`);
+                window.localStorage.setItem("pawpal-theme", theme);
+              }}
             />
           }
         />

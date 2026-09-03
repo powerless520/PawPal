@@ -100,6 +100,15 @@ import {
 import { createTrayImage } from "./trayIcon";
 import { getStoredSettings, normalizeSettings } from "./settingsStore";
 import {
+  daysKnown,
+  eligibleMilestoneIds,
+  healthTotals,
+  kindOfMilestone,
+  normalizeGrowth,
+  stageFor,
+  stageRank
+} from "../shared/growth";
+import {
   getCurrentStats,
   getStatsHistory,
   resetCurrentStats,
@@ -220,8 +229,10 @@ function commitActiveToRoster(): void {
   active.appearanceId = getSettings().petAppearanceId;
   active.customPetAppearance = getSettings().customPetAppearance;
   active.outfit = getSettings().outfit ?? {};
-  active.totalInteractions = readGrowth().totalInteractions;
-  active.bornAt = readGrowth().bornAt;
+  const activeGrowth = readGrowth();
+  active.totalInteractions = activeGrowth.totalInteractions;
+  active.bornAt = activeGrowth.bornAt;
+  active.growth = activeGrowth;
   writeRoster(roster);
 }
 
@@ -238,6 +249,14 @@ function loadActiveFromRoster(): void {
   petFacing = transient.facing;
   petMood = transient.mood;
   lastInteractionAt = transient.lastInteractionAt;
+  // Restore this pet's own growth record so snapshots and milestone logic
+  // always reflect the currently active pet. Each roster entry owns one.
+  const growth = active.growth
+    ? normalizeGrowth(active.growth, Date.now())
+    : normalizeGrowth({ bornAt: active.bornAt, totalInteractions: active.totalInteractions }, Date.now());
+  active.growth = growth;
+  store.set("petGrowth", growth);
+  writeRoster(roster);
 }
 
 function petsById(): Record<PetId, PetInstance> {
@@ -733,18 +752,7 @@ function readDiary(): PetDiary {
 
 function readGrowth(): PetGrowth {
   const stored = store.get("petGrowth") as Partial<PetGrowth> | undefined;
-  if (stored && typeof stored.bornAt === "number") {
-    return {
-      bornAt: stored.bornAt,
-      totalInteractions: stored.totalInteractions ?? 0,
-      lastMilestone: stored.lastMilestone ?? null
-    };
-  }
-  return {
-    bornAt: Date.now(),
-    totalInteractions: 0,
-    lastMilestone: null
-  };
+  return normalizeGrowth(stored, Date.now());
 }
 
 // Easter egg stats: counters + last-visit timestamp + which eggs
@@ -874,28 +882,69 @@ function recordVisitAndMaybeGreet(): void {
   writePetStats({ ...stats, lastVisitAt: now });
 }
 
-const MILESTONE_THRESHOLDS = [10, 50, 100, 250, 500, 1000];
-
 function bumpInteraction(): void {
   const current = readGrowth();
-  const nextCount = current.totalInteractions + 1;
-  const milestone = MILESTONE_THRESHOLDS.find(
-    (threshold) => nextCount >= threshold && current.lastMilestone !== `interactions-${threshold}`
-  );
-  const lastMilestone = milestone ? `interactions-${milestone}` : current.lastMilestone;
-  store.set("petGrowth", {
-    bornAt: current.bornAt,
-    totalInteractions: nextCount,
-    lastMilestone
-  });
-  if (milestone) {
-    showBubble({
-      id: "milestone",
-      message: pick(text().bubble.woof),
-      autoDismissMs: 2200
-    });
-  }
+  store.set("petGrowth", { ...current, totalInteractions: current.totalInteractions + 1 });
+  advanceGrowthAndCelebrate();
+}
+
+/**
+ * Heart of the growth system: compare the pet's whole picture (days spent
+ * together, lifetime interactions, lifetime health behaviour) against what has
+ * already been recorded, unlock anything new, raise the companion stage when
+ * requirements are met, then celebrate — unless we are in the middle of a
+ * reminder flow, where achievements stay quiet (they surface via the settings
+ * panel instead and celebrate on the next calm interaction).
+ */
+function advanceGrowthAndCelebrate(): void {
+  const growth = readGrowth();
+  const now = Date.now();
+  const totals = healthTotals(getStats(), getStatsHistory(store));
+  const eligible = eligibleMilestoneIds(growth, totals, now);
+  const unlocked = new Set(growth.milestones.map((m) => m.id));
+  const freshIds = eligible.filter((id) => !unlocked.has(id));
+  const nextStage = stageFor(daysKnown(growth.bornAt, now), growth.totalInteractions);
+  const stageUp = stageRank(nextStage) > stageRank(growth.stage);
+  if (!stageUp && freshIds.length === 0) return;
+
+  const interactionIds = freshIds.filter((id) => id.startsWith("interactions-"));
+  const next: PetGrowth = {
+    ...growth,
+    stage: stageUp ? nextStage : growth.stage,
+    stageChangedAt: stageUp ? now : growth.stageChangedAt,
+    milestones: [
+      ...growth.milestones,
+      ...freshIds.map((id) => ({ id, kind: kindOfMilestone(id), unlockedAt: now }))
+    ],
+    lastMilestone:
+      interactionIds.length > 0
+        ? interactionIds[interactionIds.length - 1]
+        : growth.lastMilestone
+  };
+  store.set("petGrowth", next);
   publishSnapshot();
+
+  if (stageUp) logStageUpDiary(next);
+  celebrateGrowth(next, { stageUp, freshIds });
+}
+
+function logStageUpDiary(growth: PetGrowth): void {
+  const copy = text().settings;
+  const stageName = copy.growthStageName[growth.stage];
+  const body = copy.growthDiaryStageUp(stageName);
+  logDiaryForPet(readRoster().activePetId, body, "fallback");
+}
+
+function celebrateGrowth(growth: PetGrowth, event: { stageUp: boolean; freshIds: string[] }): void {
+  if (blockingMode || focusActive) return; // busy moments stay quiet
+  const language = getSettings().language;
+  const label = petAppearanceLabel(getSettings().petAppearanceId, language);
+  const copy = text().settings;
+  const message = event.stageUp
+    ? pick(copy.growthStageUpBubbles[growth.stage]).replace("{label}", label)
+    : pick(copy.growthMilestoneBubbles).replace("{label}", label);
+  hideBubble();
+  showBubble({ id: "growth-celebration", message, autoDismissMs: 4600 });
 }
 
 let updateCheck: UpdateCheckResult = createInitialUpdateCheck();
@@ -1529,6 +1578,7 @@ function finishBreakRun(): void {
       if (showOverdueReminder()) return;
       hideBubble();
       setPetState("idle");
+      advanceGrowthAndCelebrate();
     }
   }, 2300);
   publishSnapshot();
@@ -2095,6 +2145,7 @@ function stopFocusMode(completed: boolean): void {
       if (showOverdueReminder()) return;
       hideBubble();
       setPetState("idle");
+      advanceGrowthAndCelebrate();
     }
   }, 2900);
   updateTrayMenu();
@@ -2154,6 +2205,7 @@ function handleBubbleAction(actionId: string): void {
         if (showOverdueReminder()) return;
         hideBubble();
         setPetState(focusActive ? "focusGuard" : "idle");
+        advanceGrowthAndCelebrate();
       }, 1900);
     }, 2400);
     return;

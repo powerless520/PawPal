@@ -195,6 +195,45 @@ export const I18N = {
       growthAgeDays: (n: number) => `已陪伴 ${n} 天`,
       growthAgeDaysOne: "刚出生",
       growthInteractions: (n: number) => `互动 ${n} 次`,
+      growthStageName: {
+        acquaintance: "初遇",
+        companion: "伙伴",
+        closeFriend: "好友",
+        soulmate: "挚友"
+      },
+      growthStageDesc: {
+        acquaintance: "刚遇见的小家伙，多陪陪它，它会慢慢熟悉你。",
+        companion: "它开始信任你了，愿意安静地陪你工作学习。",
+        closeFriend: "你们越来越有默契，它总在你需要的时候出现。",
+        soulmate: "无需言语也心意相通，它早已是你生活的一部分。"
+      },
+      growthStageProgress: "成长进度",
+      growthNextStage: "下一阶段",
+      growthStageMax: "已到最高阶段",
+      growthStageDaysRemain: (n: number) => `再陪伴 ${n} 天`,
+      growthStageInteractionsRemain: (n: number) => `再互动 ${n} 次`,
+      growthStageNeedsDaysAndInteractions: (d: number, i: number) => `再陪伴 ${d} 天、互动 ${i} 次`,
+      growthMilestones: "成长足迹",
+      growthMilestoneCount: (n: number, total: number) => `已点亮 ${n}/${total} 枚`,
+      growthMilestoneAge: (d: number) => `陪伴满 ${d} 天`,
+      growthMilestoneInteractions: (c: number) => `累计互动 ${c} 次`,
+      growthMilestoneBreaks: (c: number) => `完成 ${c} 次休息`,
+      growthMilestoneWaters: (c: number) => `喝下 ${c} 杯水`,
+      growthMilestoneFocus: (m: number) => `专注累计 ${m} 分钟`,
+      growthUnlockedAt: "点亮于",
+      growthLocked: "尚未点亮",
+      growthStageUpBubbles: {
+        acquaintance: ["谢谢你遇见我！从今天起我会一直陪着你的~"],
+        companion: ["{label} 正式成为你的伙伴啦！以后多多关照！", "嘿嘿，{label} 交到好朋友了！"],
+        closeFriend: ["{label} 觉得我们已经是死党了！", "一起走过这么多天，我们是最好的朋友啦！"],
+        soulmate: ["{label} 和你在一起，是世界上最幸福的事。", "无需多言，我们早已心意相通~"]
+      },
+      growthMilestoneBubbles: [
+        "{label} 刚刚点亮了一枚成长足迹！",
+        "哇，{label} 又收集到一份新回忆！",
+        "一起经历了这么多，{label} 都记在小本本上啦~"
+      ],
+      growthDiaryStageUp: (name: string) => `今天我成为了你的「${name}」！谢谢你一直陪着我~`,
       moodChart: "心情曲线",
       moodChartHint: "过去 7 天每小时一次心情采样",
       backup: "备份与还原",
@@ -469,8 +508,7 @@ export const I18N = {
       ttsEnabledHelp: "When on, the pet's bubble text is read aloud in a real human voice",
       ttsRate: "Speech rate",
       easterEggsEnabled: "Easter eggs",
-      easterEggsEnabledHelp:
-        "When on, hidden interactions (rapid clicks, long-press, dragging a sleeping pet, etc.) trigger surprise bubbles",
+      easterEggsEnabledHelp: "When on, hidden interactions (rapid clicks, long-press, dragging a sleeping pet, etc.) trigger surprise bubbles",
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",
@@ -542,6 +580,46 @@ export const I18N = {
       growthAgeDays: (n: number) => `${n} day${n === 1 ? "" : "s"} together`,
       growthAgeDaysOne: "Brand new",
       growthInteractions: (n: number) => `${n} interactions`,
+      growthStageName: {
+        acquaintance: "New Friend",
+        companion: "Companion",
+        closeFriend: "Best Buddy",
+        soulmate: "Soulmate"
+      },
+      growthStageDesc: {
+        acquaintance: "A tiny newcomer — spend time together and it will warm up to you.",
+        companion: "It trusts you now and quietly keeps you company while you work.",
+        closeFriend: "You two are in sync; it always shows up right when you need it.",
+        soulmate: "Words aren't needed anymore — it's simply part of your life."
+      },
+      growthStageProgress: "Growth progress",
+      growthNextStage: "Next stage",
+      growthStageMax: "Highest stage reached",
+      growthStageDaysRemain: (n: number) => `${n} more day${n === 1 ? "" : "s"} together`,
+      growthStageInteractionsRemain: (n: number) => `${n} more interactions`,
+      growthStageNeedsDaysAndInteractions: (d: number, i: number) =>
+        `${d} more day${d === 1 ? "" : "s"} and ${i} interactions`,
+      growthMilestones: "Milestones",
+      growthMilestoneCount: (n: number, total: number) => `${n}/${total} unlocked`,
+      growthMilestoneAge: (d: number) => `${d} days together`,
+      growthMilestoneInteractions: (c: number) => `${c} interactions`,
+      growthMilestoneBreaks: (c: number) => `${c} breaks taken`,
+      growthMilestoneWaters: (c: number) => `${c} glasses of water`,
+      growthMilestoneFocus: (m: number) => `${m} focused minutes`,
+      growthUnlockedAt: "Unlocked on",
+      growthLocked: "Locked",
+      growthStageUpBubbles: {
+        acquaintance: ["Thanks for meeting me! I'll be right by your side from now on~"],
+        companion: ["{label} is officially your companion now!", "Hehe, {label} made a best friend!"],
+        closeFriend: ["{label} thinks we're inseparable now!", "After all these days, we're the best of friends!"],
+        soulmate: ["Being with you is the happiest thing for {label}.", "No words needed — our hearts already know~"]
+      },
+      growthMilestoneBubbles: [
+        "{label} just lit up a milestone!",
+        "Wow, {label} collected another memory!",
+        "{label} keeps a little notebook of everything we share~"
+      ],
+      growthDiaryStageUp: (name: string) => `Today I became your "${name}"! Thanks for always being with me~`,
       moodChart: "Mood history",
       moodChartHint: "Hourly mood samples over the past 7 days",
       backup: "Backup & restore",

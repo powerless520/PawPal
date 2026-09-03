@@ -68,6 +68,7 @@ export type PetInstance = {
   outfit: Outfit;
   bornAt: number;
   totalInteractions: number;
+  growth?: PetGrowth;
   transient: {
     state: PetState;
     facing: PetFacing;
@@ -98,6 +99,7 @@ export type Outfit = Partial<Record<OutfitPart, string>>;
 
 export type OutfitMode = "manual" | "seasonal";
 
+
 export type OutfitItem = {
   id: string;
   part: OutfitPart;
@@ -123,10 +125,23 @@ export type PetDiary = {
   entries: DiaryEntry[];
 };
 
+export type PetGrowthStage = "acquaintance" | "companion" | "closeFriend" | "soulmate";
+
+export type GrowthMilestoneKind = "interaction" | "age" | "health";
+
+export type GrowthMilestone = {
+  id: string;
+  kind: GrowthMilestoneKind;
+  unlockedAt: number;
+};
+
 export type PetGrowth = {
   bornAt: number;
   totalInteractions: number;
   lastMilestone: string | null;
+  stage: PetGrowthStage;
+  stageChangedAt: number | null;
+  milestones: GrowthMilestone[];
 };
 
 export type EasterEgg =
