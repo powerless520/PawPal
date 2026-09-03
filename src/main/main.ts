@@ -32,6 +32,7 @@ import {
   resolveBuiltInPetAppearanceId
 } from "../shared/petAppearances";
 import { OUTFIT_SLOTS, outfitItemById } from "../shared/outfits";
+import { nextHolidayEvent } from "../shared/holidays";
 import type {
   AppSnapshot,
   BlockingMode,
@@ -597,6 +598,25 @@ function cancelChatter(): void {
   }
 }
 
+let lastHolidayBubble = "";
+
+function maybeHolidayBubbleMessage(): string | null {
+  const now = new Date();
+  const s = getSettings();
+  const event = nextHolidayEvent(
+    now,
+    s.birthdayMonth ? { month: s.birthdayMonth, day: s.birthdayDay ?? 1 } : null
+  );
+  if (!event || event.daysUntil > 7) return null;
+  const stamp = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}:${event.key}`;
+  if (lastHolidayBubble === stamp) return null;
+  lastHolidayBubble = stamp;
+  const name = text().holidayNames[event.key];
+  return event.isToday
+    ? text().bubble.holidayToday(name)
+    : text().bubble.holidayCountdown(name, event.daysUntil);
+}
+
 function scheduleNextChatter(): void {
   cancelChatter();
   // Observer mode: the pet never initiates conversation on its own.
@@ -629,6 +649,15 @@ async function performChatter(): Promise<void> {
   const client = createAiClient(settings.aiProvider, settings.aiApiKey);
   let message: string;
   const hour = new Date().getHours();
+
+  // Festive heads-up: at most once per day, remind about a holiday within a
+  // week, or celebrate when today is one.
+  const holidayHint = maybeHolidayBubbleMessage();
+  if (holidayHint) {
+    showBubble({ id: "holiday-bubble", message: holidayHint, autoDismissMs: 4000 });
+    scheduleNextChatter();
+    return;
+  }
 
   if (client.isConfigured() && Math.random() < 0.5) {
     try {

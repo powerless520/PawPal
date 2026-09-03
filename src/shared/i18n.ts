@@ -73,7 +73,24 @@ export const I18N = {
       updateAvailable: [
         (version: string) => `发现新版本 ${version}，去看看更新吧`,
         (version: string) => `PawPal 有新版本 ${version} 啦`
-      ]
+      ],
+      holidayToday: (name: string) => `✨ 今天是 ${name}！`,
+      holidayCountdown: (name: string, days: number) => `还有 ${days} 天就到 ${name} 啦`
+    },
+    holidayNames: {
+      newYear: "元旦",
+      springFestival: "春节",
+      valentines: "情人节",
+      arborDay: "植树节",
+      easter: "复活节",
+      laborDay: "劳动节",
+      childrensDay: "儿童节",
+      midAutumn: "中秋",
+      nationalDay: "国庆节",
+      halloween: "万圣节",
+      thanksgiving: "感恩节",
+      christmas: "圣诞节",
+      birthday: "你的生日"
     },
     actions: {
       breakDone: "我站起来了",
@@ -132,6 +149,9 @@ export const I18N = {
       themeSakura: "樱花",
       observerMode: "观察者模式",
       observerModeHelp: "开启后宠物不主动搭话或游走，只在你点击、拖动或换装时回应",
+      nextHoliday: "下一个节日",
+      holidayTodayLabel: "就是今天！",
+      holidayIn: (name: string, days: number) => `${name} · ${days} 天后`,
       launchAtLoginHelp:
         "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
       about: "关于",
@@ -466,7 +486,24 @@ export const I18N = {
       updateAvailable: [
         (version: string) => `Version ${version} is available. Want to see what's new?`,
         (version: string) => `PawPal has a new version: ${version}.`
-      ]
+      ],
+      holidayToday: (name: string) => `✨ Today is ${name}!`,
+      holidayCountdown: (name: string, days: number) => `Only ${days} ${days === 1 ? "day" : "days"} until ${name}!`
+    },
+    holidayNames: {
+      newYear: "New Year's Day",
+      springFestival: "Spring Festival",
+      valentines: "Valentine's Day",
+      arborDay: "Arbor Day",
+      easter: "Easter",
+      laborDay: "Labor Day",
+      childrensDay: "Children's Day",
+      midAutumn: "Mid-Autumn Festival",
+      nationalDay: "National Day",
+      halloween: "Halloween",
+      thanksgiving: "Thanksgiving",
+      christmas: "Christmas",
+      birthday: "your birthday"
     },
     actions: {
       breakDone: "I stood up",
@@ -525,6 +562,9 @@ export const I18N = {
       themeSakura: "Sakura",
       observerMode: "Observer mode",
       observerModeHelp: "When on, the pet never chats or wanders on its own — it only responds to your clicks, drags and dress-ups",
+      nextHoliday: "Next holiday",
+      holidayTodayLabel: "It's today!",
+      holidayIn: (name: string, days: number) => `${name} · in ${days} ${days === 1 ? "day" : "days"}`,
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",

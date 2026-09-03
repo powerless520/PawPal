@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent, JSX, ReactNode } from "react";
 import { i18n, LANGUAGE_OPTIONS, resolveLanguage } from "../../../shared/i18n";
+import { nextHolidayEvent } from "../../../shared/holidays";
 import { OUTFIT_SLOTS, seasonalOutfitForDate, seasonalOutfitsForDate } from "../../../shared/outfits";
 import {
   hasRequiredCustomPetAssets,
@@ -1143,6 +1144,16 @@ export function SettingsView(): JSX.Element {
   const language = resolveLanguage(draft.language);
   const labels = i18n(language).settings;
   const customPetReady = hasRequiredCustomPetAssets(draft.customPetAppearance);
+  const holidayNames = i18n(language).holidayNames;
+  const nextEvent = nextHolidayEvent(
+    new Date(),
+    draft.birthdayMonth ? { month: draft.birthdayMonth, day: draft.birthdayDay ?? 1 } : null
+  );
+  const holidayDisplay = nextEvent
+    ? nextEvent.isToday
+      ? `${labels.holidayTodayLabel} · ${holidayNames[nextEvent.key]}`
+      : labels.holidayIn(holidayNames[nextEvent.key], nextEvent.daysUntil)
+    : null;
   const navSections = [
     { id: "pref-appearance", label: labels.appearance },
     { id: "pref-outfit", label: labels.outfit },
@@ -1376,6 +1387,12 @@ export function SettingsView(): JSX.Element {
 
       <section id="pref-reminders" className="prefs__group">
         <h2 className="prefs__group-title">{labels.reminders}</h2>
+        {holidayDisplay ? (
+          <Row
+            label={labels.nextHoliday}
+            control={<span className="pref-static-value">{holidayDisplay}</span>}
+          />
+        ) : null}
         <Row
           label={labels.enableBreakReminder}
           control={
