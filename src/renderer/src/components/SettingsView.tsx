@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { DragEvent, JSX, ReactNode } from "react";
+import type { DragEvent, JSX, KeyboardEvent, ReactNode } from "react";
 import { i18n, LANGUAGE_OPTIONS, resolveLanguage } from "../../../shared/i18n";
 import { nextHolidayEvent } from "../../../shared/holidays";
 import { OUTFIT_SLOTS, seasonalOutfitForDate, seasonalOutfitsForDate } from "../../../shared/outfits";
@@ -16,6 +16,7 @@ import type {
   CustomPetAppearance,
   CustomPetAsset,
   DemoTrigger,
+  DiaryEntry,
   MoodSample,
   PetGrowth,
   PetMood,
@@ -753,6 +754,11 @@ function GrowthPanel({
   );
 }
 
+type DiaryPage =
+  | { kind: "cover"; petName: string; count: number }
+  | { kind: "entry"; entry: DiaryEntry }
+  | { kind: "back" };
+
 function DiaryPanel({
   labels,
   sectionId,
@@ -764,6 +770,37 @@ function DiaryPanel({
 }): JSX.Element {
   const snapshot = useSnapshot();
   const [generating, setGenerating] = useState(false);
+  const [page, setPage] = useState(0);
+  const [flip, setFlip] = useState<"next" | "prev" | null>(null);
+
+  const roster = snapshot.petRoster;
+  const activeId = roster?.activePetId ?? snapshot.activePetId;
+  const petName =
+    roster?.pets.find((p) => p.id === activeId)?.label ??
+    snapshot.pets[activeId]?.label ??
+    "";
+
+  const entries = useMemo(() => snapshot.petDiary?.entries ?? [], [snapshot.petDiary]);
+
+  const pages = useMemo<DiaryPage[]>(() => {
+    const list: DiaryPage[] = [
+      { kind: "cover", petName, count: entries.length }
+    ];
+    for (const entry of entries) list.push({ kind: "entry", entry });
+    list.push({ kind: "back" });
+    return list;
+  }, [entries, petName]);
+
+  const lastPage = pages.length - 1;
+  const safePage = Math.min(page, lastPage);
+  const flipping = flip !== null;
+  const visibleIndex =
+    flip === "next" ? safePage + 1 : flip === "prev" ? safePage - 1 : safePage;
+
+  useEffect(() => {
+    setPage(0);
+    setFlip(null);
+  }, [entries.length]);
 
   async function handleGenerate(): Promise<void> {
     setGenerating(true);
@@ -774,7 +811,96 @@ function DiaryPanel({
     }
   }
 
-  const entries = snapshot.petDiary?.entries ?? [];
+  function flipTo(next: boolean): void {
+    if (flipping) return;
+    const target = next ? safePage + 1 : safePage - 1;
+    if (target < 0 || target > lastPage) return;
+    setFlip(next ? "next" : "prev");
+  }
+
+  function jumpTo(target: number): void {
+    if (flipping || target < 0 || target > lastPage) return;
+    setPage(target);
+  }
+
+  function endFlip(): void {
+    setPage((current) => {
+      if (flip === "next") return Math.min(lastPage, current + 1);
+      if (flip === "prev") return Math.max(0, current - 1);
+      return current;
+    });
+    setFlip(null);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
+    if (event.key === "ArrowRight" || event.key === "PageDown") {
+      event.preventDefault();
+      flipTo(true);
+    } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
+      event.preventDefault();
+      flipTo(false);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      jumpTo(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      jumpTo(lastPage);
+    }
+  }
+
+  function renderPage(index: number): JSX.Element {
+    const item = pages[index];
+    let tone = "entry";
+    let content: JSX.Element;
+    if (item.kind === "cover") {
+      tone = "cover";
+      content = (
+        <div className="diary-book__cover">
+          <div className="diary-book__coverFrame">
+            <p className="diary-book__coverEyebrow">{labels.diary}</p>
+            <h3 className="diary-book__coverTitle">{labels.diaryCoverTitle(item.petName)}</h3>
+            <p className="diary-book__coverCount">{labels.diaryCoverCount(item.count)}</p>
+          </div>
+        </div>
+      );
+    } else if (item.kind === "back") {
+      tone = "back";
+      content = (
+        <div className="diary-book__back">
+          <p className="diary-book__backTitle">{labels.diaryBackCover}</p>
+          <p className="diary-book__backHint">{labels.diaryBackHint}</p>
+        </div>
+      );
+    } else {
+      const entry = item.entry;
+      content = (
+        <>
+          <header className="diary-entry__meta diary-book__meta">
+            <span className="diary-entry__date">{entry.date}</span>
+            <span
+              className={`diary-entry__source diary-entry__source--${entry.source}`}
+            >
+              {entry.source === "ai" ? labels.diarySourceAi : labels.diarySourceFallback}
+            </span>
+            <button
+              type="button"
+              className="diary-listen"
+              aria-label={labels.diaryPlay}
+              title={labels.diaryPlay}
+              disabled={!ttsEnabled}
+              onClick={() => window.pawpal.speakText(entry.body)}
+            >
+              🔊
+            </button>
+          </header>
+          <p className="diary-entry__body diary-book__body">{entry.body}</p>
+        </>
+      );
+    }
+    return (
+      <div className={`diary-book__page diary-book__page--${tone}`}>{content}</div>
+    );
+  }
 
   return (
     <section id={sectionId} className="prefs__group">
@@ -795,30 +921,69 @@ function DiaryPanel({
       {entries.length === 0 ? (
         <p className="pref-hint">{labels.diaryEmpty}</p>
       ) : (
-        <div className="diary-list">
-          {entries.map((entry) => (
-            <article key={entry.date} className="diary-entry">
-              <header className="diary-entry__meta">
-                <span className="diary-entry__date">{entry.date}</span>
-                <span
-                  className={`diary-entry__source diary-entry__source--${entry.source}`}
-                >
-                  {entry.source === "ai" ? labels.diarySourceAi : labels.diarySourceFallback}
-                </span>
-                <button
-                  type="button"
-                  className="diary-listen"
-                  aria-label={labels.diaryPlay}
-                  title={labels.diaryPlay}
-                  disabled={!ttsEnabled}
-                  onClick={() => window.pawpal.speakText(entry.body)}
-                >
-                  🔊
-                </button>
-              </header>
-              <p className="diary-entry__body">{entry.body}</p>
-            </article>
-          ))}
+        <div
+          className="diary-book"
+          role="region"
+          aria-label={labels.diary}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+        >
+          <div className="diary-book__stage">
+            {flip !== null && (
+              <div
+                className={`diary-book__flip diary-book__flip--${flip}`}
+                aria-hidden="true"
+                onAnimationEnd={endFlip}
+              >
+                <div className="diary-book__face">{renderPage(safePage)}</div>
+                <div className="diary-book__face diary-book__face--back">
+                  {renderPage(safePage)}
+                </div>
+              </div>
+            )}
+            {renderPage(visibleIndex)}
+          </div>
+          <div className="diary-book__bar">
+            <button
+              type="button"
+              className="diary-book__arrow"
+              aria-label={labels.diaryPrev}
+              title={labels.diaryPrev}
+              disabled={safePage === 0 || flipping}
+              onClick={() => flipTo(false)}
+            >
+              ←
+            </button>
+            {pages.length <= 13 ? (
+              <div className="diary-book__dots">
+                {pages.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    className={`diary-book__dot${index === safePage ? " is-on" : ""}`}
+                    aria-label={`${index + 1} / ${pages.length}`}
+                    title={`${index + 1} / ${pages.length}`}
+                    onClick={() => jumpTo(index)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <span className="diary-book__count" aria-live="polite">
+                {safePage + 1} / {pages.length}
+              </span>
+            )}
+            <button
+              type="button"
+              className="diary-book__arrow"
+              aria-label={labels.diaryNext}
+              title={labels.diaryNext}
+              disabled={safePage === lastPage || flipping}
+              onClick={() => flipTo(true)}
+            >
+              →
+            </button>
+          </div>
+          <p className="diary-book__hint">{labels.diaryTurnHint}</p>
         </div>
       )}
     </section>
