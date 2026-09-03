@@ -1352,6 +1352,31 @@ export function SettingsView(): JSX.Element {
             />
           }
         />
+        <Row
+          label={labels.ttsEnabled}
+          hint={labels.ttsEnabledHelp}
+          control={
+            <ToggleControl
+              checked={draft.ttsEnabled}
+              onChange={(ttsEnabled) => updateDraft({ ttsEnabled })}
+              ariaLabel={labels.ttsEnabled}
+            />
+          }
+        />
+        {draft.ttsEnabled ? (
+          <Row
+            label={labels.ttsRate}
+            control={
+              <NumberControl
+                value={draft.ttsRate}
+                min={0.5}
+                max={2}
+                unit="x"
+                onChange={(ttsRate) => updateDraft({ ttsRate })}
+              />
+            }
+          />
+        ) : null}
         {/* Local-only fork: update-check toggle removed (always off). */}
       </section>
 

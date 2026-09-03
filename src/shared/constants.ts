@@ -20,6 +20,10 @@ export const DEFAULT_SETTINGS: Settings = {
   outfit: {},
   outfitMode: "seasonal",
   soundEnabled: true,
+  ttsEnabled: true,
+  ttsRate: 1,
+  ttsVoice: null,
+  easterEggsEnabled: true,
   birthdayMonth: null,
   birthdayDay: null,
   distractionBlockedApps: [

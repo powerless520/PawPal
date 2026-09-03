@@ -80,6 +80,7 @@ import { applyLaunchAtLoginPreference, getLaunchAtLoginState } from "./loginItem
 import { createAiClient } from "./aiClient";
 import { appendDiary, composeDiaryEntry, emptyDiary } from "./diary";
 import { playSound } from "./soundPlayer";
+import { speak, stopSpeaking } from "./ttsPlayer";
 import {
   buildApplicationMenuTemplate,
   buildPetContextMenuTemplate,
@@ -927,7 +928,17 @@ function setPetFacing(next: PetFacing): void {
 
 function showBubble(bubble: SpeechBubble): void {
   if (bubbleTimer) clearTimeout(bubbleTimer);
+  stopSpeaking();
   sendToPet("pet:show-bubble", bubble);
+  // TTS: only for bubbles without action buttons (so reminder
+  // prompts with CTAs are not voice-narrated twice) and only when
+  // explicitly enabled in settings.
+  if (!bubble.actions?.length) {
+    const settings = getSettings();
+    if (settings.ttsEnabled) {
+      speak(bubble.message, { voice: settings.ttsVoice, rate: settings.ttsRate });
+    }
+  }
   if (bubble.autoDismissMs) {
     bubbleTimer = setTimeout(() => hideBubble(), bubble.autoDismissMs);
   }
@@ -938,6 +949,7 @@ function hideBubble(): void {
     clearTimeout(bubbleTimer);
     bubbleTimer = null;
   }
+  stopSpeaking();
   sendToPet("pet:hide-bubble");
 }
 

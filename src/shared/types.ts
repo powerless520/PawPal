@@ -178,6 +178,10 @@ export type Settings = {
   outfit: Outfit;
   outfitMode: OutfitMode;
   soundEnabled: boolean;
+  ttsEnabled: boolean;
+  ttsRate: number;
+  ttsVoice: string | null;
+  easterEggsEnabled: boolean;
   birthdayMonth: number | null;
   birthdayDay: number | null;
 };
