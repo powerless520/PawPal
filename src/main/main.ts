@@ -7,6 +7,7 @@ import {
   BrowserWindow,
   clipboard,
   dialog,
+  globalShortcut,
   ipcMain,
   Menu,
   nativeImage,
@@ -1385,6 +1386,45 @@ function togglePetWindowVisibility(): void {
   else showPetWindowFromMenu();
 }
 
+function toggleFocusModeFromShortcut(): void {
+  if (focusActive) stopFocusMode(true);
+  else startFocusMode();
+}
+
+// R8/T2.5: global shortcuts. Registered while the app runs so the pet can
+// be summoned from any app. Each registration may fail silently when the
+// combination is already claimed by the OS or another app; we log a warning
+// instead of breaking startup, and unregister everything on quit.
+function registerGlobalShortcuts(): void {
+  const shortcuts: Array<{ accelerator: string; description: string; action: () => void }> = [
+    {
+      accelerator: "CommandOrControl+Shift+P",
+      description: "toggle pet visibility",
+      action: togglePetWindowVisibility
+    },
+    {
+      accelerator: "CommandOrControl+Shift+C",
+      description: "open chat window",
+      action: createChatWindow
+    },
+    {
+      accelerator: "CommandOrControl+Shift+F",
+      description: "toggle focus mode",
+      action: toggleFocusModeFromShortcut
+    }
+  ];
+  for (const shortcut of shortcuts) {
+    try {
+      const ok = globalShortcut.register(shortcut.accelerator, shortcut.action);
+      if (!ok) {
+        console.warn(`[shortcut] not registered (already in use): ${shortcut.accelerator} (${shortcut.description})`);
+      }
+    } catch (error) {
+      console.warn(`[shortcut] registration error for ${shortcut.accelerator} (${shortcut.description})`, error);
+    }
+  }
+}
+
 function hidePetWindowFromMenu(): void {
   setPetHiddenByUser(true);
   petWindow?.hide();
@@ -2576,6 +2616,7 @@ app.whenReady().then(() => {
   registerIpc();
   createPetWindow();
   createTray();
+  registerGlobalShortcuts();
   registerDisplayChangeHandlers();
   scheduleReminderTimers();
   scheduleDistractionDetection();
@@ -2613,6 +2654,7 @@ app.on("before-quit", () => {
   ]) {
     if (timer) clearTimeout(timer);
   }
+  globalShortcut.unregisterAll();
 });
 
 app.on("window-all-closed", () => {

@@ -106,6 +106,7 @@ export const I18N = {
       petActionShy: "害羞",
       petActionYawn: "打哈欠",
       resetToday: "重置今日",
+      shortcutsHint: "快捷键：⇧⌘P 显隐宠物 · ⇧⌘C 聊天 · ⇧⌘F 专注",
       quit: "退出"
     },
     settings: {
@@ -496,6 +497,7 @@ export const I18N = {
       petActionShy: "Shy",
       petActionYawn: "Yawn",
       resetToday: "Reset Today",
+      shortcutsHint: "Shortcuts: ⇧⌘P show/hide pet · ⇧⌘C chat · ⇧⌘F focus",
       quit: "Quit"
     },
     settings: {

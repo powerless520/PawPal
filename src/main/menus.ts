@@ -109,6 +109,8 @@ export function buildPetContextMenuTemplate(
   actions: MenuActions
 ): Electron.MenuItemConstructorOptions[] {
   return [
+    { label: labels.shortcutsHint, enabled: false },
+    { type: "separator" },
     { label: labels.settings, click: actions.openSettings },
     {
       label: labels.chatWithPet,
