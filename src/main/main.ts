@@ -33,6 +33,7 @@ import {
 } from "../shared/petAppearances";
 import { OUTFIT_SLOTS, outfitItemById } from "../shared/outfits";
 import { nextHolidayEvent } from "../shared/holidays";
+import { timeAwareKind, type TimeAwareKind } from "../shared/timeaware";
 import type {
   AppSnapshot,
   BlockingMode,
@@ -599,6 +600,7 @@ function cancelChatter(): void {
 }
 
 let lastHolidayBubble = "";
+let lastTimeCheckAt = 0;
 
 function maybeHolidayBubbleMessage(): string | null {
   const now = new Date();
@@ -615,6 +617,28 @@ function maybeHolidayBubbleMessage(): string | null {
   return event.isToday
     ? text().bubble.holidayToday(name)
     : text().bubble.holidayCountdown(name, event.daysUntil);
+}
+
+function timeBubbleMessage(kind: TimeAwareKind, hour: number): string | null {
+  const pool = text().bubble;
+  switch (kind) {
+    case "fridayEvening":
+      return pick(pool.timeFridayEvening);
+    case "lateNight":
+      return pick(pool.timeLateNight);
+    case "morning":
+      return pick(pool.timeMorning);
+    case "noon":
+      return pick(pool.timeNoon);
+    case "evening":
+      return pick(pool.timeEvening);
+    case "weekend":
+      return pick(pool.timeWeekend);
+    case "timeNow":
+      return pick(pool.timeNow)(hour);
+    case "chatter":
+      return pick(pool.timeChatter);
+  }
 }
 
 function scheduleNextChatter(): void {
@@ -657,6 +681,20 @@ async function performChatter(): Promise<void> {
     showBubble({ id: "holiday-bubble", message: holidayHint, autoDismissMs: 4000 });
     scheduleNextChatter();
     return;
+  }
+
+  // Time-aware heads-up: roughly every 30-60 idle minutes the pet "checks the
+  // clock" and says a time-appropriate phrase instead of idle chatter.
+  const timeNowMs = Date.now();
+  if (timeNowMs - lastTimeCheckAt >= 30 * 60_000 + Math.random() * 30 * 60_000) {
+    const now = new Date(timeNowMs);
+    const timeMessage = timeBubbleMessage(timeAwareKind(now), now.getHours());
+    if (timeMessage) {
+      lastTimeCheckAt = timeNowMs;
+      showBubble({ id: "time-aware", message: timeMessage, autoDismissMs: 3500 });
+      scheduleNextChatter();
+      return;
+    }
   }
 
   if (client.isConfigured() && Math.random() < 0.5) {

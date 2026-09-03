@@ -13,6 +13,24 @@ export function pick<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+function zhHourWord(hour: number): string {
+  let period: string;
+  if (hour >= 22) period = "深夜";
+  else if (hour < 5) period = "凌晨";
+  else if (hour < 12) period = "上午";
+  else if (hour < 14) period = "中午";
+  else if (hour < 18) period = "下午";
+  else period = "晚上";
+  let display = hour % 12;
+  if (display === 0) display = hour === 0 ? 0 : 12;
+  return `${period}${display}点`;
+}
+
+function enHourWord(hour: number): string {
+  const display = hour % 12 === 0 ? 12 : hour % 12;
+  return `${display} ${hour < 12 ? "AM" : "PM"}`;
+}
+
 export const I18N = {
   "zh-CN": {
     bubble: {
@@ -75,7 +93,18 @@ export const I18N = {
         (version: string) => `PawPal 有新版本 ${version} 啦`
       ],
       holidayToday: (name: string) => `✨ 今天是 ${name}！`,
-      holidayCountdown: (name: string, days: number) => `还有 ${days} 天就到 ${name} 啦`
+      holidayCountdown: (name: string, days: number) => `还有 ${days} 天就到 ${name} 啦`,
+      timeFridayEvening: ["周五啦！下班！", "耶！周五到了，周末在招手~"],
+      timeLateNight: ["夜深啦……早点睡吧", "都这么晚了，主人要好好休息哦", "哈欠……该睡觉啦~"],
+      timeMorning: ["早呀！新的一天开始啦~", "早上好，今天也一起加油哦", "太阳出来啦~早安！"],
+      timeNoon: ["中午啦，记得好好吃饭哦", "该吃午饭啦！我也想吃点~", "午休一下嘛，别太累啦"],
+      timeEvening: ["傍晚啦，今天辛苦啦", "晚上好呀，今天过得怎么样？", "下班时间~去放松一下吧"],
+      timeWeekend: ["周末啦，要不要出去走走呀？", "难得的休息日，一起窝着吧~", "周末好呀！"],
+      timeChatter: ["嘀嗒嘀嗒……又陪你待了一会儿~", "时间过得好快呀", "一晃又过了好久，来看看你~"],
+      timeNow: [
+        (hour: number) => `已经${zhHourWord(hour)}了~`,
+        (hour: number) => `看看表……${zhHourWord(hour)}啦`
+      ]
     },
     holidayNames: {
       newYear: "元旦",
@@ -496,7 +525,18 @@ export const I18N = {
         (version: string) => `PawPal has a new version: ${version}.`
       ],
       holidayToday: (name: string) => `✨ Today is ${name}!`,
-      holidayCountdown: (name: string, days: number) => `Only ${days} ${days === 1 ? "day" : "days"} until ${name}!`
+      holidayCountdown: (name: string, days: number) => `Only ${days} ${days === 1 ? "day" : "days"} until ${name}!`,
+      timeFridayEvening: ["It's Friday! Log off~", "Yay, Friday! Weekend's on its way~"],
+      timeLateNight: ["It's late… off to bed soon, okay?", "So late! Rest well, my human~", "*yawn* …bedtime~"],
+      timeMorning: ["Morning! A new day begins~", "Good morning! You got this today", "Sun's up~ Good morning!"],
+      timeNoon: ["It's noon — don't skip lunch!", "Lunchtime! I wouldn't mind a snack~", "Take a midday break~"],
+      timeEvening: ["Evening! You worked hard today", "Good evening! How was your day?", "After work~ go relax a bit"],
+      timeWeekend: ["Weekend! Wanna go out for a bit?", "A rare day off — let's just snuggle in~", "Happy weekend!"],
+      timeChatter: ["Tick tock… been hanging out with you a while~", "Time flies, huh?", "Been a while — just checking on you~"],
+      timeNow: [
+        (hour: number) => `It's ${enHourWord(hour)} already~`,
+        (hour: number) => `*checks clock* ${enHourWord(hour)} already!`
+      ]
     },
     holidayNames: {
       newYear: "New Year's Day",
