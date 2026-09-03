@@ -19,6 +19,7 @@ import {
 } from "electron";
 import Store from "electron-store";
 import {
+  createEmptyPetStats,
   createEmptyStats,
   DEFAULT_SETTINGS
 } from "../shared/constants";
@@ -40,11 +41,14 @@ import type {
   Language,
   PetAppearanceId,
   PetAction,
+  EasterEgg,
   MoodHistory,
   MoodSample,
   OutfitItem,
   OutfitPart,
   PetDiary,
+  PetReactPayload,
+  PetStats,
   PetFacing,
   PetGrowth,
   PetId,
@@ -745,6 +749,133 @@ function readGrowth(): PetGrowth {
   };
 }
 
+// Easter egg stats: counters + last-visit timestamp + which eggs
+// have already been seen. Persisted in electron-store so the user
+// gets credit even after restarting the app.
+const PET_STATS_KEY = "petStats";
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const LATE_NIGHT_START_HOUR = 3;
+const LATE_NIGHT_END_HOUR = 5;
+
+function readPetStats(): PetStats {
+  const stored = store.get(PET_STATS_KEY) as Partial<PetStats> | undefined;
+  if (stored && typeof stored.totalClicks === "number") {
+    return {
+      totalClicks: stored.totalClicks ?? 0,
+      totalDrags: stored.totalDrags ?? 0,
+      totalRightClicks: stored.totalRightClicks ?? 0,
+      longestLongPressMs: stored.longestLongPressMs ?? 0,
+      lastVisitAt: stored.lastVisitAt ?? null,
+      seenEasterEggs: Array.isArray(stored.seenEasterEggs) ? stored.seenEasterEggs as EasterEgg[] : []
+    };
+  }
+  return createEmptyPetStats();
+}
+
+function writePetStats(stats: PetStats): void {
+  store.set(PET_STATS_KEY, stats);
+}
+
+function fireEasterEgg(egg: EasterEgg, bubble: Omit<SpeechBubble, "id">): void {
+  const stats = readPetStats();
+  if (stats.seenEasterEggs.includes(egg)) return;
+  if (!getSettings().easterEggsEnabled) return;
+  writePetStats({ ...stats, seenEasterEggs: [...stats.seenEasterEggs, egg] });
+  showBubble({ id: `egg-${egg}`, ...bubble });
+}
+
+function recordClick(): void {
+  const stats = readPetStats();
+  const next: PetStats = { ...stats, totalClicks: stats.totalClicks + 1 };
+  writePetStats(next);
+  // 5-click combo (within 5 seconds of the previous click)
+  // 100 / 500 lifetime milestones
+  if (next.totalClicks === 5) {
+    fireEasterEgg("click5", {
+      message: "🎉 五连击！手感不错~",
+      autoDismissMs: 2500
+    });
+  } else if (next.totalClicks === 100) {
+    fireEasterEgg("click100", {
+      message: "哇！被点了 100 次啦！你是有多喜欢我~",
+      autoDismissMs: 3000
+    });
+  } else if (next.totalClicks === 500) {
+    fireEasterEgg("click500", {
+      message: "500 次了！我已经习惯了你的指尖温度~",
+      autoDismissMs: 3500
+    });
+  }
+}
+
+function recordRightClick(): void {
+  const stats = readPetStats();
+  const next: PetStats = { ...stats, totalRightClicks: stats.totalRightClicks + 1 };
+  writePetStats(next);
+  if (next.totalRightClicks === 50) {
+    fireEasterEgg("rightClick50", {
+      message: "右键点了 50 次啦~ 你是想找什么彩蛋吗？",
+      autoDismissMs: 3000
+    });
+  }
+}
+
+function recordLongPress(durationMs: number): void {
+  const stats = readPetStats();
+  const longest = Math.max(stats.longestLongPressMs, durationMs);
+  const next: PetStats = { ...stats, longestLongPressMs: longest };
+  writePetStats(next);
+  if (longest >= 10_000 && longest < 12_000) {
+    fireEasterEgg("longPress10s", {
+      message: "你按了 10 秒…我都要睡着了…ZZZ",
+      autoDismissMs: 3500
+    });
+    setPetState("sleeping");
+  }
+}
+
+function recordDragWhileSleeping(): void {
+  // 'wakeByDrag' fires once per session the first time the user
+  // drags the pet while it is in the sleeping state.
+  fireEasterEgg("wakeByDrag", {
+    message: "唔…再睡一会儿嘛…(揉眼睛)",
+    autoDismissMs: 2500
+  });
+}
+
+function recordPetCount(count: number): void {
+  if (count >= 3) {
+    fireEasterEgg("threePets", {
+      message: "🎉 你现在有 3 只宠物啦！小族群成立！",
+      autoDismissMs: 3500
+    });
+  }
+}
+
+function recordVisitAndMaybeGreet(): void {
+  const stats = readPetStats();
+  const now = Date.now();
+  const last = stats.lastVisitAt;
+  if (last !== null && now - last >= ONE_WEEK_MS) {
+    fireEasterEgg("comeback", {
+      message: "你终于回来啦！想你了~",
+      autoDismissMs: 3500
+    });
+  }
+  // Late-night nudge: 3-5am and we haven't greeted this hour yet
+  const hour = new Date().getHours();
+  if (hour >= LATE_NIGHT_START_HOUR && hour < LATE_NIGHT_END_HOUR) {
+    const greetedThisHour = stats.seenEasterEggs.includes("lateNight");
+    if (!greetedThisHour) {
+      fireEasterEgg("lateNight", {
+        message: "主人…该睡觉了哦…(打哈欠)",
+        autoDismissMs: 3000
+      });
+    }
+  }
+  writePetStats({ ...stats, lastVisitAt: now });
+}
+
 const MILESTONE_THRESHOLDS = [10, 50, 100, 250, 500, 1000];
 
 function bumpInteraction(): void {
@@ -886,6 +1017,7 @@ function snapshot(): AppSnapshot {
     petDiary: readDiary(),
     petGrowth: readGrowth(),
     petMoodHistory: readMoodHistory(),
+    petStats: readPetStats(),
     blockingMode,
     dogVisible: Boolean(petWindow?.isVisible()),
     focusActive
@@ -1271,6 +1403,7 @@ function movePetWithCursor(): void {
 
 function startPetDrag(offset: { offsetX: number; offsetY: number }): void {
   if (blockingMode === "breakRun" || !petWindow || petWindow.isDestroyed()) return;
+  if (petState === "sleeping") recordDragWhileSleeping();
   cancelWander();
   dragOffset = {
     x: Math.min(Math.max(Math.round(offset.offsetX), 0), PET_WINDOW.width),
@@ -1702,15 +1835,15 @@ function schedulePetReactionRevert(delayMs: number, returnState: PetState): void
   }, delayMs);
 }
 
-function petReact(reaction: PetReaction, holding: boolean): void {
+function petReact(payload: PetReactPayload): void {
   if (blockingMode) return;
   const returnState = focusActive ? "focusGuard" : "idle";
   const soundOn = getSettings().soundEnabled;
-  if (reaction === "single") playSound("click", soundOn);
-  if (reaction === "longPress" && holding) playSound("petted", soundOn);
-  if (reaction === "double") playSound("happy", soundOn);
+  if (payload.reaction === "single") playSound("click", soundOn);
+  if (payload.reaction === "longPress" && payload.holding) playSound("petted", soundOn);
+  if (payload.reaction === "double") playSound("happy", soundOn);
 
-  switch (reaction) {
+  switch (payload.reaction) {
     case "single":
     case "double":
       lastInteractionAt = Date.now();
@@ -1721,21 +1854,25 @@ function petReact(reaction: PetReaction, holding: boolean): void {
       scheduleNextChatter();
       break;
     case "longPress":
-      if (holding) {
+      if (payload.holding) {
         lastInteractionAt = Date.now();
         bumpInteraction();
         maybeWakeUp();
         refreshMood();
         scheduleNextWander();
         scheduleNextChatter();
+        if (typeof payload.durationMs === "number") {
+          recordLongPress(payload.durationMs);
+        }
       }
       break;
   }
 
-  switch (reaction) {
+  switch (payload.reaction) {
     case "single":
       cancelPetReactionRevert();
       setPetState("happy");
+      recordClick();
       showBubble({
         id: "pet-react-single",
         message: pick(text().bubble.singleClick),
@@ -1746,6 +1883,7 @@ function petReact(reaction: PetReaction, holding: boolean): void {
     case "double":
       cancelPetReactionRevert();
       setPetState("happy");
+      recordClick();
       showBubble({
         id: "pet-react-double",
         message: pick(text().bubble.doubleClick),
@@ -1754,7 +1892,7 @@ function petReact(reaction: PetReaction, holding: boolean): void {
       schedulePetReactionRevert(2100, returnState);
       break;
     case "longPress":
-      if (holding) {
+      if (payload.holding) {
         cancelPetReactionRevert();
         setPetState("petted");
         showBubble({
@@ -2194,8 +2332,8 @@ function registerIpc(): void {
   });
   ipcMain.on(
     "pet:react",
-    (_event, payload: { reaction: PetReaction; holding: boolean }) => {
-      petReact(payload.reaction, payload.holding);
+    (_event, payload: PetReactPayload) => {
+      petReact(payload);
     }
   );
   ipcMain.on(
@@ -2305,6 +2443,7 @@ function registerIpc(): void {
       roster.activePetId = id;
       writeRoster(roster);
       loadActiveFromRoster();
+      recordPetCount(roster.pets.length);
       sendToAll("app:snapshot", snapshot());
       return roster;
     }
@@ -2323,7 +2462,10 @@ function registerIpc(): void {
     sendToAll("app:snapshot", snapshot());
     return roster;
   });
-  ipcMain.on("pet:context-menu", showPetContextMenu);
+  ipcMain.on("pet:context-menu", () => {
+    recordRightClick();
+    showPetContextMenu();
+  });
   ipcMain.on("pet:drag-start", (_event, offset: { offsetX: number; offsetY: number }) =>
     startPetDrag(offset)
   );
@@ -2391,6 +2533,7 @@ app.whenReady().then(() => {
   scheduleMoodHistoryFlush();
   scheduleNextWander();
   scheduleNextChatter();
+  recordVisitAndMaybeGreet();
   if (IS_DEV) {
     createSettingsWindow();
   }

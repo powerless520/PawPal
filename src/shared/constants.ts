@@ -1,4 +1,4 @@
-import type { Settings, TodayStats } from "./types";
+import type { PetStats, Settings, TodayStats } from "./types";
 
 export const DEFAULT_SETTINGS: Settings = {
   language: "zh-CN",
@@ -79,5 +79,16 @@ export function createEmptyStats(date = todayKey()): TodayStats {
     watersLogged: 0,
     focusMinutes: 0,
     focusWarnings: 0
+  };
+}
+
+export function createEmptyPetStats(): PetStats {
+  return {
+    totalClicks: 0,
+    totalDrags: 0,
+    totalRightClicks: 0,
+    longestLongPressMs: 0,
+    lastVisitAt: null,
+    seenEasterEggs: []
   };
 }

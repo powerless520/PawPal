@@ -8,6 +8,7 @@ import type {
   OutfitItem,
   OutfitPart,
   PetDiary,
+  PetReactPayload,
   PetId,
   PetReaction,
   PetRoster,
@@ -36,8 +37,8 @@ const api = {
     ipcRenderer.invoke("custom-pet:import-asset", state, sourcePath),
   pathForFile: (file: File): string => webUtils.getPathForFile(file),
   petClicked: (): void => ipcRenderer.send("pet:clicked"),
-  petReact: (reaction: PetReaction, holding: boolean): void =>
-    ipcRenderer.send("pet:react", { reaction, holding }),
+  petReact: (payload: PetReactPayload): void =>
+    ipcRenderer.send("pet:react", payload),
   petPlayCatch: (targetX: number, targetY: number): void =>
     ipcRenderer.send("pet:play-catch", { targetX, targetY }),
   petContextMenu: (): void => ipcRenderer.send("pet:context-menu"),

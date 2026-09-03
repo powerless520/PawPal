@@ -164,6 +164,8 @@ export const I18N = {
       ttsEnabled: "宠物声音 (TTS)",
       ttsEnabledHelp: "开启后，宠物说话会用真人声音念出气泡里的字",
       ttsRate: "语速",
+      easterEggsEnabled: "互动彩蛋",
+      easterEggsEnabledHelp: "开启后，连续点击、长按、拖动睡觉中的宠物等会触发隐藏彩蛋",
       launchAtLoginHelp: "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
       about: "关于",
       version: "版本",
@@ -538,6 +540,8 @@ export const I18N = {
       ttsEnabled: "Pet voice (TTS)",
       ttsEnabledHelp: "When on, the pet's bubble text is read aloud in a real human voice",
       ttsRate: "Speech rate",
+      easterEggsEnabled: "Easter eggs",
+      easterEggsEnabledHelp: "When on, hidden interactions (rapid clicks, long-press, dragging a sleeping pet, etc.) trigger surprise bubbles",
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",

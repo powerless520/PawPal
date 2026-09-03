@@ -65,6 +65,14 @@ export function useSnapshot(): AppSnapshot {
     petDiary: { entries: [] },
     petGrowth: { bornAt: 0, totalInteractions: 0, lastMilestone: null },
     petMoodHistory: { samples: [] },
+    petStats: {
+      totalClicks: 0,
+      totalDrags: 0,
+      totalRightClicks: 0,
+      longestLongPressMs: 0,
+      lastVisitAt: null,
+      seenEasterEggs: []
+    },
     activePetId: MAIN_PET_ID,
     petRoster: {
       activePetId: MAIN_PET_ID,

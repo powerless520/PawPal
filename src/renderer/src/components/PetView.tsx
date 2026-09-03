@@ -14,6 +14,7 @@ type DragRef = {
   dragging: boolean;
   longPressTimer: number | null;
   longPressActive: boolean;
+  longPressStartMs: number;
   clickTimer: number | null;
   clickState: "idle" | "pending";
 };
@@ -196,9 +197,14 @@ export function PetView(): JSX.Element {
         if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
         if (dragRef.current.dragging) return;
         dragRef.current.longPressActive = true;
-        window.pawpal.petReact("longPress", true);
+        window.pawpal.petReact({ reaction: "longPress", holding: true });
+        // mark when the press actually started so we can report the
+        // total press duration on release (used by the longPress10s
+        // easter egg in the main process)
+        dragRef.current.longPressStartMs = event.timeStamp;
       }, LONG_PRESS_MS),
       longPressActive: false,
+      longPressStartMs: 0,
       clickTimer: null,
       clickState: "idle"
     };
@@ -236,7 +242,14 @@ export function PetView(): JSX.Element {
     if (drag.longPressActive) {
       drag.longPressActive = false;
       finishPointerDrag(false);
-      window.pawpal.petReact("longPress", false);
+      const durationMs = drag.longPressStartMs
+        ? event.timeStamp - drag.longPressStartMs
+        : undefined;
+      window.pawpal.petReact({
+        reaction: "longPress",
+        holding: false,
+        durationMs
+      });
       if (shouldReleaseCapture) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
@@ -255,7 +268,7 @@ export function PetView(): JSX.Element {
             current.clickState = "idle";
             current.clickTimer = null;
           }
-          window.pawpal.petReact("single", false);
+          window.pawpal.petReact({ reaction: "single" });
         }, DOUBLE_CLICK_MS);
       } else {
         if (drag.clickTimer !== null) {
@@ -263,7 +276,7 @@ export function PetView(): JSX.Element {
           drag.clickTimer = null;
         }
         drag.clickState = "idle";
-        window.pawpal.petReact("double", false);
+        window.pawpal.petReact({ reaction: "double" });
       }
     }
 

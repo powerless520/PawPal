@@ -26,6 +26,15 @@ export type PetState =
 
 export type PetReaction = "single" | "double" | "longPress" | "play";
 
+// Detail sent with single / double so the main process can count
+// streaks (5 in a row, 100 lifetime) without having to re-implement
+// timing in the renderer.
+export type PetReactPayload =
+  | { reaction: "single" }
+  | { reaction: "double" }
+  | { reaction: "longPress"; holding: boolean; durationMs?: number }
+  | { reaction: "play" };
+
 export type PetAction = "dance" | "sing" | "spin" | "heart" | "stretch" | "wave" | "shy" | "yawn";
 
 export type PetMood = "energetic" | "playful" | "calm" | "sleepy" | "bored";
@@ -118,6 +127,26 @@ export type PetGrowth = {
   bornAt: number;
   totalInteractions: number;
   lastMilestone: string | null;
+};
+
+export type EasterEgg =
+  | "click5"
+  | "click100"
+  | "click500"
+  | "longPress10s"
+  | "rightClick50"
+  | "threePets"
+  | "wakeByDrag"
+  | "comeback"
+  | "lateNight";
+
+export type PetStats = {
+  totalClicks: number;
+  totalDrags: number;
+  totalRightClicks: number;
+  longestLongPressMs: number;
+  lastVisitAt: number | null;
+  seenEasterEggs: EasterEgg[];
 };
 
 export type ChatMessage = {
@@ -230,6 +259,7 @@ export type AppSnapshot = {
   petDiary: PetDiary;
   petGrowth: PetGrowth;
   petMoodHistory: MoodHistory;
+  petStats: PetStats;
   blockingMode: BlockingMode;
   focusActive: boolean;
   dogVisible: boolean;

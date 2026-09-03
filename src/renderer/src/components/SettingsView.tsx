@@ -1419,6 +1419,17 @@ export function SettingsView(): JSX.Element {
             }
           />
         ) : null}
+        <Row
+          label={labels.easterEggsEnabled}
+          hint={labels.easterEggsEnabledHelp}
+          control={
+            <ToggleControl
+              checked={draft.easterEggsEnabled}
+              onChange={(easterEggsEnabled) => updateDraft({ easterEggsEnabled })}
+              ariaLabel={labels.easterEggsEnabled}
+            />
+          }
+        />
         {/* Local-only fork: update-check toggle removed (always off). */}
       </section>
 
