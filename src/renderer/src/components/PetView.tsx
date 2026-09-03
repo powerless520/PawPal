@@ -26,6 +26,7 @@ const LONG_PRESS_MS = 500;
 const DOUBLE_CLICK_MS = 300;
 const PET_BUTTON_SELECTOR = ".pet-button";
 const BUBBLE_INTERACTIVE_SELECTOR = ".speech-bubble";
+const MOOD_HINT_SELECTOR = ".status-hint";
 
 function randomVariant(count: number, previous?: number): number {
   if (count <= 1) return 0;
@@ -124,8 +125,9 @@ export function PetView(): JSX.Element {
     const isOnPet = petButton ? pointInElementHitbox(point, petButton) : false;
     const isOnBubble =
       bubbleVisibleRef.current && Boolean(target.closest(BUBBLE_INTERACTIVE_SELECTOR));
+    const isOnMoodHint = Boolean(target.closest(MOOD_HINT_SELECTOR));
 
-    setMouseInteractive(isOnPet || isOnBubble);
+    setMouseInteractive(isOnPet || isOnBubble || isOnMoodHint);
   }, []);
 
   useEffect(() => {
@@ -338,8 +340,22 @@ export function PetView(): JSX.Element {
         </div>
       ) : null}
 
-      <div className={`mood-pill mood-pill--${snapshot.petMood}`} aria-hidden="true">
-        <span className="mood-pill__emoji">{moodEmoji}</span>
+      <div
+        className="status-hint"
+        role="img"
+        tabIndex={0}
+        aria-label={`${labels.mood}: ${labels.petMoods[snapshot.petMood]} — ${labels.state}: ${labels.petStates[state]}`}
+      >
+        <span className={`mood-pill mood-pill--${snapshot.petMood}`} aria-hidden="true">
+          <span className="mood-pill__emoji">{moodEmoji}</span>
+        </span>
+        <span className="status-hint__tip" role="tooltip">
+          <span className="status-hint__mood">
+            {moodEmoji} {labels.petMoods[snapshot.petMood]}
+          </span>
+          <span className="status-hint__state">{labels.petStates[state]}</span>
+          <span className="status-hint__desc">{labels.petStateDescriptions[state]}</span>
+        </span>
       </div>
 
       <button
