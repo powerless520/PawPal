@@ -104,7 +104,18 @@ export const I18N = {
       timeNow: [
         (hour: number) => `已经${zhHourWord(hour)}了~`,
         (hour: number) => `看看表……${zhHourWord(hour)}啦`
-      ]
+      ],
+      greetMorning: ["早上好呀~ 今天也元气满满！", "早安！新的一天，我陪你~"],
+      greetNoon: ["中午好呀，记得吃午饭哦~", "到饭点啦，先去吃点东西吧"],
+      greetAfternoon: ["下午好~ 继续加油哦", "午安！困了就先起来走走"],
+      greetEvening: ["晚上好呀，今天辛苦啦", "夜晚好~ 该放松一下了"],
+      greetNight: ["夜深啦……早点休息哦", "这么晚了还在呀，晚安~"],
+      greetSleepy: ["呼……我刚睡醒，早安~", "哈欠……主人你来啦，早呀"],
+      greetBored: ["主人你来啦！等你半天了~", "好耶，终于有人陪我玩了~"],
+      greetSpring: ["春天来啦，一起出去走走吧~", "外面花开了哦，春意满满~"],
+      greetSummer: ["夏天好呀，记得多喝水~", "天气热热的，注意防暑哦~"],
+      greetAutumn: ["秋天到了，一起看落叶吧~", "秋风凉凉，记得添件衣服哦"],
+      greetWinter: ["冬天来啦，注意保暖哦~", "天冷了，想和你一起暖暖的~"]
     },
     holidayNames: {
       newYear: "元旦",
@@ -536,7 +547,18 @@ export const I18N = {
       timeNow: [
         (hour: number) => `It's ${enHourWord(hour)} already~`,
         (hour: number) => `*checks clock* ${enHourWord(hour)} already!`
-      ]
+      ],
+      greetMorning: ["Good morning~ Ready for a fresh day!", "Morning! I'll be right by your side~"],
+      greetNoon: ["Noon already — don't forget lunch~", "Meal time! Go grab a bite"],
+      greetAfternoon: ["Good afternoon~ Keep it up!", "Afternoon! Stretch those legs a bit"],
+      greetEvening: ["Good evening! You worked hard today", "Night's settling in — time to unwind"],
+      greetNight: ["It's late… rest up soon, okay?", "Still up? Sleep tight~"],
+      greetSleepy: ["Zzz… just woke up, morning~", "*yawn* …you're here! Morning"],
+      greetBored: ["You're back! I've been waiting~", "Yay, someone to play with at last~"],
+      greetSpring: ["Spring's here — let's go for a walk~", "Flowers are blooming out there~"],
+      greetSummer: ["Summer, huh? Drink lots of water~", "Stay cool in this heat, okay?"],
+      greetAutumn: ["Autumn leaves are falling — let's watch~", "The air's turning crisp; grab a sweater!"],
+      greetWinter: ["Winter's here — bundle up~", "So cold out there… let's get cozy~"]
     },
     holidayNames: {
       newYear: "New Year's Day",

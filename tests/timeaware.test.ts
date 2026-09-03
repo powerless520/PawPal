@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { timeAwareKind } from "../src/shared/timeaware";
+import { seasonOfMonth, timeAwareKind } from "../src/shared/timeaware";
 
 /** 2026-09-06 is a Sunday; `dow` shifts to the requested weekday (0 = Sun). */
 function dateAt(dow: number, hour: number, minute = 0): Date {
@@ -71,6 +71,17 @@ export const tests = [
     name: "mid-hour falls back to generic chatter",
     run(): void {
       assert.equal(timeAwareKind(dateAt(4, 9, 30)), "chatter");
+    }
+  },
+  {
+    name: "seasonOfMonth maps the four seasons",
+    run(): void {
+      assert.equal(seasonOfMonth(3), "spring");
+      assert.equal(seasonOfMonth(5), "spring");
+      assert.equal(seasonOfMonth(7), "summer");
+      assert.equal(seasonOfMonth(10), "autumn");
+      assert.equal(seasonOfMonth(12), "winter");
+      assert.equal(seasonOfMonth(1), "winter");
     }
   }
 ];

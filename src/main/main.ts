@@ -33,7 +33,7 @@ import {
 } from "../shared/petAppearances";
 import { OUTFIT_SLOTS, outfitItemById } from "../shared/outfits";
 import { nextHolidayEvent } from "../shared/holidays";
-import { timeAwareKind, type TimeAwareKind } from "../shared/timeaware";
+import { seasonOfMonth, timeAwareKind, type TimeAwareKind } from "../shared/timeaware";
 import type {
   AppSnapshot,
   BlockingMode,
@@ -952,6 +952,43 @@ function recordVisitAndMaybeGreet(): void {
     }
   }
   writePetStats({ ...stats, lastVisitAt: now });
+}
+
+function launchGreetingMessage(): string | null {
+  const pool = text().bubble;
+  // Late-night nudge (3-5am) already fires its own easter egg, so skip.
+  const hour = new Date().getHours();
+  if (hour >= 3 && hour < 5) return null;
+  // The last known mood shapes the greeting.
+  if (petMood === "sleepy") return pick(pool.greetSleepy);
+  if (petMood === "bored") return pick(pool.greetBored);
+  // Sometimes greet by season, otherwise by time of day.
+  if (Math.random() < 0.3) {
+    const season = seasonOfMonth(new Date().getMonth() + 1);
+    if (season === "spring") return pick(pool.greetSpring);
+    if (season === "summer") return pick(pool.greetSummer);
+    if (season === "autumn") return pick(pool.greetAutumn);
+    return pick(pool.greetWinter);
+  }
+  if (hour < 5) return pick(pool.greetNight);
+  if (hour < 11) return pick(pool.greetMorning);
+  if (hour < 14) return pick(pool.greetNoon);
+  if (hour < 18) return pick(pool.greetAfternoon);
+  if (hour < 23) return pick(pool.greetEvening);
+  return pick(pool.greetNight);
+}
+
+function scheduleLaunchGreeting(): void {
+  // Say one line 3-5 seconds after the app starts.
+  const delayMs = 3000 + Math.random() * 2000;
+  setTimeout(() => {
+    if (!petWindow || petWindow.isDestroyed()) return;
+    if (blockingMode) return;
+    if (getSettings().observerMode) return;
+    const message = launchGreetingMessage();
+    if (!message) return;
+    showBubble({ id: "launch-greeting", message, autoDismissMs: 3500 });
+  }, delayMs);
 }
 
 function bumpInteraction(): void {
@@ -2705,6 +2742,7 @@ app.whenReady().then(() => {
   scheduleNextWander();
   scheduleNextChatter();
   recordVisitAndMaybeGreet();
+  scheduleLaunchGreeting();
   if (IS_DEV) {
     createSettingsWindow();
   }

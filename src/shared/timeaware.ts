@@ -28,3 +28,13 @@ export function timeAwareKind(now: Date): TimeAwareKind {
   if (minute <= 15 || minute >= 45) return "timeNow";
   return "chatter";
 }
+
+export type Season = "spring" | "summer" | "autumn" | "winter";
+
+/** Northern-hemisphere season from the month (1-12). */
+export function seasonOfMonth(month: number): Season {
+  if (month >= 3 && month <= 5) return "spring";
+  if (month >= 6 && month <= 8) return "summer";
+  if (month >= 9 && month <= 11) return "autumn";
+  return "winter";
+}
