@@ -253,7 +253,7 @@ function ChatApp(): JSX.Element {
     }
   }
 
-  function useQuickReply(qr: QuickReply): void {
+  function sendQuickReply(qr: QuickReply): void {
     const text = qr.send?.[language] ?? qr.draft?.[language] ?? "";
     if (qr.send) {
       void send(text);
@@ -365,7 +365,7 @@ function ChatApp(): JSX.Element {
                 key={qr.key}
                 type="button"
                 className="chat-quick__chip"
-                onClick={() => useQuickReply(qr)}
+                onClick={() => sendQuickReply(qr)}
               >
                 {qr.label[language]}
               </button>

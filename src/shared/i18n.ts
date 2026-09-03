@@ -17,25 +17,9 @@ export const I18N = {
   "zh-CN": {
     bubble: {
       woof: ["woof!", "汪！", "汪汪~"],
-      singleClick: [
-        "嗯？",
-        "叫我？",
-        "在呢~",
-        "干嘛呀",
-        "摸摸？"
-      ],
-      doubleClick: [
-        "耶~再来一次！",
-        "好好玩！",
-        "嘿嘿~",
-        "再来再来！"
-      ],
-      longPress: [
-        "好舒服~",
-        "再撸一会儿嘛",
-        "嘿嘿，舒服~",
-        "呼噜呼噜~"
-      ],
+      singleClick: ["嗯？", "叫我？", "在呢~", "干嘛呀", "摸摸？"],
+      doubleClick: ["耶~再来一次！", "好好玩！", "嘿嘿~", "再来再来！"],
+      longPress: ["好舒服~", "再撸一会儿嘛", "嘿嘿，舒服~", "呼噜呼噜~"],
       idleChatter: [
         "今天天气真好~",
         "主人你在干嘛呀？",
@@ -59,37 +43,21 @@ export const I18N = {
         "坐了好久了……去走一分钟吧！",
         "我想玩儿了，去走一分钟吧"
       ],
-      breakDone: [
-        "好耶！摇尾巴~",
-        "耶耶耶 好喜欢你",
-        "开心！"
-      ],
+      breakDone: ["好耶！摇尾巴~", "耶耶耶 好喜欢你", "开心！"],
       breakRun: [
         (seconds: number) => `我还要玩 ${seconds} 秒！快离开屏幕~`,
         (seconds: number) => `倒计时 ${seconds} 秒，别偷偷回来哦`,
         (seconds: number) => `${seconds} 秒！`
       ],
-      breakRunComplete: [
-        "玩够啦，回来陪你坐会儿~",
-        "回来啦！我在等你呢",
-        "休息完毕，蹲好了~"
-      ],
-      breakIgnore: [
-        "好吧……但我会担心你的",
-        "呜……那你下次一定站起来",
-        "好吧，我先趴着等你……"
-      ],
+      breakRunComplete: ["玩够啦，回来陪你坐会儿~", "回来啦！我在等你呢", "休息完毕，蹲好了~"],
+      breakIgnore: ["好吧……但我会担心你的", "呜……那你下次一定站起来", "好吧，我先趴着等你……"],
       hydrationReminder: [
         "我有点渴了……你也喝口水吧？",
         "想喝水了！你也来一口嘛",
         "舔舔嘴……该喝水啦",
         "水碗空了！你的杯子呢？"
       ],
-      hydrationDone: [
-        "咕嘟咕嘟，舒服~",
-        "喝饱啦！",
-        "汪，水真好喝"
-      ],
+      hydrationDone: ["咕嘟咕嘟，舒服~", "喝饱啦！", "汪，水真好喝"],
       focusStart: [
         (minutes: number) => `好，我帮你看着这 ${minutes} 分钟！`,
         (minutes: number) => `专心${minutes} 分钟，我盯着`
@@ -97,21 +65,11 @@ export const I18N = {
       focusWarning: [
         (rule: string) => `说好专注的，不许看 ${rule}`,
         (rule: string) => `走神啦！${rule} 不能玩`,
-        (rule: string) => `你怎么在偷偷看 ${rule} 了`,
+        (rule: string) => `你怎么在偷偷看 ${rule} 了`
       ],
-      focusComplete: [
-        "专心时间到！",
-        "专心结束！摇尾巴~",
-      ],
-      focusCancelled: [
-        "好，我陪你歇会儿",
-        "收工！我趴下啦"
-      ],
-      focusBack: [
-        "好，我继续盯着~",
-        "嗯！回去干活吧",
-        "我也继续专心啦"
-      ],
+      focusComplete: ["专心时间到！", "专心结束！摇尾巴~"],
+      focusCancelled: ["好，我陪你歇会儿", "收工！我趴下啦"],
+      focusBack: ["好，我继续盯着~", "嗯！回去干活吧", "我也继续专心啦"],
       updateAvailable: [
         (version: string) => `发现新版本 ${version}，去看看更新吧`,
         (version: string) => `PawPal 有新版本 ${version} 啦`
@@ -166,7 +124,8 @@ export const I18N = {
       ttsRate: "语速",
       easterEggsEnabled: "互动彩蛋",
       easterEggsEnabledHelp: "开启后，连续点击、长按、拖动睡觉中的宠物等会触发隐藏彩蛋",
-      launchAtLoginHelp: "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
+      launchAtLoginHelp:
+        "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
       about: "关于",
       version: "版本",
       releaseNotes: "更新说明",
@@ -175,7 +134,8 @@ export const I18N = {
       checkForUpdates: "检查更新",
       checkingUpdates: "检查中…",
       updateCheckOnLaunch: "启动时检查更新",
-      updateCheckOnLaunchHelp: "开启后每次启动会检查 GitHub 最新 Release；关闭时只在你手动检查时联网。",
+      updateCheckOnLaunchHelp:
+        "开启后每次启动会检查 GitHub 最新 Release；关闭时只在你手动检查时联网。",
       updateIdle: "还没有检查更新。",
       updateAvailable: (version: string) => `发现新版本 ${version}`,
       updateCurrent: (version: string) => `已是最新版本 ${version}`,
@@ -208,7 +168,8 @@ export const I18N = {
       outfitModeManual: "自己搭配",
       outfitModeHint: "开启后，节日期间自动给宠物穿上对应装扮。",
       outfitSeasonalNow: (label: string) => `当前节日：${label}`,
-      outfitSeasonalVariant: (label: string, total: number) => `当前装扮：${label}（共 ${total} 套随机抽）`,
+      outfitSeasonalVariant: (label: string, total: number) =>
+        `当前装扮：${label}（共 ${total} 套随机抽）`,
       outfitUploadCustom: "上传 PNG",
       birthday: "你的生日",
       birthdayHint: "填上生日后，宠物当天会自动给你穿戴上派对造型。",
@@ -254,7 +215,8 @@ export const I18N = {
       rosterAddPlaceholder: "例如：阿喵",
       customPet: "自定义",
       customPetAssets: "自定义素材",
-      customPetRequirements: "仅支持 GIF；默认状态素材必填，其它状态可选；建议使用透明背景并保持主体大小一致",
+      customPetRequirements:
+        "仅支持 GIF；默认状态素材必填，其它状态可选；建议使用透明背景并保持主体大小一致",
       customPetReady: "已可使用",
       customPetMissingRequired: "需要上传默认状态素材",
       customPetRequired: "必填",
@@ -393,25 +355,9 @@ export const I18N = {
   en: {
     bubble: {
       woof: ["woof!", "bark bark!", "arf~"],
-      singleClick: [
-        "Hm?",
-        "Yes?",
-        "Here~",
-        "What?",
-        "Pet me?"
-      ],
-      doubleClick: [
-        "Yay~ do it again!",
-        "So fun!",
-        "Hehe~",
-        "More more!"
-      ],
-      longPress: [
-        "So comfy~",
-        "Keep petting me",
-        "Hehe, nice~",
-        "Purrr~"
-      ],
+      singleClick: ["Hm?", "Yes?", "Here~", "What?", "Pet me?"],
+      doubleClick: ["Yay~ do it again!", "So fun!", "Hehe~", "More more!"],
+      longPress: ["So comfy~", "Keep petting me", "Hehe, nice~", "Purrr~"],
       idleChatter: [
         "Nice weather today~",
         "Whatcha doing?",
@@ -435,11 +381,7 @@ export const I18N = {
         "Sitting for so long… go walk for a minute!",
         "I wanna play! Walk for a minute~"
       ],
-      breakDone: [
-        "Yay! *tail wag*",
-        "Yay yay yay I like you so much",
-        "Happy!"
-      ],
+      breakDone: ["Yay! *tail wag*", "Yay yay yay I like you so much", "Happy!"],
       breakRun: [
         (seconds: number) => `I still wanna play for ${seconds}s! Get away from the screen~`,
         (seconds: number) => `${seconds}s left, no sneaking back!`,
@@ -461,11 +403,7 @@ export const I18N = {
         "*licks lips* …time for water~",
         "My bowl's empty! Where's your cup?"
       ],
-      hydrationDone: [
-        "*slurp slurp* ahh~",
-        "All full!",
-        "Woof, water's so good"
-      ],
+      hydrationDone: ["*slurp slurp* ahh~", "All full!", "Woof, water's so good"],
       focusStart: [
         (minutes: number) => `Okay, I'll keep watch for ${minutes} minutes!`,
         (minutes: number) => `Focus for ${minutes} minutes, I'm watching`
@@ -475,19 +413,9 @@ export const I18N = {
         (rule: string) => `I saw you open ${rule}~ come back!`,
         (rule: string) => `Stay away from ${rule}!`
       ],
-      focusComplete: [
-        "Focus time's up!",
-        "Focus done! *tail wag*"
-      ],
-      focusCancelled: [
-        "Okay, I'll keep you company for a bit",
-        "All done! I'm lying down~"
-      ],
-      focusBack: [
-        "Good, I'll keep watching~",
-        "Mm! Back to work then",
-        "I'll keep focusing too~"
-      ],
+      focusComplete: ["Focus time's up!", "Focus done! *tail wag*"],
+      focusCancelled: ["Okay, I'll keep you company for a bit", "All done! I'm lying down~"],
+      focusBack: ["Good, I'll keep watching~", "Mm! Back to work then", "I'll keep focusing too~"],
       updateAvailable: [
         (version: string) => `Version ${version} is available. Want to see what's new?`,
         (version: string) => `PawPal has a new version: ${version}.`
@@ -541,7 +469,8 @@ export const I18N = {
       ttsEnabledHelp: "When on, the pet's bubble text is read aloud in a real human voice",
       ttsRate: "Speech rate",
       easterEggsEnabled: "Easter eggs",
-      easterEggsEnabledHelp: "When on, hidden interactions (rapid clicks, long-press, dragging a sleeping pet, etc.) trigger surprise bubbles",
+      easterEggsEnabledHelp:
+        "When on, hidden interactions (rapid clicks, long-press, dragging a sleeping pet, etc.) trigger surprise bubbles",
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",
@@ -572,7 +501,8 @@ export const I18N = {
       aiOllamaUrl: "Server URL",
       aiOllamaUrlHint: "Default http://localhost:11434; change if you run a custom host",
       aiOllamaUrlPlaceholder: "http://localhost:11434",
-      aiProviderHelp: "Pick one and supply an API key. Stored locally on this machine; only sent to the provider when AI-generated chit-chat is enabled.",
+      aiProviderHelp:
+        "Pick one and supply an API key. Stored locally on this machine; only sent to the provider when AI-generated chit-chat is enabled.",
       aiApiKey: "API Key",
       aiApiKeyPlaceholder: "sk-...",
       aiTestConnection: "Test Connection",
@@ -586,7 +516,8 @@ export const I18N = {
       outfitModeManual: "Manual",
       outfitModeHint: "When on, the pet will auto-wear a seasonal outfit on holidays.",
       outfitSeasonalNow: (label: string) => `Current season: ${label}`,
-      outfitSeasonalVariant: (label: string, total: number) => `Today's outfit: ${label} (random pick out of ${total})`,
+      outfitSeasonalVariant: (label: string, total: number) =>
+        `Today's outfit: ${label} (random pick out of ${total})`,
       outfitUploadCustom: "Upload PNG",
       birthday: "Your birthday",
       birthdayHint: "Fill in your birthday and the pet will dress up for the party on that day.",
@@ -621,7 +552,8 @@ export const I18N = {
       backupImportMerge: "Merge",
       backupImportReplace: "Replace",
       backupImported: "Backup imported",
-      backupExportHint: "Bundle settings, pet roster, outfits, diary, mood history into a single JSON file",
+      backupExportHint:
+        "Bundle settings, pet roster, outfits, diary, mood history into a single JSON file",
       roster: "Pet Roster",
       rosterActive: "Active",
       rosterSwitch: "Switch",

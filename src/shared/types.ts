@@ -270,12 +270,7 @@ export type AppInfo = {
   releaseNotesUrl: string;
 };
 
-export type UpdateCheckStatus =
-  | "idle"
-  | "checking"
-  | "available"
-  | "up-to-date"
-  | "error";
+export type UpdateCheckStatus = "idle" | "checking" | "available" | "up-to-date" | "error";
 
 export type UpdateCheckResult = {
   status: UpdateCheckStatus;
@@ -286,11 +281,7 @@ export type UpdateCheckResult = {
   error: string | null;
 };
 
-export type DemoTrigger =
-  | "break"
-  | "hydration"
-  | "focusWarning"
-  | "happy";
+export type DemoTrigger = "break" | "hydration" | "focusWarning" | "happy";
 
 export type RendererEventMap = {
   "pet:set-state": PetState;

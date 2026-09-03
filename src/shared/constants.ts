@@ -26,13 +26,7 @@ export const DEFAULT_SETTINGS: Settings = {
   easterEggsEnabled: true,
   birthdayMonth: null,
   birthdayDay: null,
-  distractionBlockedApps: [
-    "Steam",
-    "Discord",
-    "Telegram",
-    "WeChat",
-    "QQ"
-  ],
+  distractionBlockedApps: ["Steam", "Discord", "Telegram", "WeChat", "QQ"],
   distractionBlockedKeywords: [
     "youtube",
     "youtu.be",

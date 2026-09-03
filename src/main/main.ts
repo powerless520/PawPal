@@ -54,7 +54,6 @@ import type {
   PetId,
   PetInstance,
   PetMood,
-  PetReaction,
   PetRoster,
   PetState,
   Settings,
@@ -81,7 +80,6 @@ import {
   STORE_NAME
 } from "./config";
 import {
-  clampBoundsToWorkArea,
   displayForBounds,
   initialWindowBounds,
   savedPositionFromBounds,
@@ -134,7 +132,7 @@ if (app.getPath("userData") !== userDataPath) {
 }
 try {
   mkdirSync(userDataPath, { recursive: true });
-} catch (_) {
+} catch {
   // ignore
 }
 
@@ -147,7 +145,7 @@ const storeFilePath = join(userDataPath, `${STORE_NAME}.json`);
 if (!existsSync(storeFilePath)) {
   try {
     writeFileSync(storeFilePath, JSON.stringify(defaultStoreSnapshot, undefined, 2), { mode: 0o600 });
-  } catch (_) {
+  } catch {
     // ignore: if we can't pre-create, let electron-store try
   }
 }
@@ -605,7 +603,7 @@ async function performChatter(): Promise<void> {
 
   const settings = getSettings();
   const client = createAiClient(settings.aiProvider, settings.aiApiKey);
-  let message = "";
+  let message: string;
   const hour = new Date().getHours();
 
   if (client.isConfigured() && Math.random() < 0.5) {
@@ -2198,7 +2196,7 @@ function registerIpc(): void {
   ipcMain.handle(
     "outfit:import",
     async (
-      _e,
+      _event,
       payload: { part: OutfitPart; sourcePath: string; label: string }
     ): Promise<OutfitItem | null> => {
       return importCustomOutfit(payload.part, payload.sourcePath, payload.label);
@@ -2285,7 +2283,7 @@ function registerIpc(): void {
   );
   ipcMain.handle(
     "outfit:select-file",
-    async (_e, part: OutfitPart): Promise<string | null> => {
+    async (): Promise<string | null> => {
       try {
         const parent = settingsWindow && !settingsWindow.isDestroyed() ? settingsWindow : null;
         const result = parent
@@ -2347,7 +2345,6 @@ function registerIpc(): void {
     try {
       const path = await renderPetSnapshot();
       if (path) {
-        const { copyFile } = await import("node:fs/promises");
         const buffer = await readFile(path);
         clipboard.writeImage(nativeImage.createFromBuffer(buffer));
         return path;
@@ -2489,7 +2486,7 @@ protocol.registerSchemesAsPrivileged([
 
 app.whenReady().then(() => {
   protocol.handle("pawpal-asset", (request) => {
-    let relativePath = "";
+    let relativePath: string;
     try {
       const url = new URL(request.url);
       relativePath = decodeURIComponent(url.pathname.replace(/^\/+/, ""));
@@ -2576,7 +2573,6 @@ async function renderPetSnapshot(): Promise<string | null> {
   if (!petWindow || petWindow.isDestroyed()) return null;
   const settings = getSettings();
   const active = activeRosterEntry(readRoster());
-  const stats = getStats();
   const growth = readGrowth();
 
   // 1. Determine the pet's current visible GIF so the snapshot

@@ -65,9 +65,15 @@ export const tests = [
       });
 
       assert.equal(restored.x > resizedSecondary.workArea.x, true);
-      assert.equal(restored.x < resizedSecondary.workArea.x + resizedSecondary.workArea.width, true);
+      assert.equal(
+        restored.x < resizedSecondary.workArea.x + resizedSecondary.workArea.width,
+        true
+      );
       assert.equal(restored.y > resizedSecondary.workArea.y, true);
-      assert.equal(restored.y < resizedSecondary.workArea.y + resizedSecondary.workArea.height, true);
+      assert.equal(
+        restored.y < resizedSecondary.workArea.y + resizedSecondary.workArea.height,
+        true
+      );
     }
   },
   {

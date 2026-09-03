@@ -1,4 +1,4 @@
-import type { Language, OutfitItem, OutfitPart, OutfitSlot } from "./types";
+import type { Language, OutfitItem, OutfitSlot } from "./types";
 
 const OUTFITS_BASE = "pet_assets/outfits";
 

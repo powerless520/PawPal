@@ -4,7 +4,6 @@ import type { AiProvider, ChatMessage } from "../shared/types";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 const OLLAMA_DEFAULT_URL = "http://localhost:11434/v1/chat/completions";
 const DEFAULT_TIMEOUT_MS = 15_000;
-const OLLAMA_TEST_TIMEOUT_MS = 5_000;
 
 type FetchOptions = {
   method?: string;

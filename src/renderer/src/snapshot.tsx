@@ -27,8 +27,7 @@ function Snapshot(): JSX.Element {
   const [data, setData] = useState<SnapshotData | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const incoming = (window as any).__snapshotData;
+    const incoming = (window as unknown as { __snapshotData?: SnapshotData }).__snapshotData;
     if (incoming) setData(incoming);
   }, []);
 

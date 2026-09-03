@@ -371,14 +371,28 @@ export const PET_APPEARANCES: Record<BuiltInPetAppearanceId, PetAppearanceManife
 };
 
 export function resolvePetAppearanceId(value: unknown): PetAppearanceId {
-  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino" || value === "totodile" || value === "custom") {
+  if (
+    value === "lineDog" ||
+    value === "lovartPuppy" ||
+    value === "xiaoJiMao" ||
+    value === "dino" ||
+    value === "totodile" ||
+    value === "custom"
+  ) {
     return value;
   }
   return "lineDog";
 }
 
 export function resolveBuiltInPetAppearanceId(value: unknown): BuiltInPetAppearanceId {
-  if (value === "lineDog" || value === "lovartPuppy" || value === "xiaoJiMao" || value === "dino" || value === "totodile") return value;
+  if (
+    value === "lineDog" ||
+    value === "lovartPuppy" ||
+    value === "xiaoJiMao" ||
+    value === "dino" ||
+    value === "totodile"
+  )
+    return value;
   return "lineDog";
 }
 
@@ -427,11 +441,15 @@ export function normalizeCustomPetAppearance(value: unknown): CustomPetAppearanc
   };
 }
 
-export function hasRequiredCustomPetAssets(custom: CustomPetAppearance | null | undefined): boolean {
+export function hasRequiredCustomPetAssets(
+  custom: CustomPetAppearance | null | undefined
+): boolean {
   return Boolean(custom && REQUIRED_CUSTOM_PET_STATES.every((state) => custom.assets[state]));
 }
 
-export function petAppearanceOptions(language: Language): Array<{ value: BuiltInPetAppearanceId; label: string }> {
+export function petAppearanceOptions(
+  language: Language
+): Array<{ value: BuiltInPetAppearanceId; label: string }> {
   return Object.values(PET_APPEARANCES).map((appearance) => ({
     value: appearance.id,
     label: appearance.label[language]
@@ -448,7 +466,12 @@ export function getCustomPetAssetDefinition(
     custom.assets[state] ??
     (fallbackState ? custom.assets[fallbackState] : undefined) ??
     custom.assets.idle;
-  return asset ? { path: asset.relativePath, isPlaceholder: asset.relativePath !== custom.assets[state]?.relativePath } : null;
+  return asset
+    ? {
+        path: asset.relativePath,
+        isPlaceholder: asset.relativePath !== custom.assets[state]?.relativePath
+      }
+    : null;
 }
 
 export function getPetAssetDefinition(

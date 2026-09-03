@@ -20,7 +20,10 @@ class MemoryStatsStore implements StatsStore {
 
   get(key: "stats", defaultValue: TodayStats): TodayStats;
   get(key: "statsHistory", defaultValue: StatsHistory): StatsHistory;
-  get(key: "stats" | "statsHistory", defaultValue: TodayStats | StatsHistory): TodayStats | StatsHistory {
+  get(
+    key: "stats" | "statsHistory",
+    defaultValue: TodayStats | StatsHistory
+  ): TodayStats | StatsHistory {
     return this[key] ?? defaultValue;
   }
 

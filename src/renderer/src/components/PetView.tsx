@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { JSX, PointerEvent } from "react";
 import { i18n, resolveLanguage } from "../../../shared/i18n";
 import { outfitItemById, OUTFIT_SLOTS, seasonalOutfitForDate } from "../../../shared/outfits";
-import type { OutfitPart, PetState, SpeechBubble } from "../../../shared/types";
+import type { PetState, SpeechBubble } from "../../../shared/types";
 import { getPetAsset, getPetAssetVariantCount } from "../assets";
 import { useNow, useSnapshot } from "../hooks";
 import { pointInElementHitbox } from "../petHitbox";
@@ -103,7 +103,7 @@ export function PetView(): JSX.Element {
     window.pawpal.setMouseInteractive(interactive);
   }
 
-  function updateMouseInteractivity(point: { x: number; y: number } | null): void {
+  const updateMouseInteractivity = useCallback((point: { x: number; y: number } | null): void => {
     if (dragRef.current) {
       setMouseInteractive(true);
       return;
@@ -126,7 +126,7 @@ export function PetView(): JSX.Element {
       bubbleVisibleRef.current && Boolean(target.closest(BUBBLE_INTERACTIVE_SELECTOR));
 
     setMouseInteractive(isOnPet || isOnBubble);
-  }
+  }, []);
 
   useEffect(() => {
     const variantCount = getPetAssetVariantCount(appearanceId, state, customAppearance);
@@ -178,12 +178,15 @@ export function PetView(): JSX.Element {
       }
       window.pawpal.setMouseInteractive(true);
     };
+    // updateMouseInteractivity is a stable useCallback that captures
+    // refs internally — intentionally not in the dep array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     bubbleVisibleRef.current = Boolean(bubble);
     updateMouseInteractivity(lastMousePointRef.current);
-  }, [bubble]);
+  }, [bubble, updateMouseInteractivity]);
 
   function startPointer(event: PointerEvent<HTMLButtonElement>): void {
     if (event.button !== 0) return;

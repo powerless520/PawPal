@@ -10,7 +10,6 @@ import type {
   PetDiary,
   PetReactPayload,
   PetId,
-  PetReaction,
   PetRoster,
   PetState,
   Settings,

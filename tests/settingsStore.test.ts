@@ -43,7 +43,10 @@ export const tests = [
     name: "normalizeSettings enforces break run duration minimum only",
     run(): void {
       assert.equal(normalizeSettings({ breakRunDurationSeconds: 5 }).breakRunDurationSeconds, 10);
-      assert.equal(normalizeSettings({ breakRunDurationSeconds: 1200 }).breakRunDurationSeconds, 1200);
+      assert.equal(
+        normalizeSettings({ breakRunDurationSeconds: 1200 }).breakRunDurationSeconds,
+        1200
+      );
       assert.equal(
         normalizeSettings({ breakRunDurationSeconds: Number.NaN }).breakRunDurationSeconds,
         DEFAULT_SETTINGS.breakRunDurationSeconds
@@ -68,7 +71,10 @@ export const tests = [
       });
 
       assert.equal(settings.petAppearanceId, "custom");
-      assert.equal(settings.customPetAppearance?.assets.idle?.relativePath, "custom_pet_assets/idle/my-pet.gif");
+      assert.equal(
+        settings.customPetAppearance?.assets.idle?.relativePath,
+        "custom_pet_assets/idle/my-pet.gif"
+      );
     }
   },
   {

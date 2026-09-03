@@ -42,10 +42,7 @@ export const tests = [
   {
     name: "seasonal: user birthday overrides generic date",
     run(): void {
-      const outfit = seasonalOutfitForDate(
-        new Date(2025, 6, 15),
-        { month: 7, day: 15 }
-      );
+      const outfit = seasonalOutfitForDate(new Date(2025, 6, 15), { month: 7, day: 15 });
       assert.equal(outfit?.label["zh-CN"], "你的生日");
       assert.equal(outfit?.hat, "crown");
       assert.equal(outfit?.glasses, "sunglasses");
