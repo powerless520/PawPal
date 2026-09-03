@@ -220,6 +220,9 @@
 - `e30d987` feat(holidays): festive countdown reminders and settings display（节日倒计时）
 - `e5fd5d1` feat(diary): read diary entries aloud via TTS（日记朗读）
 - `9e9c01c` feat(diary): 3D flipbook viewer for diary entries（3D 翻页日记本）
+- `21a5ef1` feat(time): pet checks the clock with time-appropriate bubbles（看时间闲聊）
+- `35f584e` feat(greet): launch-day greeting picks mood, season or time of day（今日一句开机问候）
+- `ea963f6` feat(habits): pet learns daily launches, work start and favourite action（学习习惯：记忆今日启动/首次专注/最爱动作）
 
 ---
 
@@ -234,6 +237,7 @@
 | AI 聊天 | `46fd8bc`（DeepSeek）→ `2c09b3b` → `8bcbda0` → `eb50531`（Ollama） |
 | 成长养成 | `c9f5919`（里程碑庆祝）→ `f2a9326`（阶段 / 24 足迹 / 里程碑墙） |
 | 心情 / 统计 | `9ce1a78` → `9df68c4` → `ccf5130` → `54612c7` |
+| 时间 / 习惯关怀 | `21a5ef1`（看时间）→ `35f584e`（开机问候）→ `ea963f6`（学习习惯：启动次数 / 首次专注 / 最爱动作） |
 | 声音 | `555a69b`（早期移除）→ `e1ecf50`（重引入）→ `cbae6a8` |
 | 打包 / 发布 | `8618179` → `852873a` → `fccb577` → `6a48b02` |
 
