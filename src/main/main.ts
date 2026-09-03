@@ -1091,6 +1091,9 @@ function sendToAll<T>(channel: string, payload?: T): void {
   if (settingsWindow && !settingsWindow.isDestroyed()) {
     settingsWindow.webContents.send(channel, payload);
   }
+  if (chatWindow && !chatWindow.isDestroyed()) {
+    chatWindow.webContents.send(channel, payload);
+  }
 }
 
 function publishSnapshot(): void {

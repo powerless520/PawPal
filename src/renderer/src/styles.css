@@ -1369,12 +1369,15 @@ textarea {
   --chat-ink-faint: #998d7c;
   --chat-paper: #fbf7ee;
   --chat-paper-deep: #f3e9d2;
+  --chat-raised: #fffdf7;
+  --chat-title-from: #3a2f22;
+  --chat-title-to: #5a4733;
   --chat-rule: rgba(60, 47, 28, 0.1);
   --chat-rule-strong: rgba(60, 47, 28, 0.18);
   --chat-accent: #b67d3a;
   --chat-accent-ink: #fff9ed;
   --chat-accent-soft: rgba(182, 125, 58, 0.14);
-  --chat-user: #8e6a3e;
+  --chat-user: #c98f4b;
   --chat-user-ink: #fffaf0;
   --chat-shadow-sm: 0 1px 2px rgba(45, 38, 31, 0.08), 0 2px 6px rgba(45, 38, 31, 0.05);
   --chat-shadow-md: 0 6px 18px rgba(45, 38, 31, 0.12), 0 2px 4px rgba(45, 38, 31, 0.06);
@@ -1433,10 +1436,15 @@ textarea {
 }
 
 .chat-app__header {
-  background: linear-gradient(180deg, rgba(251, 247, 238, 0.92), rgba(251, 247, 238, 0.78) 60%, rgba(251, 247, 238, 0));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--chat-paper) 92%, transparent),
+    color-mix(in srgb, var(--chat-paper) 78%, transparent) 60%,
+    transparent
+  );
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   backdrop-filter: saturate(180%) blur(14px);
-  border-bottom: 1px solid rgba(60, 47, 28, 0.08);
+  border-bottom: 1px solid var(--chat-rule);
   -webkit-app-region: drag;
   padding: 12px 20px 14px;
   position: relative;
@@ -1462,7 +1470,7 @@ textarea {
 }
 
 .chat-app__header h1 {
-  background: linear-gradient(180deg, #3a2f22, #5a4733);
+  background: linear-gradient(180deg, var(--chat-title-from), var(--chat-title-to));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1587,7 +1595,7 @@ textarea {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px 16px 10px;
-  scrollbar-color: rgba(60, 47, 28, 0.22) transparent;
+  scrollbar-color: var(--chat-rule-strong) transparent;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
 }
@@ -1602,13 +1610,13 @@ textarea {
 
 .chat-app__list::-webkit-scrollbar-thumb {
   background-clip: padding-box;
-  background-color: rgba(60, 47, 28, 0.22);
+  background-color: var(--chat-rule-strong);
   border: 3px solid transparent;
   border-radius: 999px;
 }
 
 .chat-app__list::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(60, 47, 28, 0.34);
+  background-color: color-mix(in srgb, var(--chat-rule-strong) 55%, var(--chat-ink-faint));
 }
 
 .chat-app__list-top-fade,
@@ -1650,7 +1658,7 @@ textarea {
 }
 
 .chat-divider span {
-  background: rgba(255, 253, 246, 0.7);
+  background: var(--chat-raised);
   border: 1px solid var(--chat-rule);
   border-radius: 999px;
   color: var(--chat-ink-faint);
@@ -1711,12 +1719,12 @@ textarea {
 }
 
 .chat-msg--pet .chat-msg__bubble {
-  background: linear-gradient(180deg, #fffdf7 0%, #fcf4df 100%);
-  border-color: rgba(136, 99, 50, 0.14);
+  background: linear-gradient(180deg, var(--chat-raised) 0%, var(--chat-paper-deep) 100%);
+  border-color: var(--chat-rule-strong);
   color: var(--chat-ink);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 2px 8px rgba(90, 62, 28, 0.08);
+    0 1px 0 color-mix(in srgb, var(--chat-paper-deep) 70%, #ffffff) inset,
+    0 2px 8px color-mix(in srgb, var(--chat-ink) 10%, transparent);
 }
 
 .chat-msg--pet.chat-msg--single .chat-msg__bubble,
@@ -1735,7 +1743,7 @@ textarea {
 .chat-msg--pet.chat-msg--last .chat-msg__bubble::before,
 .chat-msg--pet.chat-msg--single .chat-msg__bubble::before {
   border: 6px solid transparent;
-  border-right-color: rgba(136, 99, 50, 0.14);
+  border-right-color: var(--chat-rule-strong);
   border-top-width: 0;
   bottom: 14px;
   content: "";
@@ -1748,7 +1756,7 @@ textarea {
 .chat-msg--pet.chat-msg--last .chat-msg__bubble::after,
 .chat-msg--pet.chat-msg--single .chat-msg__bubble::after {
   border: 5px solid transparent;
-  border-right-color: #fcf4df;
+  border-right-color: var(--chat-paper-deep);
   border-top-width: 0;
   bottom: 15px;
   content: "";
@@ -1759,14 +1767,17 @@ textarea {
 }
 
 .chat-msg--user .chat-msg__bubble {
-  background:
-    linear-gradient(180deg, #c98f4b 0%, #a46b29 100%);
-  border-color: rgba(120, 78, 30, 0.26);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--chat-user) 88%, #ffffff) 0%,
+    color-mix(in srgb, var(--chat-user) 82%, #000000) 100%
+  );
+  border-color: color-mix(in srgb, var(--chat-user) 34%, transparent);
   color: var(--chat-user-ink);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 3px 10px rgba(120, 78, 30, 0.22);
-  text-shadow: 0 1px 0 rgba(90, 55, 15, 0.25);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 3px 10px color-mix(in srgb, var(--chat-user) 30%, transparent);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--chat-user-ink) 20%, transparent);
 }
 
 .chat-msg--user.chat-msg--single .chat-msg__bubble,
@@ -1785,7 +1796,7 @@ textarea {
 .chat-msg--user.chat-msg--last .chat-msg__bubble::before,
 .chat-msg--user.chat-msg--single .chat-msg__bubble::before {
   border: 6px solid transparent;
-  border-left-color: rgba(120, 78, 30, 0.26);
+  border-left-color: color-mix(in srgb, var(--chat-user) 34%, transparent);
   border-top-width: 0;
   bottom: 14px;
   content: "";
@@ -1798,7 +1809,7 @@ textarea {
 .chat-msg--user.chat-msg--last .chat-msg__bubble::after,
 .chat-msg--user.chat-msg--single .chat-msg__bubble::after {
   border: 5px solid transparent;
-  border-left-color: #a46b29;
+  border-left-color: color-mix(in srgb, var(--chat-user) 82%, #000000);
   border-top-width: 0;
   bottom: 15px;
   content: "";
@@ -1865,7 +1876,7 @@ textarea {
 }
 
 .chat-msg--user .chat-typing span {
-  background: rgba(255, 250, 240, 0.75);
+  background: color-mix(in srgb, var(--chat-user-ink) 75%, transparent);
 }
 
 .chat-typing span:nth-child(2) {
@@ -1914,13 +1925,13 @@ textarea {
 
 .chat-quick__chip {
   align-items: center;
-  background: linear-gradient(180deg, #fffdf5 0%, #f9eed4 100%);
-  border: 1px solid rgba(136, 99, 50, 0.18);
+  background: linear-gradient(180deg, var(--chat-raised) 0%, var(--chat-paper-deep) 100%);
+  border: 1px solid var(--chat-rule-strong);
   border-radius: 999px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 2px 5px rgba(90, 62, 28, 0.08);
-  color: #6a4a22;
+    inset 0 1px 0 color-mix(in srgb, var(--chat-paper-deep) 72%, #ffffff),
+    0 2px 5px color-mix(in srgb, var(--chat-ink) 10%, transparent);
+  color: var(--chat-ink-soft);
   cursor: pointer;
   display: inline-flex;
   font-family: inherit;
@@ -1936,7 +1947,7 @@ textarea {
 }
 
 .chat-quick__chip:hover {
-  border-color: rgba(182, 125, 58, 0.4);
+  border-color: color-mix(in srgb, var(--chat-accent) 45%, transparent);
   filter: brightness(1.02);
   transform: translateY(-1px);
 }
@@ -1947,30 +1958,34 @@ textarea {
 
 .chat-quick__chip:focus-visible {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 2px 5px rgba(90, 62, 28, 0.08),
-    0 0 0 3px rgba(182, 125, 58, 0.22);
+    inset 0 1px 0 color-mix(in srgb, var(--chat-paper-deep) 72%, #ffffff),
+    0 2px 5px color-mix(in srgb, var(--chat-ink) 10%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--chat-accent) 26%, transparent);
   outline: 0;
 }
 
 .chat-app__input {
   -webkit-app-region: no-drag;
   align-items: flex-end;
-  background:
-    linear-gradient(0deg, rgba(251, 247, 238, 0.98) 0%, rgba(251, 247, 238, 0.92) 70%, rgba(251, 247, 238, 0));
-  border-top: 1px solid rgba(60, 47, 28, 0.08);
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--chat-paper) 98%, transparent) 0%,
+    color-mix(in srgb, var(--chat-paper) 92%, transparent) 70%,
+    transparent
+  );
+  border-top: 1px solid var(--chat-rule);
   display: flex;
   gap: 10px;
   padding: 10px 14px 16px;
 }
 
 .chat-app__input-wrap {
-  background: #fffdf7;
+  background: var(--chat-raised);
   border: 1px solid var(--chat-rule-strong);
   border-radius: var(--chat-radius-md);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 2px 8px rgba(45, 38, 31, 0.05);
+    0 1px 0 color-mix(in srgb, var(--chat-paper-deep) 70%, #ffffff) inset,
+    0 2px 8px color-mix(in srgb, var(--chat-ink) 7%, transparent);
   display: flex;
   flex: 1;
   min-height: 38px;
@@ -1982,11 +1997,11 @@ textarea {
 }
 
 .chat-app__input-wrap:focus-within {
-  background: #ffffff;
+  background: color-mix(in srgb, var(--chat-raised) 78%, #ffffff);
   border-color: var(--chat-accent);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 0 0 4px rgba(182, 125, 58, 0.16);
+    0 1px 0 color-mix(in srgb, var(--chat-paper-deep) 70%, #ffffff) inset,
+    0 0 0 4px var(--chat-accent-soft);
 }
 
 .chat-app__input textarea {
@@ -2009,12 +2024,12 @@ textarea {
 
 .chat-app__send {
   align-items: center;
-  background: linear-gradient(180deg, var(--chat-accent) 0%, #a36b2c 100%);
-  border: 1px solid rgba(120, 78, 30, 0.26);
+  background: linear-gradient(180deg, var(--chat-accent) 0%, color-mix(in srgb, var(--chat-accent) 82%, #000000) 100%);
+  border: 1px solid color-mix(in srgb, var(--chat-accent) 34%, transparent);
   border-radius: var(--chat-radius-md);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.22) inset,
-    0 3px 10px rgba(120, 78, 30, 0.26);
+    0 3px 10px color-mix(in srgb, var(--chat-accent) 30%, transparent);
   color: var(--chat-accent-ink);
   cursor: pointer;
   display: inline-flex;
@@ -2045,16 +2060,20 @@ textarea {
 .chat-app__send:focus-visible {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.22) inset,
-    0 3px 10px rgba(120, 78, 30, 0.26),
-    0 0 0 4px rgba(182, 125, 58, 0.28);
+    0 3px 10px color-mix(in srgb, var(--chat-accent) 30%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--chat-accent) 32%, transparent);
   outline: 0;
 }
 
 .chat-app__send:disabled {
-  background: linear-gradient(180deg, #cdbf9f 0%, #b7a683 100%);
-  border-color: rgba(120, 78, 30, 0.16);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--chat-ink-faint) 22%, var(--chat-paper-deep)) 0%,
+    color-mix(in srgb, var(--chat-ink-faint) 30%, var(--chat-paper-deep)) 100%
+  );
+  border-color: var(--chat-rule);
   box-shadow: none;
-  color: rgba(255, 250, 240, 0.88);
+  color: color-mix(in srgb, var(--chat-ink-faint) 85%, transparent);
   cursor: not-allowed;
   filter: saturate(0.8);
 }

@@ -99,6 +99,7 @@ export type Outfit = Partial<Record<OutfitPart, string>>;
 
 export type OutfitMode = "manual" | "seasonal";
 
+export type Theme = "default" | "midnight" | "paperwhite" | "sakura";
 
 export type OutfitItem = {
   id: string;
@@ -226,6 +227,7 @@ export type Settings = {
   ttsRate: number;
   ttsVoice: string | null;
   easterEggsEnabled: boolean;
+  theme: Theme;
   birthdayMonth: number | null;
   birthdayDay: number | null;
 };

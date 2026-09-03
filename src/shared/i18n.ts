@@ -124,6 +124,11 @@ export const I18N = {
       ttsRate: "语速",
       easterEggsEnabled: "互动彩蛋",
       easterEggsEnabledHelp: "开启后，连续点击、长按、拖动睡觉中的宠物等会触发隐藏彩蛋",
+      theme: "主题",
+      themeDefault: "默认",
+      themeMidnight: "暗夜",
+      themePaperwhite: "高对比",
+      themeSakura: "樱花",
       launchAtLoginHelp:
         "正式打包版本会在 macOS 或 Windows 登录后启动；开发环境只保存偏好，不注册系统登录项。",
       about: "关于",
@@ -509,6 +514,11 @@ export const I18N = {
       ttsRate: "Speech rate",
       easterEggsEnabled: "Easter eggs",
       easterEggsEnabledHelp: "When on, hidden interactions (rapid clicks, long-press, dragging a sleeping pet, etc.) trigger surprise bubbles",
+      theme: "Theme",
+      themeDefault: "Default",
+      themeMidnight: "Midnight",
+      themePaperwhite: "Paperwhite",
+      themeSakura: "Sakura",
       launchAtLoginHelp:
         "Packaged macOS and Windows builds will start after login. Development builds only save the preference.",
       about: "About",

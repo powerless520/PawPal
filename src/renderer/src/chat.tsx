@@ -404,7 +404,45 @@ function ChatApp(): JSX.Element {
   );
 }
 
+const VALID_THEMES = ["default", "midnight", "paperwhite", "sakura"] as const;
+type ThemeId = (typeof VALID_THEMES)[number];
+
+function applyThemeClass(theme: string): void {
+  const root = document.documentElement;
+  for (const id of VALID_THEMES) {
+    root.classList.remove(`theme-${id}`);
+  }
+  const resolved: ThemeId = (VALID_THEMES as readonly string[]).includes(theme)
+    ? (theme as ThemeId)
+    : "default";
+  root.classList.add(`theme-${resolved}`);
+}
+
+function bootTheming(): void {
+  // Priority: localStorage fast path (written by the settings window when
+  // the user changes the theme) -> authoritative snapshot from main on
+  // first load -> live switches via the settings:updated broadcast.
+  const stored = window.localStorage.getItem("pawpal-theme");
+  if (stored) {
+    applyThemeClass(stored);
+  } else {
+    applyThemeClass("default");
+  }
+  void window.pawpal
+    .getSnapshot()
+    .then((snap) => {
+      applyThemeClass(snap.settings.theme);
+      window.localStorage.setItem("pawpal-theme", snap.settings.theme);
+    })
+    .catch(() => {});
+  window.pawpal.onSettingsUpdated((settings) => {
+    applyThemeClass(settings.theme);
+    window.localStorage.setItem("pawpal-theme", settings.theme);
+  });
+}
+
 const container = document.getElementById("root");
 if (container) {
+  bootTheming();
   createRoot(container).render(<ChatApp />);
 }

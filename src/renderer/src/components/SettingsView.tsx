@@ -21,13 +21,10 @@ import type {
   PetState,
   Settings
 } from "../../../shared/types";
-import { createEmptyStats } from "../../../shared/constants";
 import {
   ALL_MILESTONE_IDS,
   daysKnown,
-  eligibleMilestoneIds,
   GROWTH_STAGES,
-  healthTotals,
   kindOfMilestone,
   stageRank
 } from "../../../shared/growth";
@@ -634,11 +631,6 @@ function GrowthPanel({ labels }: { labels: SettingsCopy }): JSX.Element {
   };
   const language = snapshot.settings.language;
   const days = daysKnown(safeGrowth.bornAt, now);
-  const totals = healthTotals(
-    snapshot.stats ?? createEmptyStats(),
-    snapshot.statsHistory ?? {}
-  );
-  const eligible = eligibleMilestoneIds(safeGrowth, totals, now);
   const unlockedAt = new Map<string, number>(
     safeGrowth.milestones.map((m) => [m.id, m.unlockedAt])
   );
@@ -1539,17 +1531,10 @@ export function SettingsView(): JSX.Element {
               onChange={(value) => {
                 const theme = value as Settings["theme"];
                 updateDraft({ theme });
-                // Hot-swap the chat window's theme class. The chat
-                // window reads this on next mount; for instant feel we
-                // also flip the body class here so a future reload
-                // picks the right one immediately.
-                document.documentElement.classList.remove(
-                  "theme-default",
-                  "theme-midnight",
-                  "theme-paperwhite",
-                  "theme-sakura"
-                );
-                document.documentElement.classList.add(`theme-${theme}`);
+                // This window has no themes.css, so don't flip classes
+                // here. The chat window applies the theme live via the
+                // settings:updated broadcast (main -> all windows); the
+                // localStorage write only accelerates its first paint.
                 window.localStorage.setItem("pawpal-theme", theme);
               }}
             />
