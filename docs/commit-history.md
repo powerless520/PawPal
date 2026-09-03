@@ -1,6 +1,6 @@
 # PawPal 提交历史总结
 
-> 数据来源：`git log`（截止 2026-09-03，共 **141** 个 commit）。
+> 数据来源：`git log`（截止 2026-09-03，共 **150** 个 commit）。
 > 时间跨度：2026-04-26（init）→ 2026-09-03。
 > 本文档按开发阶段整理；完整明细可用 `git --no-pager log --oneline` 查看。
 
@@ -10,10 +10,10 @@
 
 | 类型 | 数量 | 说明 |
 | --- | --- | --- |
-| feat | 62 | 新功能 |
+| feat | 69 | 新功能 |
 | fix | 26 | 缺陷修复 |
 | chore | 21 | 构建 / 打包 / 版本 / 杂项 |
-| docs | 11 | 文档 |
+| docs | 12 | 文档 |
 | refactor | 9 | 重构 |
 | ci | 4 | 持续集成 |
 | style | 2 | 样式 |
@@ -28,7 +28,7 @@
 | 2026-05 | 31 | v0.1.x → v0.3.0：发布、更新检查、自定义外观 |
 | 2026-06 | 7 | v0.3.1 修复批次 |
 | 2026-07 ~ 08 | 3 | CI 与 README 维护 |
-| 2026-09 | 43 | fork 本地化 + 功能爆发期（多宠物 / 装扮 / AI / 成长 / 主题） |
+| 2026-09 | 52 | fork 本地化 + 功能爆发期（多宠物 / 装扮 / AI / 成长 / 主题 / R8-R9 设置与日记批次） |
 
 > 注：本仓库上游为开源 PawPal；2026-09-01 起 `a41d829` 之后为本地 fork 的独立迭代。
 
@@ -213,6 +213,13 @@
 - `f2a9326` feat(growth): stage-based companion growth with milestones（成长阶段系统）
 - `65b986f` docs(history): summarize 139 commits into stage-based timeline（历史总结文档）
 - `402efec` feat(theme): live-switchable chat themes（聊天窗口实时主题切换）
+- `3883663` feat(pet): hover tooltip shows pet mood and current state（悬停显示心情/状态）
+- `1f1a0dc` feat(shortcuts): global hotkeys to summon pet, chat and focus（全局快捷键）
+- `4f13eb5` feat(settings): sticky section nav with scroll-spy highlights（设置目录导航）
+- `70bd116` feat(observer): quiet observer mode disables proactive chatter and wandering（观察者模式）
+- `e30d987` feat(holidays): festive countdown reminders and settings display（节日倒计时）
+- `e5fd5d1` feat(diary): read diary entries aloud via TTS（日记朗读）
+- `9e9c01c` feat(diary): 3D flipbook viewer for diary entries（3D 翻页日记本）
 
 ---
 
@@ -221,7 +228,7 @@
 | 功能域 | 关键提交（旧 → 新） |
 | --- | --- |
 | 专注 / 休息 / 干扰 | `307b85f` → `8e3711c` → `1e5b367` → `3d00e61` |
-| 设置 UI + i18n | `710255a` → `8cb6162` → `035a665` → `efa984f` → `402efec`（聊天主题） |
+| 设置 UI + i18n | `710255a` → `8cb6162` → `035a665` → `efa984f` → `402efec`（聊天主题）→ `4f13eb5`（目录导航）→ `9e9c01c`（翻页日记本） |
 | 多宠物 roster | `7447b62`（地基）→ `58d6165`（开启）→ `13438f6`（切换仪式）→ `f2a9326`（按宠物成长） |
 | 装扮 outfit | `b8f82b8` → `9f86ed7` → `f09e1f7` → `81b8381` → `5fc972f` → `1895c24` |
 | AI 聊天 | `46fd8bc`（DeepSeek）→ `2c09b3b` → `8bcbda0` → `eb50531`（Ollama） |
